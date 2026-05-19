@@ -1,0 +1,132 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="secondary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tests"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Nuevo test</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  @if (cargando) {
+    <div class="centro">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p><ion-text color="medium">Cargando…</ion-text></p>
+    </div>
+  } @else {
+    <ion-list>
+      <ion-item>
+        <ion-label position="stacked">Nombre del test *</ion-label>
+        <ion-input
+          [(ngModel)]="nombre"
+          placeholder="Auscultación básica"
+          maxlength="200"
+        ></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-label position="stacked">Descripción</ion-label>
+        <ion-textarea
+          [(ngModel)]="descripcion"
+          autoGrow="true"
+          maxlength="1000"
+        ></ion-textarea>
+      </ion-item>
+
+      <ion-item>
+        <ion-label position="stacked">Curso de origen (opcional)</ion-label>
+        <ion-select
+          [(ngModel)]="cursoOrigenId"
+          placeholder="Sin curso"
+          interface="popover"
+        >
+          <ion-select-option [value]="null">Sin curso</ion-select-option>
+          @for (c of cursos; track c.curso_id) {
+            <ion-select-option [value]="c.curso_id">
+              {{ c.codigo }} — {{ c.nombre }}
+            </ion-select-option>
+          }
+        </ion-select>
+      </ion-item>
+
+      <ion-item>
+        <ion-icon name="shuffle-outline" slot="start"></ion-icon>
+        <ion-label>Orden aleatorio de preguntas</ion-label>
+        <ion-toggle [(ngModel)]="ordenAleatorio" slot="end"></ion-toggle>
+      </ion-item>
+    </ion-list>
+
+    <h2 class="section-title">Preguntas seleccionadas</h2>
+    <ion-text color="medium">
+      <p class="hint">Arrastra para reordenar. El orden definido aquí es el que verá el estudiante (si NO está en aleatorio).</p>
+    </ion-text>
+
+    @if (preguntasSeleccionadas.length === 0) {
+      <ion-text color="medium">
+        <p class="empty">Aún no seleccionaste preguntas.</p>
+      </ion-text>
+    } @else {
+      <ion-list>
+        <ion-reorder-group
+          disabled="false"
+          (ionItemReorder)="reordenar($event)"
+        >
+          @for (p of preguntasSeleccionadas; track p.pregunta_id; let i = $index) {
+            <ion-item>
+              <ion-note slot="start">{{ i + 1 }}</ion-note>
+              <ion-label class="ion-text-wrap">
+                <p>{{ p.enunciado }}</p>
+              </ion-label>
+              <ion-reorder slot="end"></ion-reorder>
+            </ion-item>
+          }
+        </ion-reorder-group>
+      </ion-list>
+    }
+
+    <h2 class="section-title">Banco de preguntas</h2>
+    <ion-text color="medium">
+      <p class="hint">Marca las que quieres incluir.</p>
+    </ion-text>
+
+    @if (preguntasDisponibles.length === 0) {
+      <ion-text color="medium">
+        <p class="empty">No hay preguntas creadas todavía.</p>
+      </ion-text>
+    } @else {
+      <ion-list>
+        @for (p of preguntasDisponibles; track p.pregunta_id) {
+          <ion-item button (click)="togglePregunta(p)">
+            <ion-checkbox
+              slot="start"
+              [checked]="estaSeleccionada(p)"
+              (ionChange)="togglePregunta(p)"
+            ></ion-checkbox>
+            <ion-label class="ion-text-wrap">
+              <h3>{{ p.enunciado }}</h3>
+              @if (p.curso_nombre) {
+                <p>{{ p.curso_nombre }}</p>
+              }
+            </ion-label>
+            <ion-note slot="end">#{{ p.pregunta_id }}</ion-note>
+          </ion-item>
+        }
+      </ion-list>
+    }
+
+    <ion-button
+      expand="block"
+      color="secondary"
+      class="ion-margin-top"
+      (click)="guardar()"
+      [disabled]="guardando"
+    >
+      @if (guardando) {
+        <ion-spinner name="dots"></ion-spinner>
+      } @else {
+        <ion-icon name="save-outline" slot="start"></ion-icon>
+        Guardar test
+      }
+    </ion-button>
+  }
+</ion-content>
