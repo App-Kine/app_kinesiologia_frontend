@@ -5,15 +5,21 @@ import { NativeStorage } from '@ionic-native/native-storage/ngx';
 
 import { BaseService } from '../../base/service/base.service';
 import { AnalyticsService } from './analytics.service';
+<<<<<<< HEAD
 import { createLogger } from './logger';
 
 export interface CursoResumen {
+=======
+
+export interface Curso {
+>>>>>>> 876202e2368df665f01863ed9dd9fae585232ce3
   curso_id: number;
   codigo: string;
   nombre: string;
   descripcion: string | null;
 }
 
+<<<<<<< HEAD
 export interface CrearCursoInput {
   codigo: string;
   nombre: string;
@@ -22,6 +28,8 @@ export interface CrearCursoInput {
 
 const log = createLogger('curso');
 
+=======
+>>>>>>> 876202e2368df665f01863ed9dd9fae585232ce3
 @Injectable({ providedIn: 'root' })
 export class CursoService extends BaseService {
   private url: string;
@@ -36,6 +44,7 @@ export class CursoService extends BaseService {
     this.url = this.BASE_URL;
   }
 
+<<<<<<< HEAD
   /** Lista todos los cursos activos. */
   async listar(): Promise<CursoResumen[]> {
     log.info('listar');
@@ -86,5 +95,15 @@ export class CursoService extends BaseService {
       log.error('obtenerConAplicaciones', e);
       throw e;
     }
+=======
+  listarActivos(): Promise<Curso[]> {
+    return this.post(this.url + 'cursos/listar', {});
+  }
+
+  misCursos(profesorId?: number): Promise<Curso[]> {
+    const args: any = {};
+    if (profesorId != null) args.profesorId = profesorId;
+    return this.post(this.url + 'cursos/misCursos', args);
+>>>>>>> 876202e2368df665f01863ed9dd9fae585232ce3
   }
 }

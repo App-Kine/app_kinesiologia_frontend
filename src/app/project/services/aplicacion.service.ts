@@ -5,11 +5,16 @@ import { NativeStorage } from '@ionic-native/native-storage/ngx';
 
 import { BaseService } from '../../base/service/base.service';
 import { AnalyticsService } from './analytics.service';
+<<<<<<< HEAD
 import { createLogger } from './logger';
 
 const log = createLogger('aplicacion');
 
 export interface CrearAplicacionInput {
+=======
+
+export interface AplicacionInput {
+>>>>>>> 876202e2368df665f01863ed9dd9fae585232ce3
   testId: number;
   cursoId: number;
 }
@@ -24,8 +29,11 @@ export interface AplicacionResumen {
   curso_nombre: string;
   profesor_id: number;
   activo: boolean;
+<<<<<<< HEAD
   visible_desde: string | null;
   visible_hasta: string | null;
+=======
+>>>>>>> 876202e2368df665f01863ed9dd9fae585232ce3
   created_at: string;
 }
 
@@ -43,6 +51,7 @@ export class AplicacionService extends BaseService {
     this.url = this.BASE_URL;
   }
 
+<<<<<<< HEAD
   async crear(input: CrearAplicacionInput): Promise<{ aplicacion_id: number; aplicacion_uuid: string }> {
     log.info('crear', input);
     try {
@@ -84,5 +93,22 @@ export class AplicacionService extends BaseService {
       log.error('setActivo', e);
       throw e;
     }
+=======
+  crear(a: AplicacionInput): Promise<{ aplicacion_id: number }> {
+    return this.post(this.url + 'crearAplicacion', a);
+  }
+
+  listar(profesorId?: number): Promise<AplicacionResumen[]> {
+    const args: any = {};
+    if (profesorId != null) args.profesorId = profesorId;
+    return this.post(this.url + 'listarAplicaciones', args);
+  }
+
+  setActivo(aplicacionId: number, activo: boolean): Promise<any> {
+    return this.post(this.url + 'setActivoAplicacion', {
+      aplicacionId,
+      activo,
+    });
+>>>>>>> 876202e2368df665f01863ed9dd9fae585232ce3
   }
 }

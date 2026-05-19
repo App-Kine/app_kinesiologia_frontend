@@ -5,9 +5,12 @@ import { NativeStorage } from '@ionic-native/native-storage/ngx';
 
 import { BaseService } from '../../base/service/base.service';
 import { AnalyticsService } from './analytics.service';
+<<<<<<< HEAD
 import { createLogger } from './logger';
 
 const log = createLogger('test');
+=======
+>>>>>>> 876202e2368df665f01863ed9dd9fae585232ce3
 
 export interface PreguntaEnTest {
   preguntaId: number;
@@ -63,6 +66,7 @@ export class TestService extends BaseService {
     this.url = this.BASE_URL;
   }
 
+<<<<<<< HEAD
   async crear(t: TestInput): Promise<{ test_id: number }> {
     log.info('crear', { nombre: t.nombre, preguntas: t.preguntas?.length });
     try {
@@ -99,5 +103,19 @@ export class TestService extends BaseService {
       log.error('obtener', e);
       throw e;
     }
+=======
+  crear(t: TestInput): Promise<{ test_id: number }> {
+    return this.post(this.url + 'crearTest', t);
+  }
+
+  listar(profesorId?: number): Promise<TestResumen[]> {
+    const args: any = {};
+    if (profesorId != null) args.profesorId = profesorId;
+    return this.post(this.url + 'listarTests', args);
+  }
+
+  obtener(testId: number): Promise<TestDetalle> {
+    return this.post(this.url + 'obtenerTest', { testId });
+>>>>>>> 876202e2368df665f01863ed9dd9fae585232ce3
   }
 }

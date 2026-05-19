@@ -48,7 +48,11 @@ export const routes: Routes = [
   },
 
   // -----------------------------------------------------------
+<<<<<<< HEAD
   // Mis cursos (RF-61, + creación de cursos por profesor)
+=======
+  // Gestión docente: preguntas, tests, aplicaciones (RF-62..73, 88..93)
+>>>>>>> 876202e2368df665f01863ed9dd9fae585232ce3
   // -----------------------------------------------------------
   {
     path: 'mis-cursos',
@@ -144,6 +148,7 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./project/pages/aplicacion-nueva/aplicacion-nueva.page').then(
         (m) => m.AplicacionNuevaPage
+<<<<<<< HEAD
       ),
   },
   {
@@ -153,6 +158,8 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./project/pages/aplicacion-nueva/aplicacion-nueva.page').then(
         (m) => m.AplicacionNuevaPage
+=======
+>>>>>>> 876202e2368df665f01863ed9dd9fae585232ce3
       ),
   },
 

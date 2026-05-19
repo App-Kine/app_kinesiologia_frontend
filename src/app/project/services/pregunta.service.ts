@@ -5,9 +5,12 @@ import { NativeStorage } from '@ionic-native/native-storage/ngx';
 
 import { BaseService } from '../../base/service/base.service';
 import { AnalyticsService } from './analytics.service';
+<<<<<<< HEAD
 import { createLogger } from './logger';
 
 const log = createLogger('pregunta');
+=======
+>>>>>>> 876202e2368df665f01863ed9dd9fae585232ce3
 
 export interface AlternativaInput {
   texto: string;
@@ -63,6 +66,7 @@ export class PreguntaService extends BaseService {
     this.url = this.BASE_URL;
   }
 
+<<<<<<< HEAD
   async crear(p: PreguntaInput): Promise<{ pregunta_id: number }> {
     log.info('crear', { alternativas: p.alternativas?.length });
     try {
@@ -149,5 +153,37 @@ export class PreguntaService extends BaseService {
       log.error('quitarDeTest', e);
       throw e;
     }
+=======
+  crear(p: PreguntaInput): Promise<{ pregunta_id: number }> {
+    return this.post(this.url + 'crearPregunta', p);
+  }
+
+  listar(profesorId?: number): Promise<PreguntaResumen[]> {
+    const args: any = {};
+    if (profesorId != null) args.profesorId = profesorId;
+    return this.post(this.url + 'listarPreguntas', args);
+  }
+
+  obtener(preguntaId: number): Promise<PreguntaDetalle> {
+    return this.post(this.url + 'obtenerPregunta', { preguntaId });
+  }
+
+  editar(preguntaId: number, p: PreguntaInput): Promise<{ pregunta_id: number }> {
+    return this.post(this.url + 'editarPregunta', { ...p, preguntaId });
+  }
+
+  eliminar(preguntaId: number): Promise<{ pregunta_id: number }> {
+    return this.post(this.url + 'eliminarPregunta', { preguntaId });
+  }
+
+  /** Crea pregunta + la vincula al test en una sola operación. */
+  agregarATest(testId: number, p: PreguntaInput): Promise<{ pregunta_id: number; orden: number }> {
+    return this.post(this.url + 'agregarPreguntaATest', { ...p, testId });
+  }
+
+  /** Quita la pregunta del test. Si queda huérfana se marca como inactiva. */
+  quitarDeTest(testId: number, preguntaId: number): Promise<{ huerfanaEliminada: boolean }> {
+    return this.post(this.url + 'quitarPreguntaDeTest', { testId, preguntaId });
+>>>>>>> 876202e2368df665f01863ed9dd9fae585232ce3
   }
 }
