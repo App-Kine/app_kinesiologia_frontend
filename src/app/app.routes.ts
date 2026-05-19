@@ -48,7 +48,6 @@ export const routes: Routes = [
   },
 
   // -----------------------------------------------------------
-<<<<<<< HEAD
   // Gestión docente: preguntas, tests, aplicaciones (RF-62..73, 88..93)
   // -----------------------------------------------------------
   {
@@ -113,71 +112,6 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./project/pages/aplicacion-nueva/aplicacion-nueva.page').then(
         (m) => m.AplicacionNuevaPage
-=======
-  // Módulo docente: preguntas, tests, aplicaciones
-  // (RF-61..RF-73, RF-88..RF-93)
-  // -----------------------------------------------------------
-  {
-    path: 'mis-cursos',
-    canActivate: [docenteGuard],
-    loadComponent: () =>
-      import('./project/pages/mis-cursos/mis-cursos.page').then(
-        (m) => m.MisCursosPage
-      ),
-  },
-  {
-    path: 'curso/:cursoId',
-    canActivate: [docenteGuard],
-    loadComponent: () =>
-      import('./project/pages/curso-detalle/curso-detalle.page').then(
-        (m) => m.CursoDetallePage
-      ),
-  },
-  {
-    path: 'preguntas',
-    canActivate: [docenteGuard],
-    loadComponent: () =>
-      import('./project/pages/preguntas/preguntas.page').then(
-        (m) => m.PreguntasPage
-      ),
-  },
-  {
-    path: 'crear-pregunta',
-    canActivate: [docenteGuard],
-    loadComponent: () =>
-      import('./project/pages/crear-pregunta/crear-pregunta.page').then(
-        (m) => m.CrearPreguntaPage
-      ),
-  },
-  {
-    path: 'tests',
-    canActivate: [docenteGuard],
-    loadComponent: () =>
-      import('./project/pages/tests/tests.page').then((m) => m.TestsPage),
-  },
-  {
-    path: 'crear-test',
-    canActivate: [docenteGuard],
-    loadComponent: () =>
-      import('./project/pages/crear-test/crear-test.page').then(
-        (m) => m.CrearTestPage
-      ),
-  },
-  {
-    path: 'aplicaciones',
-    canActivate: [docenteGuard],
-    loadComponent: () =>
-      import('./project/pages/aplicaciones/aplicaciones.page').then(
-        (m) => m.AplicacionesPage
-      ),
-  },
-  {
-    path: 'crear-aplicacion',
-    canActivate: [docenteGuard],
-    loadComponent: () =>
-      import('./project/pages/crear-aplicacion/crear-aplicacion.page').then(
-        (m) => m.CrearAplicacionPage
->>>>>>> c1be50b161eba707808a3bf917f8d24005bc82c9
       ),
   },
 
