@@ -1,0 +1,79 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="secondary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/mis-aplicaciones"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Nueva aplicación de test</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  <div class="form-wrapper">
+    <ion-note class="hint">
+      <ion-icon name="clipboard-outline"></ion-icon>
+      Asocia un test a un curso. Cada par (test, curso) produce una aplicación
+      independiente que mantiene sus propios resultados (RF-72).
+    </ion-note>
+
+    @if (cargando) {
+      <div class="centro"><ion-spinner></ion-spinner><p>Cargando datos...</p></div>
+    } @else {
+      <form (ngSubmit)="guardar()" novalidate>
+        <ion-item lines="full">
+          <ion-label position="stacked">Test *</ion-label>
+          <ion-select
+            [(ngModel)]="testId"
+            name="test"
+            placeholder="Selecciona un test..."
+            [disabled]="guardando"
+          >
+            @for (t of tests; track t.test_id) {
+              <ion-select-option [value]="t.test_id">
+                {{ t.nombre }} ({{ t.cantidad_preguntas }} preguntas)
+              </ion-select-option>
+            }
+          </ion-select>
+        </ion-item>
+
+        <ion-item lines="full">
+          <ion-label position="stacked">Curso *</ion-label>
+          <ion-select
+            [(ngModel)]="cursoId"
+            name="curso"
+            placeholder="Selecciona un curso..."
+            [disabled]="guardando"
+          >
+            @for (c of cursos; track c.curso_id) {
+              <ion-select-option [value]="c.curso_id">
+                {{ c.codigo }} · {{ c.nombre }}
+              </ion-select-option>
+            }
+          </ion-select>
+        </ion-item>
+
+        @if (errorMsg) {
+          <ion-text color="danger" class="msg"><p>{{ errorMsg }}</p></ion-text>
+        }
+        @if (okMsg) {
+          <ion-text color="success" class="msg">
+            <p><ion-icon name="checkmark-circle"></ion-icon> {{ okMsg }}</p>
+          </ion-text>
+        }
+
+        <ion-button
+          expand="block"
+          type="submit"
+          [disabled]="guardando"
+          class="ion-margin-top"
+        >
+          @if (guardando) {
+            <ion-spinner name="dots"></ion-spinner>
+          } @else {
+            <ion-icon slot="start" name="save-outline"></ion-icon>
+            Crear aplicación
+          }
+        </ion-button>
+      </form>
+    }
+  </div>
+</ion-content>

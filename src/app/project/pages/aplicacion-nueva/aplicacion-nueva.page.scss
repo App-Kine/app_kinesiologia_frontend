@@ -1,0 +1,14 @@
+.form-wrapper { max-width: 640px; margin: 0 auto; }
+.centro { text-align: center; padding: 32px 0; color: var(--ion-color-medium); }
+.hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 16px;
+  font-size: 0.9rem;
+}
+.msg {
+  display: block;
+  margin-top: 12px;
+  p { margin: 0; display: flex; align-items: center; gap: 6px; }
+}

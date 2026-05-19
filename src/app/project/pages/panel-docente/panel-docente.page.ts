@@ -88,4 +88,8 @@ export class PanelDocentePage implements OnInit {
   async cerrarSesion(): Promise<void> {
     await this.auth.logout();
   }
+
+  irA(ruta: string): void {
+    this.router.navigateByUrl(ruta);
+  }
 }

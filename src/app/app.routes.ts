@@ -48,6 +48,74 @@ export const routes: Routes = [
   },
 
   // -----------------------------------------------------------
+  // Gestión docente: preguntas, tests, aplicaciones (RF-62..73, 88..93)
+  // -----------------------------------------------------------
+  {
+    path: 'mis-preguntas',
+    canActivate: [docenteGuard],
+    loadComponent: () =>
+      import('./project/pages/mis-preguntas/mis-preguntas.page').then(
+        (m) => m.MisPreguntasPage
+      ),
+  },
+  {
+    path: 'pregunta-nueva',
+    canActivate: [docenteGuard],
+    loadComponent: () =>
+      import('./project/pages/pregunta-nueva/pregunta-nueva.page').then(
+        (m) => m.PreguntaNuevaPage
+      ),
+  },
+  {
+    path: 'pregunta-editar/:id',
+    canActivate: [docenteGuard],
+    loadComponent: () =>
+      import('./project/pages/pregunta-editar/pregunta-editar.page').then(
+        (m) => m.PreguntaEditarPage
+      ),
+  },
+  {
+    path: 'mis-tests',
+    canActivate: [docenteGuard],
+    loadComponent: () =>
+      import('./project/pages/mis-tests/mis-tests.page').then(
+        (m) => m.MisTestsPage
+      ),
+  },
+  {
+    path: 'test-detalle/:id',
+    canActivate: [docenteGuard],
+    loadComponent: () =>
+      import('./project/pages/test-detalle/test-detalle.page').then(
+        (m) => m.TestDetallePage
+      ),
+  },
+  {
+    path: 'test-nuevo',
+    canActivate: [docenteGuard],
+    loadComponent: () =>
+      import('./project/pages/test-nuevo/test-nuevo.page').then(
+        (m) => m.TestNuevoPage
+      ),
+  },
+  {
+    path: 'mis-aplicaciones',
+    canActivate: [docenteGuard],
+    loadComponent: () =>
+      import('./project/pages/mis-aplicaciones/mis-aplicaciones.page').then(
+        (m) => m.MisAplicacionesPage
+      ),
+  },
+  {
+    path: 'aplicacion-nueva',
+    canActivate: [docenteGuard],
+    loadComponent: () =>
+      import('./project/pages/aplicacion-nueva/aplicacion-nueva.page').then(
+        (m) => m.AplicacionNuevaPage
+      ),
+  },
+
+  // -----------------------------------------------------------
   // Tabs / home: lo dejamos como vista pública del estudiante.
   // Se monta SIN guard porque la app del estudiante es de acceso
   // público según RF-01. Si en el futuro proteges algo, agrega

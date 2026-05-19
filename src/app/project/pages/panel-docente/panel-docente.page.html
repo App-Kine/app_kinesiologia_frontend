@@ -41,33 +41,21 @@
   <ion-grid class="docente-grid">
     <ion-row>
       <ion-col size="12" size-md="6" size-lg="4">
-        <ion-card button>
-          <ion-card-header>
-            <ion-icon name="help-circle-outline" class="card-icon"></ion-icon>
-            <ion-card-title>Preguntas</ion-card-title>
-            <ion-card-subtitle>Banco de preguntas clínicas</ion-card-subtitle>
-          </ion-card-header>
-          <ion-card-content>
-            Crea, edita y clona preguntas con audio e imagen. (RF-62 a RF-68)
-          </ion-card-content>
-        </ion-card>
-      </ion-col>
-
-      <ion-col size="12" size-md="6" size-lg="4">
-        <ion-card button>
+        <ion-card button (click)="irA('/mis-tests')">
           <ion-card-header>
             <ion-icon name="document-text-outline" class="card-icon"></ion-icon>
-            <ion-card-title>Tests</ion-card-title>
+            <ion-card-title>Tests y preguntas</ion-card-title>
             <ion-card-subtitle>Componer evaluaciones</ion-card-subtitle>
           </ion-card-header>
           <ion-card-content>
-            Define orden secuencial o aleatorio. (RF-69, RF-70, RF-73)
+            Crea tests y dentro de cada uno agrega, edita o quita preguntas.
+            (RF-62 a RF-73)
           </ion-card-content>
         </ion-card>
       </ion-col>
 
       <ion-col size="12" size-md="6" size-lg="4">
-        <ion-card button>
+        <ion-card button (click)="irA('/mis-aplicaciones')">
           <ion-card-header>
             <ion-icon name="clipboard-outline" class="card-icon"></ion-icon>
             <ion-card-title>Aplicaciones</ion-card-title>
@@ -80,23 +68,17 @@
       </ion-col>
 
       <ion-col size="12" size-md="6" size-lg="4">
-        <ion-card button>
+        <ion-card button disabled>
           <ion-card-header>
             <ion-icon name="stats-chart-outline" class="card-icon"></ion-icon>
             <ion-card-title>Analítica</ion-card-title>
             <ion-card-subtitle>Resultados por curso y test</ion-card-subtitle>
           </ion-card-header>
           <ion-card-content>
-            Tasa de error por pregunta, intentos totales. (RF-94 a RF-104)
+            Tasa de error por pregunta, intentos totales. (RF-94 a RF-104) <em>— próximamente</em>
           </ion-card-content>
         </ion-card>
       </ion-col>
     </ion-row>
   </ion-grid>
-
-  <ion-text color="medium">
-    <p class="footer-hint">
-      Este panel está en construcción. Pronto verás los módulos completos.
-    </p>
-  </ion-text>
 </ion-content>

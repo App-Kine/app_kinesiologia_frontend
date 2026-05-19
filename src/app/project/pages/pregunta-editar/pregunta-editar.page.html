@@ -1,0 +1,255 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="secondary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/mis-preguntas"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Editar pregunta</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  <div class="pregunta-wrapper">
+
+    @if (cargandoInicial) {
+      <div class="centro">
+        <ion-spinner></ion-spinner>
+        <p>Cargando pregunta...</p>
+      </div>
+    } @else if (errorCarga) {
+      <div class="centro">
+        <ion-icon name="alert-circle-outline" color="danger" style="font-size:48px"></ion-icon>
+        <h2>{{ errorCarga }}</h2>
+        <ion-button fill="outline" routerLink="/mis-preguntas">
+          Volver al listado
+        </ion-button>
+      </div>
+    } @else {
+
+      <!-- Header con info de la pregunta editada -->
+      <div class="header-card editar">
+        <div class="header-icon">
+          <ion-icon name="create-outline"></ion-icon>
+        </div>
+        <div class="header-text">
+          <h1>Editando pregunta #{{ preguntaId }}</h1>
+          <p>
+            Modifica los campos que necesites. Las alternativas que ya hayan
+            sido respondidas en evaluaciones se conservan automáticamente.
+          </p>
+        </div>
+      </div>
+
+      <form (ngSubmit)="guardar()" novalidate>
+
+        <!-- Enunciado -->
+        <div class="section-card">
+          <div class="section-title">
+            <span class="step">1</span>
+            <h2>Enunciado de la pregunta</h2>
+          </div>
+          <ion-textarea
+            [(ngModel)]="enunciado"
+            name="enunciado"
+            label="Enunciado"
+            labelPlacement="stacked"
+            fill="outline"
+            rows="4"
+            autoGrow="true"
+            placeholder="Enunciado..."
+            [disabled]="guardando"
+            maxlength="2000"
+            [counter]="true"
+          ></ion-textarea>
+        </div>
+
+        <!-- Explicación -->
+        <div class="section-card">
+          <div class="section-title">
+            <span class="step">2</span>
+            <h2>Explicación clínica</h2>
+            <ion-note>Se muestra al estudiante tras responder.</ion-note>
+          </div>
+          <ion-textarea
+            [(ngModel)]="explicacionClinica"
+            name="explicacion"
+            label="Explicación clínica"
+            labelPlacement="stacked"
+            fill="outline"
+            rows="4"
+            autoGrow="true"
+            placeholder="Explicación..."
+            [disabled]="guardando"
+            maxlength="4000"
+            [counter]="true"
+          ></ion-textarea>
+        </div>
+
+        <!-- Alternativas -->
+        <div class="section-card">
+          <div class="section-title">
+            <span class="step">3</span>
+            <h2>Alternativas</h2>
+            <ion-chip
+              [color]="alternativas.length >= 2 && alternativas.length <= 5 ? 'success' : 'warning'"
+              class="chip-info"
+            >
+              <ion-label>{{ alternativas.length }} de 2-5</ion-label>
+            </ion-chip>
+            <ion-chip
+              [color]="cantCorrectas === 1 ? 'success' : 'medium'"
+              class="chip-info"
+            >
+              <ion-icon name="checkmark-outline"></ion-icon>
+              <ion-label>{{ cantCorrectas }} correcta</ion-label>
+            </ion-chip>
+          </div>
+
+          <ion-note class="hint-text">
+            Marca el círculo de la izquierda para indicar la respuesta correcta
+            (solo una).
+          </ion-note>
+
+          <ion-radio-group
+            [value]="correctaUid"
+            (ionChange)="marcarCorrecta($event.detail.value)"
+          >
+            <div class="alts-list">
+              @for (a of alternativas; track a.uid; let i = $index) {
+                <div class="alt-row">
+                  <div class="alt-radio">
+                    <ion-radio
+                      [value]="a.uid"
+                      [disabled]="guardando"
+                      aria-label="Marcar como correcta"
+                    ></ion-radio>
+                  </div>
+                  <div class="alt-input">
+                    <ion-input
+                      [(ngModel)]="a.texto"
+                      [name]="'alt_' + a.uid"
+                      [label]="'Alternativa ' + a.orden"
+                      labelPlacement="stacked"
+                      fill="outline"
+                      placeholder="Texto de la alternativa..."
+                      [disabled]="guardando"
+                      maxlength="1000"
+                    ></ion-input>
+                  </div>
+                  <ion-button
+                    type="button"
+                    fill="clear"
+                    color="danger"
+                    class="alt-delete"
+                    (click)="quitarAlternativa(i)"
+                    [disabled]="!puedeQuitar || guardando"
+                  >
+                    <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+                  </ion-button>
+                </div>
+              }
+            </div>
+          </ion-radio-group>
+
+          <ion-button
+            type="button"
+            fill="outline"
+            expand="block"
+            (click)="agregarAlternativa()"
+            [disabled]="!puedeAgregar || guardando"
+            class="btn-agregar-alt"
+          >
+            <ion-icon slot="start" name="add-outline"></ion-icon>
+            Agregar alternativa ({{ alternativas.length }}/5)
+          </ion-button>
+        </div>
+
+        <!-- Avanzado -->
+        <div class="section-card avanzado-card">
+          <button
+            type="button"
+            class="avanzado-toggle"
+            (click)="mostrarAvanzado = !mostrarAvanzado"
+          >
+            <ion-icon
+              [name]="mostrarAvanzado ? 'chevron-down-outline' : 'chevron-forward-outline'"
+            ></ion-icon>
+            <span>Multimedia (opcional)</span>
+          </button>
+
+          @if (mostrarAvanzado) {
+            <div class="avanzado-body">
+              <ion-input
+                [(ngModel)]="audioGridId"
+                name="audioId"
+                label="Audio · ObjectId hex 24 chars"
+                labelPlacement="stacked"
+                fill="outline"
+                placeholder="Ej: 64a1f0b3c8d4e5f601020301"
+                [disabled]="guardando"
+              >
+                <ion-icon slot="start" name="musical-notes-outline"></ion-icon>
+              </ion-input>
+              <ion-input
+                [(ngModel)]="imagenGridId"
+                name="imagenId"
+                label="Imagen · ObjectId hex 24 chars"
+                labelPlacement="stacked"
+                fill="outline"
+                placeholder="Ej: 64a1f0b3c8d4e5f601020402"
+                [disabled]="guardando"
+              >
+                <ion-icon slot="start" name="image-outline"></ion-icon>
+              </ion-input>
+            </div>
+          }
+        </div>
+
+        <!-- Validación viva -->
+        @if (pendientes.length > 0) {
+          <div class="pendientes-box">
+            <ion-icon name="alert-circle-outline" color="warning"></ion-icon>
+            <div>
+              <strong>Faltan {{ pendientes.length }} cosas:</strong>
+              <ul>
+                @for (p of pendientes; track p) {
+                  <li>{{ p }}</li>
+                }
+              </ul>
+            </div>
+          </div>
+        }
+
+        @if (errorMsg) {
+          <div class="msg-box error">
+            <ion-icon name="alert-circle-outline"></ion-icon>
+            <span>{{ errorMsg }}</span>
+          </div>
+        }
+        @if (okMsg) {
+          <div class="msg-box ok">
+            <ion-icon name="checkmark-circle"></ion-icon>
+            <span>{{ okMsg }}</span>
+          </div>
+        }
+
+        <div class="submit-bar">
+          <ion-button
+            expand="block"
+            type="submit"
+            size="large"
+            [disabled]="guardando || !formularioCompleto"
+            color="secondary"
+          >
+            @if (guardando) {
+              <ion-spinner name="dots"></ion-spinner>
+            } @else {
+              <ion-icon slot="start" name="save-outline"></ion-icon>
+              Guardar cambios
+            }
+          </ion-button>
+        </div>
+
+      </form>
+    }
+  </div>
+</ion-content>
