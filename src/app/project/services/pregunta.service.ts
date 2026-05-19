@@ -5,17 +5,13 @@ import { NativeStorage } from '@ionic-native/native-storage/ngx';
 
 import { BaseService } from '../../base/service/base.service';
 import { AnalyticsService } from './analytics.service';
-<<<<<<< HEAD
-=======
 import { createLogger } from './logger';
 
 const log = createLogger('pregunta');
->>>>>>> c1be50b161eba707808a3bf917f8d24005bc82c9
 
 export interface AlternativaInput {
   texto: string;
   esCorrecta: boolean;
-<<<<<<< HEAD
   orden: number; // 1..5
 }
 
@@ -26,18 +22,6 @@ export interface PreguntaInput {
   imagenGridId?: string | null;
   cursoOrigenId?: number | null;
   alternativas: AlternativaInput[]; // 2..5, exactamente 1 esCorrecta=true
-=======
-  orden: number;
-}
-
-export interface CrearPreguntaInput {
-  enunciado: string;
-  explicacionClinica: string;
-  audioGridId?: string | null;
-  imagenGridId?: string | null;
-  cursoOrigenId?: number | null;
-  alternativas: AlternativaInput[];
->>>>>>> c1be50b161eba707808a3bf917f8d24005bc82c9
 }
 
 export interface PreguntaResumen {
@@ -50,7 +34,6 @@ export interface PreguntaResumen {
   activo: boolean;
   created_at: string;
   updated_at: string;
-<<<<<<< HEAD
   cantidad_alternativas: number;
 }
 
@@ -64,30 +47,6 @@ export interface PreguntaDetalle extends PreguntaResumen {
     es_correcta: boolean;
     orden: number;
   }[];
-=======
-}
-
-export interface AlternativaDetalle {
-  alternativa_id: number;
-  texto: string;
-  es_correcta: boolean;
-  orden: number;
-}
-
-export interface PreguntaDetalle {
-  pregunta_id: number;
-  enunciado: string;
-  explicacion_clinica: string;
-  audio_grid_id: string | null;
-  imagen_grid_id: string | null;
-  creado_por: number;
-  curso_origen_id: number | null;
-  clonada_de_id: number | null;
-  activo: boolean;
-  created_at: string;
-  updated_at: string;
-  alternativas: AlternativaDetalle[];
->>>>>>> c1be50b161eba707808a3bf917f8d24005bc82c9
 }
 
 @Injectable({ providedIn: 'root' })
@@ -104,42 +63,10 @@ export class PreguntaService extends BaseService {
     this.url = this.BASE_URL;
   }
 
-<<<<<<< HEAD
-  crear(p: PreguntaInput): Promise<{ pregunta_id: number }> {
-    return this.post(this.url + 'crearPregunta', p);
-  }
-
-  listar(profesorId?: number): Promise<PreguntaResumen[]> {
-    const args: any = {};
-    if (profesorId != null) args.profesorId = profesorId;
-    return this.post(this.url + 'listarPreguntas', args);
-  }
-
-  obtener(preguntaId: number): Promise<PreguntaDetalle> {
-    return this.post(this.url + 'obtenerPregunta', { preguntaId });
-  }
-
-  editar(preguntaId: number, p: PreguntaInput): Promise<{ pregunta_id: number }> {
-    return this.post(this.url + 'editarPregunta', { ...p, preguntaId });
-  }
-
-  eliminar(preguntaId: number): Promise<{ pregunta_id: number }> {
-    return this.post(this.url + 'eliminarPregunta', { preguntaId });
-  }
-
-  /** Crea pregunta + la vincula al test en una sola operación. */
-  agregarATest(testId: number, p: PreguntaInput): Promise<{ pregunta_id: number; orden: number }> {
-    return this.post(this.url + 'agregarPreguntaATest', { ...p, testId });
-  }
-
-  /** Quita la pregunta del test. Si queda huérfana se marca como inactiva. */
-  quitarDeTest(testId: number, preguntaId: number): Promise<{ huerfanaEliminada: boolean }> {
-    return this.post(this.url + 'quitarPreguntaDeTest', { testId, preguntaId });
-=======
-  async crear(input: CrearPreguntaInput): Promise<{ pregunta_id: number }> {
-    log.info('crear', { alts: input.alternativas?.length });
+  async crear(p: PreguntaInput): Promise<{ pregunta_id: number }> {
+    log.info('crear', { alternativas: p.alternativas?.length });
     try {
-      const data = await this.post(this.url + 'crearPregunta', input);
+      const data = await this.post(this.url + 'crearPregunta', p);
       log.info('crear OK', data);
       return data;
     } catch (e) {
@@ -151,9 +78,9 @@ export class PreguntaService extends BaseService {
   async listar(profesorId?: number): Promise<PreguntaResumen[]> {
     log.info('listar', { profesorId });
     try {
-      const params: any = {};
-      if (Number.isInteger(profesorId)) params.profesorId = profesorId;
-      const data = await this.post(this.url + 'listarPreguntas', params);
+      const args: any = {};
+      if (profesorId != null) args.profesorId = profesorId;
+      const data = await this.post(this.url + 'listarPreguntas', args);
       log.info('listar OK', { filas: data?.length });
       return data;
     } catch (e) {
@@ -172,6 +99,55 @@ export class PreguntaService extends BaseService {
       log.error('obtener', e);
       throw e;
     }
->>>>>>> c1be50b161eba707808a3bf917f8d24005bc82c9
+  }
+
+  async editar(preguntaId: number, p: PreguntaInput): Promise<{ pregunta_id: number }> {
+    log.info('editar', { preguntaId });
+    try {
+      const data = await this.post(this.url + 'editarPregunta', { ...p, preguntaId });
+      log.info('editar OK', data);
+      return data;
+    } catch (e) {
+      log.error('editar', e);
+      throw e;
+    }
+  }
+
+  async eliminar(preguntaId: number): Promise<{ pregunta_id: number }> {
+    log.info('eliminar', { preguntaId });
+    try {
+      const data = await this.post(this.url + 'eliminarPregunta', { preguntaId });
+      log.info('eliminar OK');
+      return data;
+    } catch (e) {
+      log.error('eliminar', e);
+      throw e;
+    }
+  }
+
+  /** Crea pregunta + la vincula al test en una sola operación. */
+  async agregarATest(testId: number, p: PreguntaInput): Promise<{ pregunta_id: number; orden: number }> {
+    log.info('agregarATest', { testId });
+    try {
+      const data = await this.post(this.url + 'agregarPreguntaATest', { ...p, testId });
+      log.info('agregarATest OK', data);
+      return data;
+    } catch (e) {
+      log.error('agregarATest', e);
+      throw e;
+    }
+  }
+
+  /** Quita la pregunta del test. Si queda huérfana se marca como inactiva. */
+  async quitarDeTest(testId: number, preguntaId: number): Promise<{ huerfanaEliminada: boolean }> {
+    log.info('quitarDeTest', { testId, preguntaId });
+    try {
+      const data = await this.post(this.url + 'quitarPreguntaDeTest', { testId, preguntaId });
+      log.info('quitarDeTest OK', data);
+      return data;
+    } catch (e) {
+      log.error('quitarDeTest', e);
+      throw e;
+    }
   }
 }

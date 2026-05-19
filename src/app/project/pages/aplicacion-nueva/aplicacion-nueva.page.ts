@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import {
   IonContent, IonHeader, IonToolbar, IonTitle, IonButtons, IonBackButton,
   IonButton, IonIcon, IonItem, IonLabel, IonSelect, IonSelectOption,
@@ -11,7 +11,7 @@ import { addIcons } from 'ionicons';
 import { saveOutline, checkmarkCircle, clipboardOutline } from 'ionicons/icons';
 
 import { TestService, TestResumen } from '../../services/test.service';
-import { CursoService, Curso } from '../../services/curso.service';
+import { CursoService, CursoResumen } from '../../services/curso.service';
 import { AplicacionService } from '../../services/aplicacion.service';
 
 @Component({
@@ -30,7 +30,9 @@ export class AplicacionNuevaPage implements OnInit {
   cursoId: number | null = null;
 
   tests: TestResumen[] = [];
-  cursos: Curso[] = [];
+  cursos: CursoResumen[] = [];
+  /** Si se llegó desde /curso/:id → "Aplicar test", precargamos y al guardar volvemos. */
+  cursoIdPreseleccionado: number | null = null;
 
   cargando = false;
   guardando = false;
@@ -41,18 +43,26 @@ export class AplicacionNuevaPage implements OnInit {
     private testSvc: TestService,
     private cursoSvc: CursoService,
     private aplSvc: AplicacionService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
   ) {
     addIcons({ saveOutline, checkmarkCircle, clipboardOutline });
   }
 
   async ngOnInit(): Promise<void> {
+    // Si veniste desde /curso/:id con ?cursoId=N, preseleccionamos
+    const qpCurso = Number(this.route.snapshot.queryParamMap.get('cursoId'));
+    if (Number.isInteger(qpCurso) && qpCurso > 0) {
+      this.cursoIdPreseleccionado = qpCurso;
+      this.cursoId = qpCurso;
+    }
+
     this.cargando = true;
     try {
       this.tests = await this.testSvc.listar();
     } catch { this.tests = []; }
     try {
-      this.cursos = await this.cursoSvc.misCursos();
+      this.cursos = await this.cursoSvc.listarMisCursos();
     } catch { this.cursos = []; }
     this.cargando = false;
   }
@@ -75,7 +85,14 @@ export class AplicacionNuevaPage implements OnInit {
         cursoId: this.cursoId,
       });
       this.okMsg = `Aplicación #${resp.aplicacion_id} creada.`;
-      setTimeout(() => this.router.navigateByUrl('/mis-aplicaciones'), 1200);
+      // Si veníamos de un curso específico, volvemos ahí; si no, al listado general.
+      const destino = this.cursoIdPreseleccionado
+        ? `/curso/${this.cursoIdPreseleccionado}`
+        : '/mis-aplicaciones';
+      setTimeout(
+        () => this.router.navigateByUrl(destino, { replaceUrl: true }),
+        1200
+      );
     } catch (e: any) {
       this.errorMsg = (e && e.message) || 'No se pudo crear la aplicación.';
     } finally {

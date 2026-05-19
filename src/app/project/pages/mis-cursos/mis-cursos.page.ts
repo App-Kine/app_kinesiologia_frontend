@@ -16,10 +16,17 @@ import {
   IonNote,
   IonText,
   IonSpinner,
+  IonFab,
+  IonFabButton,
   ToastController,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { schoolOutline, chevronForwardOutline } from 'ionicons/icons';
+import {
+  schoolOutline,
+  chevronForwardOutline,
+  addOutline,
+  sparklesOutline,
+} from 'ionicons/icons';
 
 import { CursoService, CursoResumen } from '../../services/curso.service';
 import { createLogger } from '../../services/logger';
@@ -47,6 +54,8 @@ const log = createLogger('mis-cursos');
     IonNote,
     IonText,
     IonSpinner,
+    IonFab,
+    IonFabButton,
   ],
 })
 export class MisCursosPage implements OnInit {
@@ -59,7 +68,12 @@ export class MisCursosPage implements OnInit {
     private router: Router,
     private toastCtrl: ToastController
   ) {
-    addIcons({ schoolOutline, chevronForwardOutline });
+    addIcons({
+      schoolOutline,
+      chevronForwardOutline,
+      addOutline,
+      sparklesOutline,
+    });
   }
 
   async ngOnInit(): Promise<void> {
@@ -91,5 +105,9 @@ export class MisCursosPage implements OnInit {
 
   abrirCurso(c: CursoResumen): void {
     this.router.navigateByUrl(`/curso/${c.curso_id}`);
+  }
+
+  irACrearCurso(): void {
+    this.router.navigateByUrl('/curso-nuevo');
   }
 }

@@ -14,7 +14,7 @@ import {
 } from 'ionicons/icons';
 
 import { TestService } from '../../services/test.service';
-import { CursoService, Curso } from '../../services/curso.service';
+import { CursoService, CursoResumen } from '../../services/curso.service';
 
 @Component({
   selector: 'app-test-nuevo',
@@ -35,7 +35,7 @@ export class TestNuevoPage implements OnInit {
   cursoOrigenId: number | null = null;
 
   // Catálogos
-  cursos: Curso[] = [];
+  cursos: CursoResumen[] = [];
 
   // Estado
   cargando = false;
@@ -57,7 +57,7 @@ export class TestNuevoPage implements OnInit {
   async ngOnInit(): Promise<void> {
     this.cargando = true;
     try {
-      this.cursos = await this.cursoSvc.misCursos();
+      this.cursos = await this.cursoSvc.listarMisCursos();
     } catch {
       this.cursos = [];
     } finally {

@@ -5,25 +5,23 @@ import { NativeStorage } from '@ionic-native/native-storage/ngx';
 
 import { BaseService } from '../../base/service/base.service';
 import { AnalyticsService } from './analytics.service';
-<<<<<<< HEAD
-
-export interface Curso {
-=======
 import { createLogger } from './logger';
 
 export interface CursoResumen {
->>>>>>> c1be50b161eba707808a3bf917f8d24005bc82c9
   curso_id: number;
   codigo: string;
   nombre: string;
   descripcion: string | null;
 }
 
-<<<<<<< HEAD
-=======
+export interface CrearCursoInput {
+  codigo: string;
+  nombre: string;
+  descripcion?: string | null;
+}
+
 const log = createLogger('curso');
 
->>>>>>> c1be50b161eba707808a3bf917f8d24005bc82c9
 @Injectable({ providedIn: 'root' })
 export class CursoService extends BaseService {
   private url: string;
@@ -38,16 +36,6 @@ export class CursoService extends BaseService {
     this.url = this.BASE_URL;
   }
 
-<<<<<<< HEAD
-  listarActivos(): Promise<Curso[]> {
-    return this.post(this.url + 'cursos/listar', {});
-  }
-
-  misCursos(profesorId?: number): Promise<Curso[]> {
-    const args: any = {};
-    if (profesorId != null) args.profesorId = profesorId;
-    return this.post(this.url + 'cursos/misCursos', args);
-=======
   /** Lista todos los cursos activos. */
   async listar(): Promise<CursoResumen[]> {
     log.info('listar');
@@ -72,6 +60,31 @@ export class CursoService extends BaseService {
       log.error('misCursos', e);
       throw e;
     }
->>>>>>> c1be50b161eba707808a3bf917f8d24005bc82c9
+  }
+
+  /** Crear un curso (el profesor queda como creador y asignado). */
+  async crear(input: CrearCursoInput): Promise<{ curso_id: number }> {
+    log.info('crear', input);
+    try {
+      const data = await this.post(this.url + 'cursos/crear', input);
+      log.info('crear OK', data);
+      return data;
+    } catch (e) {
+      log.error('crear', e);
+      throw e;
+    }
+  }
+
+  /** Obtiene un curso + sus aplicaciones de test. */
+  async obtenerConAplicaciones(cursoId: number): Promise<any> {
+    log.info('obtenerConAplicaciones', { cursoId });
+    try {
+      const data = await this.post(this.url + 'cursos/obtener', { cursoId });
+      log.info('obtenerConAplicaciones OK');
+      return data;
+    } catch (e) {
+      log.error('obtenerConAplicaciones', e);
+      throw e;
+    }
   }
 }
