@@ -1,0 +1,78 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Auris · Iniciar sesión</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  <div class="login-wrapper">
+    <div class="login-card">
+      <h1 class="login-title">Bienvenido</h1>
+      <p class="login-subtitle">
+        Ingresa con tu cuenta de profesor o administrador.
+      </p>
+
+      <form (ngSubmit)="onSubmit()" #f="ngForm" novalidate>
+        <ion-item lines="full">
+          <ion-icon name="mail-outline" slot="start"></ion-icon>
+          <ion-label position="stacked">Correo</ion-label>
+          <ion-input
+            type="email"
+            inputmode="email"
+            autocomplete="username"
+            placeholder="tu.correo@auris.local"
+            name="correo"
+            [(ngModel)]="correo"
+            required
+            [disabled]="cargando"
+          ></ion-input>
+        </ion-item>
+
+        <ion-item lines="full">
+          <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
+          <ion-label position="stacked">Contraseña</ion-label>
+          <ion-input
+            type="password"
+            autocomplete="current-password"
+            placeholder="••••••••"
+            name="password"
+            [(ngModel)]="password"
+            required
+            [disabled]="cargando"
+          ></ion-input>
+        </ion-item>
+
+        @if (errorMsg) {
+          <ion-text color="danger" class="login-error">
+            {{ errorMsg }}
+          </ion-text>
+        }
+
+        <ion-button
+          expand="block"
+          type="submit"
+          [disabled]="cargando"
+          class="ion-margin-top"
+        >
+          @if (cargando) {
+            <ion-spinner name="dots"></ion-spinner>
+          } @else {
+            <ion-icon slot="start" name="log-in-outline"></ion-icon>
+            Iniciar sesión
+          }
+        </ion-button>
+
+        <!-- RF-59: recuperación de contraseña -->
+        <ion-button
+          expand="block"
+          fill="clear"
+          size="small"
+          (click)="olvidasteContrasena()"
+          [disabled]="cargando"
+        >
+          ¿Olvidaste tu contraseña?
+        </ion-button>
+      </form>
+    </div>
+  </div>
+</ion-content>

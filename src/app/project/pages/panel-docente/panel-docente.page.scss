@@ -1,0 +1,54 @@
+.docente-hero {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 8px 24px;
+
+  .hero-icon {
+    font-size: 56px;
+    color: var(--ion-color-secondary);
+    flex-shrink: 0;
+  }
+
+  h1 {
+    margin: 0 0 4px;
+    font-size: 1.6rem;
+    font-weight: 700;
+  }
+
+  .hero-subtitle {
+    margin: 0;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+}
+
+.docente-grid {
+  margin-top: 8px;
+
+  ion-card {
+    height: 100%;
+    margin: 8px;
+    transition: transform 0.15s ease;
+
+    &:hover {
+      transform: translateY(-2px);
+    }
+
+    .card-icon {
+      font-size: 32px;
+      color: var(--ion-color-secondary);
+      margin-bottom: 8px;
+    }
+  }
+}
+
+.footer-hint {
+  margin-top: 24px;
+  text-align: center;
+  font-style: italic;
+  font-size: 0.85rem;
+}

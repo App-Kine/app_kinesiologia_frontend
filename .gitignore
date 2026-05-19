@@ -1,40 +1,99 @@
-# Specifies intentionally untracked files to ignore when using Git
-# http://git-scm.com/docs/gitignore
+# =============================================================================
+# Auris · Frontend — .gitignore
+# =============================================================================
+# Ionic + Angular 20 + Capacitor
+# Ref: http://git-scm.com/docs/gitignore
+# =============================================================================
 
-*~
-*.sw[mnpcod]
-.tmp
-*.tmp
-*.tmp.*
-UserInterfaceState.xcuserstate
-$RECYCLE.BIN/
+# ---------------------------------------------------------------------------
+# Dependencias
+# ---------------------------------------------------------------------------
+/node_modules
+jspm_packages/
 
-*.log
-log.txt
+# Lock files (la convención del equipo es no versionar package-lock.json)
+package-lock.json
+yarn.lock
 
-
-/.sourcemaps
-/.versions
-/coverage
-
-# Ionic
-/.ionic
-/www
-/platforms
-/plugins
-
-# Compiled output
+# ---------------------------------------------------------------------------
+# Builds y outputs
+# ---------------------------------------------------------------------------
 /dist
-/tmp
+/www
 /out-tsc
 /bazel-out
+/tmp
 
-# Node
-/node_modules
-npm-debug.log
-yarn-error.log
+# ---------------------------------------------------------------------------
+# Angular CLI
+# ---------------------------------------------------------------------------
+/.angular
+/.angular/cache
 
-# IDEs and editors
+# ---------------------------------------------------------------------------
+# Ionic / Capacitor / Cordova
+# ---------------------------------------------------------------------------
+/.ionic
+/.versions
+/platforms
+/plugins
+/android
+/ios
+.capacitor/
+
+# ---------------------------------------------------------------------------
+# Variables de entorno locales (si las agregas)
+# ---------------------------------------------------------------------------
+/src/environments/environment.local.ts
+.env
+.env.local
+.env.*.local
+
+# ---------------------------------------------------------------------------
+# Tests y cobertura
+# ---------------------------------------------------------------------------
+/coverage
+/karma-coverage
+testem.log
+.nyc_output/
+
+# ---------------------------------------------------------------------------
+# Sourcemaps y cachés
+# ---------------------------------------------------------------------------
+/.sourcemaps
+.sass-cache/
+/.nx
+/.nx/cache
+/connect.lock
+/libpeerconnection.log
+/typings
+
+# ---------------------------------------------------------------------------
+# Logs
+# ---------------------------------------------------------------------------
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+log.txt
+
+# ---------------------------------------------------------------------------
+# Archivos del sistema operativo
+# ---------------------------------------------------------------------------
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+UserInterfaceState.xcuserstate
+
+# ---------------------------------------------------------------------------
+# Editores e IDEs
+# ---------------------------------------------------------------------------
 .idea/
 .project
 .classpath
@@ -44,27 +103,24 @@ yarn-error.log
 *.sublime-project
 *.sublime-workspace
 
-# Visual Studio Code
+# Visual Studio Code (ignora todo excepto configs compartibles)
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
-.history/*
+.history/
 
+# Vim / Emacs
+*.swp
+*.swo
+*.swn
+*~
+*.sw[mnpcod]
 
-# Miscellaneous
-/.angular
-/.angular/cache
-.sass-cache/
-/.nx
-/.nx/cache
-/connect.lock
-/coverage
-/libpeerconnection.log
-testem.log
-/typings
-
-# System files
-.DS_Store
-Thumbs.db
+# ---------------------------------------------------------------------------
+# Temporales
+# ---------------------------------------------------------------------------
+.tmp
+*.tmp
+*.tmp.*
