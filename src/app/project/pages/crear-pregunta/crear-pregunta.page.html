@@ -1,0 +1,117 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="secondary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/preguntas"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Nueva pregunta</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  <ion-text color="medium">
+    <p class="hint">
+      Las preguntas del banco se crean independientes del curso. Para usarlas en un curso,
+      arma un test con estas preguntas y aplícalo al curso desde "Mis cursos".
+    </p>
+  </ion-text>
+
+  <ion-list>
+    <ion-item>
+      <ion-label position="stacked">Enunciado *</ion-label>
+      <ion-textarea
+        [(ngModel)]="enunciado"
+        autoGrow="true"
+        placeholder="¿Qué tipo de ruido se escucha?"
+        maxlength="2000"
+      ></ion-textarea>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="stacked">Explicación clínica *</ion-label>
+      <ion-textarea
+        [(ngModel)]="explicacionClinica"
+        autoGrow="true"
+        placeholder="Sibilancias indican obstrucción bronquial reversible…"
+        maxlength="4000"
+      ></ion-textarea>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="stacked">Audio GridFS ID (opcional)</ion-label>
+      <ion-input
+        [(ngModel)]="audioGridId"
+        placeholder="24 caracteres hex"
+        maxlength="24"
+      ></ion-input>
+      <ion-note slot="end">
+        <small>Hex 24</small>
+      </ion-note>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="stacked">Imagen GridFS ID (opcional)</ion-label>
+      <ion-input
+        [(ngModel)]="imagenGridId"
+        placeholder="24 caracteres hex"
+        maxlength="24"
+      ></ion-input>
+      <ion-note slot="end">
+        <small>Hex 24</small>
+      </ion-note>
+    </ion-item>
+  </ion-list>
+
+  <div class="alts-header">
+    <h2>Alternativas (2 a 5)</h2>
+    <ion-button
+      size="small"
+      fill="outline"
+      (click)="agregarAlternativa()"
+      [disabled]="alternativas.length >= 5"
+    >
+      <ion-icon name="add-outline" slot="start"></ion-icon>
+      Agregar
+    </ion-button>
+  </div>
+
+  <ion-text color="medium">
+    <p class="hint">
+      Marca con el radio button cuál es la alternativa correcta. (RF-66)
+    </p>
+  </ion-text>
+
+  <ion-radio-group [(ngModel)]="ordenCorrecto">
+    @for (a of alternativas; track a.orden; let i = $index) {
+      <div class="alt-row">
+        <ion-radio slot="start" [value]="a.orden"></ion-radio>
+        <ion-item lines="full" class="alt-item">
+          <ion-label position="stacked">Alternativa #{{ a.orden }} *</ion-label>
+          <ion-input [(ngModel)]="a.texto" maxlength="1000"></ion-input>
+        </ion-item>
+        <ion-button
+          fill="clear"
+          color="danger"
+          (click)="quitarAlternativa(i)"
+          [disabled]="alternativas.length <= 2"
+        >
+          <ion-icon name="trash-outline"></ion-icon>
+        </ion-button>
+      </div>
+    }
+  </ion-radio-group>
+
+  <ion-button
+    expand="block"
+    color="secondary"
+    class="ion-margin-top"
+    (click)="guardar()"
+    [disabled]="guardando"
+  >
+    @if (guardando) {
+      <ion-spinner name="dots"></ion-spinner>
+    } @else {
+      <ion-icon name="save-outline" slot="start"></ion-icon>
+      Guardar pregunta
+    }
+  </ion-button>
+</ion-content>

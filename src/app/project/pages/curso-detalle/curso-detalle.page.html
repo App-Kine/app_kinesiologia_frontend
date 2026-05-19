@@ -1,0 +1,81 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="secondary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/mis-cursos"></ion-back-button>
+    </ion-buttons>
+    <ion-title>
+      @if (curso) { {{ curso.codigo }} } @else { Curso }
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  @if (cargando) {
+    <div class="centro">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p><ion-text color="medium">Cargando…</ion-text></p>
+    </div>
+  } @else if (error) {
+    <div class="centro">
+      <ion-text color="danger"><p>{{ error }}</p></ion-text>
+      <ion-button (click)="cargar()">Reintentar</ion-button>
+    </div>
+  } @else {
+    @if (curso) {
+      <div class="curso-hero">
+        <ion-icon name="school-outline" class="hero-icon"></ion-icon>
+        <div>
+          <h1>{{ curso.nombre }}</h1>
+          @if (curso.descripcion) {
+            <p>{{ curso.descripcion }}</p>
+          }
+        </div>
+      </div>
+    }
+
+    <h2 class="section-title">Tests aplicados a este curso</h2>
+
+    @if (aplicaciones.length === 0) {
+      <div class="centro">
+        <ion-icon name="document-text-outline" class="empty-icon"></ion-icon>
+        <p><ion-text color="medium">Aún no aplicaste ningún test a este curso.</ion-text></p>
+        <ion-button (click)="aplicarNuevoTest()">
+          <ion-icon name="add" slot="start"></ion-icon>
+          Aplicar primer test
+        </ion-button>
+      </div>
+    } @else {
+      <ion-list>
+        @for (a of aplicaciones; track a.aplicacion_id) {
+          <ion-item>
+            <ion-icon name="document-text-outline" slot="start" color="secondary"></ion-icon>
+            <ion-label class="ion-text-wrap">
+              <h2>{{ a.test_nombre }}</h2>
+              <p>
+                @if (a.activo) {
+                  <ion-badge color="success">Activo</ion-badge>
+                } @else {
+                  <ion-badge color="medium">Inactivo</ion-badge>
+                }
+              </p>
+              <ion-note>Creada: {{ a.created_at | date: 'short' }}</ion-note>
+            </ion-label>
+            <ion-toggle
+              slot="end"
+              [checked]="a.activo"
+              (ionChange)="cambiarActivo(a, $event.detail.checked)"
+            ></ion-toggle>
+          </ion-item>
+        }
+      </ion-list>
+    }
+  }
+
+  @if (curso) {
+    <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+      <ion-fab-button color="secondary" (click)="aplicarNuevoTest()">
+        <ion-icon name="add"></ion-icon>
+      </ion-fab-button>
+    </ion-fab>
+  }
+</ion-content>

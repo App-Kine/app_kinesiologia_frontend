@@ -1,0 +1,82 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="secondary">
+    <ion-buttons slot="start">
+      <ion-back-button
+        [defaultHref]="cursoPreseleccionado ? '/curso/' + cursoId : '/mis-cursos'"
+      ></ion-back-button>
+    </ion-buttons>
+    <ion-title>Aplicar test</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  @if (cargando) {
+    <div class="centro">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p><ion-text color="medium">Cargando…</ion-text></p>
+    </div>
+  } @else {
+    <ion-text color="medium">
+      <p class="hint">
+        Asignas un test del banco al curso seleccionado. Solo aparecen los cursos donde estás autorizado (RF-71).
+      </p>
+    </ion-text>
+
+    <ion-list>
+      <ion-item>
+        <ion-label position="stacked">Curso *</ion-label>
+        @if (cursoPreseleccionado && cursoSeleccionado) {
+          <ion-input
+            readonly
+            [value]="cursoSeleccionado.codigo + ' — ' + cursoSeleccionado.nombre"
+          ></ion-input>
+          <ion-note slot="end">
+            <small>Preseleccionado</small>
+          </ion-note>
+        } @else {
+          <ion-select
+            [(ngModel)]="cursoId"
+            placeholder="Selecciona un curso"
+            interface="popover"
+          >
+            @for (c of cursos; track c.curso_id) {
+              <ion-select-option [value]="c.curso_id">
+                {{ c.codigo }} — {{ c.nombre }}
+              </ion-select-option>
+            }
+          </ion-select>
+        }
+      </ion-item>
+
+      <ion-item>
+        <ion-label position="stacked">Test *</ion-label>
+        <ion-select
+          [(ngModel)]="testId"
+          placeholder="Selecciona un test del banco"
+          interface="popover"
+        >
+          @for (t of tests; track t.test_id) {
+            <ion-select-option [value]="t.test_id">
+              {{ t.nombre }} ({{ t.cantidad_preguntas }} preguntas)
+            </ion-select-option>
+          }
+        </ion-select>
+      </ion-item>
+    </ion-list>
+
+    <ion-button
+      expand="block"
+      color="secondary"
+      class="ion-margin-top"
+      (click)="guardar()"
+      [disabled]="guardando"
+    >
+      @if (guardando) {
+        <ion-spinner name="dots"></ion-spinner>
+      } @else {
+        <ion-icon name="save-outline" slot="start"></ion-icon>
+        Aplicar al curso
+      }
+    </ion-button>
+  }
+</ion-content>

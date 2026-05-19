@@ -1,0 +1,14 @@
+.centro {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+  text-align: center;
+  gap: 12px;
+}
+
+.hint {
+  font-size: 0.9rem;
+  margin-bottom: 12px;
+}

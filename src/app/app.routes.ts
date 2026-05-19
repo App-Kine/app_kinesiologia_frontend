@@ -48,6 +48,73 @@ export const routes: Routes = [
   },
 
   // -----------------------------------------------------------
+  // Módulo docente: preguntas, tests, aplicaciones
+  // (RF-61..RF-73, RF-88..RF-93)
+  // -----------------------------------------------------------
+  {
+    path: 'mis-cursos',
+    canActivate: [docenteGuard],
+    loadComponent: () =>
+      import('./project/pages/mis-cursos/mis-cursos.page').then(
+        (m) => m.MisCursosPage
+      ),
+  },
+  {
+    path: 'curso/:cursoId',
+    canActivate: [docenteGuard],
+    loadComponent: () =>
+      import('./project/pages/curso-detalle/curso-detalle.page').then(
+        (m) => m.CursoDetallePage
+      ),
+  },
+  {
+    path: 'preguntas',
+    canActivate: [docenteGuard],
+    loadComponent: () =>
+      import('./project/pages/preguntas/preguntas.page').then(
+        (m) => m.PreguntasPage
+      ),
+  },
+  {
+    path: 'crear-pregunta',
+    canActivate: [docenteGuard],
+    loadComponent: () =>
+      import('./project/pages/crear-pregunta/crear-pregunta.page').then(
+        (m) => m.CrearPreguntaPage
+      ),
+  },
+  {
+    path: 'tests',
+    canActivate: [docenteGuard],
+    loadComponent: () =>
+      import('./project/pages/tests/tests.page').then((m) => m.TestsPage),
+  },
+  {
+    path: 'crear-test',
+    canActivate: [docenteGuard],
+    loadComponent: () =>
+      import('./project/pages/crear-test/crear-test.page').then(
+        (m) => m.CrearTestPage
+      ),
+  },
+  {
+    path: 'aplicaciones',
+    canActivate: [docenteGuard],
+    loadComponent: () =>
+      import('./project/pages/aplicaciones/aplicaciones.page').then(
+        (m) => m.AplicacionesPage
+      ),
+  },
+  {
+    path: 'crear-aplicacion',
+    canActivate: [docenteGuard],
+    loadComponent: () =>
+      import('./project/pages/crear-aplicacion/crear-aplicacion.page').then(
+        (m) => m.CrearAplicacionPage
+      ),
+  },
+
+  // -----------------------------------------------------------
   // Tabs / home: lo dejamos como vista pública del estudiante.
   // Se monta SIN guard porque la app del estudiante es de acceso
   // público según RF-01. Si en el futuro proteges algo, agrega

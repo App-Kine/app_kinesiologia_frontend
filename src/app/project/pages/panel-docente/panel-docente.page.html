@@ -41,40 +41,40 @@
   <ion-grid class="docente-grid">
     <ion-row>
       <ion-col size="12" size-md="6" size-lg="4">
-        <ion-card button>
+        <ion-card button (click)="irA('/mis-cursos')">
           <ion-card-header>
-            <ion-icon name="help-circle-outline" class="card-icon"></ion-icon>
-            <ion-card-title>Preguntas</ion-card-title>
-            <ion-card-subtitle>Banco de preguntas clínicas</ion-card-subtitle>
+            <ion-icon name="school-outline" class="card-icon"></ion-icon>
+            <ion-card-title>Mis cursos</ion-card-title>
+            <ion-card-subtitle>Tus cursos asignados</ion-card-subtitle>
           </ion-card-header>
           <ion-card-content>
-            Crea, edita y clona preguntas con audio e imagen. (RF-62 a RF-68)
+            Entra a un curso para ver y aplicar tests del banco. (RF-61, RF-71)
           </ion-card-content>
         </ion-card>
       </ion-col>
 
       <ion-col size="12" size-md="6" size-lg="4">
-        <ion-card button>
+        <ion-card button (click)="irA('/preguntas')">
+          <ion-card-header>
+            <ion-icon name="help-circle-outline" class="card-icon"></ion-icon>
+            <ion-card-title>Banco de preguntas</ion-card-title>
+            <ion-card-subtitle>Reutilizables entre cursos</ion-card-subtitle>
+          </ion-card-header>
+          <ion-card-content>
+            Crea preguntas con audio e imagen sin atarlas a un curso. (RF-62 a RF-68)
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+
+      <ion-col size="12" size-md="6" size-lg="4">
+        <ion-card button (click)="irA('/tests')">
           <ion-card-header>
             <ion-icon name="document-text-outline" class="card-icon"></ion-icon>
-            <ion-card-title>Tests</ion-card-title>
+            <ion-card-title>Banco de tests</ion-card-title>
             <ion-card-subtitle>Componer evaluaciones</ion-card-subtitle>
           </ion-card-header>
           <ion-card-content>
-            Define orden secuencial o aleatorio. (RF-69, RF-70, RF-73)
-          </ion-card-content>
-        </ion-card>
-      </ion-col>
-
-      <ion-col size="12" size-md="6" size-lg="4">
-        <ion-card button>
-          <ion-card-header>
-            <ion-icon name="clipboard-outline" class="card-icon"></ion-icon>
-            <ion-card-title>Aplicaciones</ion-card-title>
-            <ion-card-subtitle>Asignar tests a cursos</ion-card-subtitle>
-          </ion-card-header>
-          <ion-card-content>
-            Activa o desactiva aplicaciones por curso. (RF-71, RF-72, RF-91)
+            Combina preguntas y define orden secuencial o aleatorio. (RF-69, RF-70, RF-73)
           </ion-card-content>
         </ion-card>
       </ion-col>
