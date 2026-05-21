@@ -1,30 +1,37 @@
 <ion-header [translucent]="true">
   <ion-toolbar color="secondary">
     <ion-buttons slot="start">
-      <ion-back-button defaultHref="/mis-tests"></ion-back-button>
+      <ion-back-button [defaultHref]="'/test-detalle/' + testId"></ion-back-button>
     </ion-buttons>
-    <ion-title>Nuevo test</ion-title>
+    <ion-title>Editar test</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true" class="ion-padding">
   <div class="form-wrapper">
 
-    <div class="header-card">
-      <div class="header-icon">
-        <ion-icon name="document-text-outline"></ion-icon>
+    @if (cargandoInicial) {
+      <div class="centro">
+        <ion-spinner></ion-spinner>
+        <p>Cargando test...</p>
       </div>
-      <div class="header-text">
-        <h1>Crear un nuevo test</h1>
-        <p>
-          Solo necesitas darle un nombre. Las preguntas se agregan después,
-          en el detalle del test.
-        </p>
+    } @else if (errorCarga) {
+      <div class="centro">
+        <ion-icon name="alert-circle-outline" color="danger" style="font-size:48px"></ion-icon>
+        <h2>{{ errorCarga }}</h2>
+        <ion-button fill="outline" routerLink="/mis-tests">Volver</ion-button>
       </div>
-    </div>
+    } @else {
+
+      <div class="header-card">
+        <div class="header-icon"><ion-icon name="create-outline"></ion-icon></div>
+        <div class="header-text">
+          <h1>Editando test #{{ testId }}</h1>
+          <p>Modifica el nombre, la descripción o el orden de las preguntas.</p>
+        </div>
+      </div>
 
       <form (ngSubmit)="guardar()" novalidate>
-
         <div class="section-card">
           <ion-textarea
             [(ngModel)]="nombre"
@@ -34,7 +41,6 @@
             fill="outline"
             rows="1"
             autoGrow="true"
-            placeholder="Ej: Auscultación pulmonar básica"
             [disabled]="guardando"
             maxlength="200"
             [counter]="true"
@@ -50,7 +56,6 @@
             fill="outline"
             rows="3"
             autoGrow="true"
-            placeholder="Una breve descripción del propósito del test..."
             [disabled]="guardando"
             maxlength="1000"
             [counter]="true"
@@ -98,18 +103,18 @@
           expand="block"
           type="submit"
           size="large"
-          [disabled]="guardando || !nombre.trim()"
           color="secondary"
+          [disabled]="guardando || !formularioCompleto"
           class="ion-margin-top"
         >
           @if (guardando) {
             <ion-spinner name="dots"></ion-spinner>
           } @else {
             <ion-icon slot="start" name="save-outline"></ion-icon>
-            Crear test y agregar preguntas
+            Guardar cambios
           }
         </ion-button>
-
       </form>
+    }
   </div>
 </ion-content>

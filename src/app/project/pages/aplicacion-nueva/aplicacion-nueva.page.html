@@ -1,24 +1,50 @@
 <ion-header [translucent]="true">
   <ion-toolbar color="secondary">
     <ion-buttons slot="start">
-      <ion-back-button defaultHref="/mis-aplicaciones"></ion-back-button>
+      <ion-back-button
+        [defaultHref]="vieneDeCurso ? '/curso/' + cursoIdPreseleccionado : '/mis-aplicaciones'"
+      ></ion-back-button>
     </ion-buttons>
-    <ion-title>Nueva aplicación de test</ion-title>
+    <ion-title>
+      @if (vieneDeCurso) { Agregar test al curso }
+      @else { Nueva aplicación de test }
+    </ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true" class="ion-padding">
   <div class="form-wrapper">
-    <ion-note class="hint">
-      <ion-icon name="clipboard-outline"></ion-icon>
-      Asocia un test a un curso. Cada par (test, curso) produce una aplicación
-      independiente que mantiene sus propios resultados (RF-72).
-    </ion-note>
+
+    <!-- Contexto del curso (cuando viene preseleccionado) -->
+    @if (vieneDeCurso && cursoContexto) {
+      <div class="contexto-card">
+        <div class="contexto-icon">
+          <ion-icon name="school-outline"></ion-icon>
+        </div>
+        <div class="contexto-text">
+          <ion-note>Agregando test al curso</ion-note>
+          <h2>
+            <ion-chip color="secondary" class="cod-chip">
+              <ion-label>{{ cursoContexto.codigo }}</ion-label>
+            </ion-chip>
+            {{ cursoContexto.nombre }}
+          </h2>
+        </div>
+      </div>
+    } @else {
+      <ion-note class="hint">
+        <ion-icon name="clipboard-outline"></ion-icon>
+        Asocia un test a un curso. Cada par (test, curso) produce una aplicación
+        independiente que mantiene sus propios resultados.
+      </ion-note>
+    }
 
     @if (cargando) {
       <div class="centro"><ion-spinner></ion-spinner><p>Cargando datos...</p></div>
     } @else {
       <form (ngSubmit)="guardar()" novalidate>
+
+        <!-- Selector de test (siempre visible) -->
         <ion-item lines="full">
           <ion-label position="stacked">Test *</ion-label>
           <ion-select
@@ -26,51 +52,65 @@
             name="test"
             placeholder="Selecciona un test..."
             [disabled]="guardando"
+            interface="popover"
           >
             @for (t of tests; track t.test_id) {
-              <ion-select-option [value]="t.test_id">
-                {{ t.nombre }} ({{ t.cantidad_preguntas }} preguntas)
+              <ion-select-option [value]="t.test_id" [disabled]="t.cantidad_preguntas === 0">
+                {{ t.nombre }} ({{ t.cantidad_preguntas }} preguntas){{ t.cantidad_preguntas === 0 ? ' — vacío' : '' }}
               </ion-select-option>
             }
           </ion-select>
         </ion-item>
+        <ion-note class="hint">
+          Solo puedes aplicar tests que ya tengan al menos una pregunta.
+        </ion-note>
 
-        <ion-item lines="full">
-          <ion-label position="stacked">Curso *</ion-label>
-          <ion-select
-            [(ngModel)]="cursoId"
-            name="curso"
-            placeholder="Selecciona un curso..."
-            [disabled]="guardando"
-          >
-            @for (c of cursos; track c.curso_id) {
-              <ion-select-option [value]="c.curso_id">
-                {{ c.codigo }} · {{ c.nombre }}
-              </ion-select-option>
-            }
-          </ion-select>
-        </ion-item>
+        <!-- Selector de curso: SOLO cuando NO viene preseleccionado -->
+        @if (!vieneDeCurso) {
+          <ion-item lines="full">
+            <ion-label position="stacked">Curso *</ion-label>
+            <ion-select
+              [(ngModel)]="cursoId"
+              name="curso"
+              placeholder="Selecciona un curso..."
+              [disabled]="guardando"
+              interface="popover"
+            >
+              @for (c of cursos; track c.curso_id) {
+                <ion-select-option [value]="c.curso_id">
+                  {{ c.codigo }} · {{ c.nombre }}
+                </ion-select-option>
+              }
+            </ion-select>
+          </ion-item>
+        }
 
         @if (errorMsg) {
-          <ion-text color="danger" class="msg"><p>{{ errorMsg }}</p></ion-text>
+          <div class="msg-box error">
+            <ion-icon name="alert-circle-outline"></ion-icon>
+            <span>{{ errorMsg }}</span>
+          </div>
         }
         @if (okMsg) {
-          <ion-text color="success" class="msg">
-            <p><ion-icon name="checkmark-circle"></ion-icon> {{ okMsg }}</p>
-          </ion-text>
+          <div class="msg-box ok">
+            <ion-icon name="checkmark-circle"></ion-icon>
+            <span>{{ okMsg }}</span>
+          </div>
         }
 
         <ion-button
           expand="block"
           type="submit"
-          [disabled]="guardando"
+          color="secondary"
+          [disabled]="guardando || !testId || !cursoId"
           class="ion-margin-top"
         >
           @if (guardando) {
             <ion-spinner name="dots"></ion-spinner>
           } @else {
             <ion-icon slot="start" name="save-outline"></ion-icon>
-            Crear aplicación
+            @if (vieneDeCurso) { Agregar test al curso }
+            @else { Crear aplicación }
           }
         </ion-button>
       </form>

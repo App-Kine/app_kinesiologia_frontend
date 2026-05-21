@@ -5,22 +5,42 @@ import { NativeStorage } from '@ionic-native/native-storage/ngx';
 
 import { BaseService } from '../../base/service/base.service';
 import { AnalyticsService } from './analytics.service';
-<<<<<<< HEAD
 import { createLogger } from './logger';
 
 export interface CursoResumen {
-=======
-
-export interface Curso {
->>>>>>> 876202e2368df665f01863ed9dd9fae585232ce3
   curso_id: number;
   codigo: string;
   nombre: string;
   descripcion: string | null;
 }
 
-<<<<<<< HEAD
+export interface CursoConAplicaciones extends CursoResumen {
+  activo: boolean;
+  creado_por: number;
+  created_at: string;
+  updated_at: string;
+  aplicaciones: {
+    aplicacion_id: number;
+    aplicacion_uuid: string;
+    test_id: number;
+    test_nombre: string;
+    cantidad_preguntas: number;
+    profesor_id: number;
+    profesor_nombre: string;
+    activo: boolean;
+    visible_desde: string | null;
+    visible_hasta: string | null;
+    created_at: string;
+  }[];
+}
+
 export interface CrearCursoInput {
+  codigo: string;
+  nombre: string;
+  descripcion?: string | null;
+}
+
+export interface EditarCursoInput {
   codigo: string;
   nombre: string;
   descripcion?: string | null;
@@ -28,8 +48,6 @@ export interface CrearCursoInput {
 
 const log = createLogger('curso');
 
-=======
->>>>>>> 876202e2368df665f01863ed9dd9fae585232ce3
 @Injectable({ providedIn: 'root' })
 export class CursoService extends BaseService {
   private url: string;
@@ -44,7 +62,6 @@ export class CursoService extends BaseService {
     this.url = this.BASE_URL;
   }
 
-<<<<<<< HEAD
   /** Lista todos los cursos activos. */
   async listar(): Promise<CursoResumen[]> {
     log.info('listar');
@@ -84,8 +101,34 @@ export class CursoService extends BaseService {
     }
   }
 
+  /** Editar un curso (solo el creador). */
+  async editar(cursoId: number, input: EditarCursoInput): Promise<{ curso_id: number }> {
+    log.info('editar', { cursoId });
+    try {
+      const data = await this.post(this.url + 'cursos/editar', { ...input, cursoId });
+      log.info('editar OK', data);
+      return data;
+    } catch (e) {
+      log.error('editar', e);
+      throw e;
+    }
+  }
+
+  /** Eliminar (soft-delete) un curso (solo el creador). */
+  async eliminar(cursoId: number): Promise<{ curso_id: number }> {
+    log.info('eliminar', { cursoId });
+    try {
+      const data = await this.post(this.url + 'cursos/eliminar', { cursoId });
+      log.info('eliminar OK');
+      return data;
+    } catch (e) {
+      log.error('eliminar', e);
+      throw e;
+    }
+  }
+
   /** Obtiene un curso + sus aplicaciones de test. */
-  async obtenerConAplicaciones(cursoId: number): Promise<any> {
+  async obtenerConAplicaciones(cursoId: number): Promise<CursoConAplicaciones> {
     log.info('obtenerConAplicaciones', { cursoId });
     try {
       const data = await this.post(this.url + 'cursos/obtener', { cursoId });
@@ -95,15 +138,5 @@ export class CursoService extends BaseService {
       log.error('obtenerConAplicaciones', e);
       throw e;
     }
-=======
-  listarActivos(): Promise<Curso[]> {
-    return this.post(this.url + 'cursos/listar', {});
-  }
-
-  misCursos(profesorId?: number): Promise<Curso[]> {
-    const args: any = {};
-    if (profesorId != null) args.profesorId = profesorId;
-    return this.post(this.url + 'cursos/misCursos', args);
->>>>>>> 876202e2368df665f01863ed9dd9fae585232ce3
   }
 }

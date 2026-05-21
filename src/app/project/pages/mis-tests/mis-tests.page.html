@@ -35,7 +35,6 @@
           <tr>
             <th>#</th>
             <th>Nombre</th>
-            <th>Curso</th>
             <th>Preguntas</th>
             <th>Orden</th>
             <th>Creado</th>
@@ -46,7 +45,6 @@
             <tr class="row-click" (click)="abrirDetalle(t)" title="Abrir detalle">
               <td>{{ t.test_id }}</td>
               <td>{{ t.nombre }}</td>
-              <td>{{ t.curso_nombre || '—' }}</td>
               <td>{{ t.cantidad_preguntas }}</td>
               <td>
                 @if (t.orden_aleatorio) {

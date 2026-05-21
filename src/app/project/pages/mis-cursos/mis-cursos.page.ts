@@ -1,31 +1,15 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import {
-  IonContent,
-  IonHeader,
-  IonToolbar,
-  IonTitle,
-  IonButtons,
-  IonBackButton,
-  IonButton,
-  IonIcon,
-  IonList,
-  IonItem,
-  IonLabel,
-  IonNote,
-  IonText,
-  IonSpinner,
-  IonFab,
-  IonFabButton,
-  ToastController,
+  IonContent, IonHeader, IonToolbar, IonTitle, IonButtons, IonBackButton,
+  IonButton, IonIcon, IonList, IonItem, IonLabel, IonText, IonSpinner,
+  IonFab, IonFabButton, AlertController, ToastController,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
-  schoolOutline,
-  chevronForwardOutline,
-  addOutline,
-  sparklesOutline,
+  schoolOutline, chevronForwardOutline, addOutline, sparklesOutline,
+  createOutline, trashOutline, ellipsisVertical,
 } from 'ionicons/icons';
 
 import { CursoService, CursoResumen } from '../../services/curso.service';
@@ -39,26 +23,12 @@ const log = createLogger('mis-cursos');
   styleUrls: ['./mis-cursos.page.scss'],
   standalone: true,
   imports: [
-    CommonModule,
-    IonContent,
-    IonHeader,
-    IonToolbar,
-    IonTitle,
-    IonButtons,
-    IonBackButton,
-    IonButton,
-    IonIcon,
-    IonList,
-    IonItem,
-    IonLabel,
-    IonNote,
-    IonText,
-    IonSpinner,
-    IonFab,
-    IonFabButton,
+    CommonModule, IonContent, IonHeader, IonToolbar, IonTitle, IonButtons,
+    IonBackButton, IonButton, IonIcon, IonList, IonItem, IonLabel,
+    IonText, IonSpinner, IonFab, IonFabButton,
   ],
 })
-export class MisCursosPage implements OnInit {
+export class MisCursosPage {
   cursos: CursoResumen[] = [];
   cargando = true;
   error: string | null = null;
@@ -66,20 +36,17 @@ export class MisCursosPage implements OnInit {
   constructor(
     private cursoService: CursoService,
     private router: Router,
-    private toastCtrl: ToastController
+    private toastCtrl: ToastController,
+    private alertCtrl: AlertController
   ) {
     addIcons({
-      schoolOutline,
-      chevronForwardOutline,
-      addOutline,
-      sparklesOutline,
+      schoolOutline, chevronForwardOutline, addOutline, sparklesOutline,
+      createOutline, trashOutline, ellipsisVertical,
     });
   }
 
-  async ngOnInit(): Promise<void> {
-    await this.cargar();
-  }
-
+  // La carga ocurre en ionViewWillEnter, que se dispara tanto al entrar la
+  // primera vez como al volver desde crear/editar (así la lista se refresca).
   ionViewWillEnter(): void {
     this.cargar();
   }
@@ -92,12 +59,7 @@ export class MisCursosPage implements OnInit {
     } catch (e: any) {
       log.error('cargar', e);
       this.error = e?.message || 'Error al cargar cursos';
-      const toast = await this.toastCtrl.create({
-        message: this.error || 'Error',
-        duration: 3000,
-        color: 'danger',
-      });
-      await toast.present();
+      await this.toast(this.error || 'Error', 'danger');
     } finally {
       this.cargando = false;
     }
@@ -109,5 +71,50 @@ export class MisCursosPage implements OnInit {
 
   irACrearCurso(): void {
     this.router.navigateByUrl('/curso-nuevo');
+  }
+
+  editarCurso(c: CursoResumen, ev: Event): void {
+    ev.stopPropagation();
+    this.router.navigateByUrl(`/curso-editar/${c.curso_id}`);
+  }
+
+  async confirmarEliminar(c: CursoResumen, ev: Event): Promise<void> {
+    ev.stopPropagation();
+    const alert = await this.alertCtrl.create({
+      header: '¿Eliminar este curso?',
+      message: `
+        <p>El curso "<strong>${this.escapar(c.nombre)}</strong>" se marcará como inactivo.</p>
+        <p>Las evaluaciones ya realizadas se conservan para histórico.</p>
+      `,
+      buttons: [
+        { text: 'Cancelar', role: 'cancel' },
+        {
+          text: 'Eliminar',
+          role: 'destructive',
+          handler: () => this.ejecutarEliminar(c),
+        },
+      ],
+    });
+    await alert.present();
+  }
+
+  private async ejecutarEliminar(c: CursoResumen): Promise<void> {
+    try {
+      await this.cursoService.eliminar(c.curso_id);
+      this.cursos = this.cursos.filter((x) => x.curso_id !== c.curso_id);
+      await this.toast(`Curso "${c.nombre}" eliminado.`, 'success');
+    } catch (e: any) {
+      await this.toast(e?.message || 'No se pudo eliminar.', 'danger');
+    }
+  }
+
+  private escapar(s: string): string {
+    const map: any = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+    return s.replace(/[&<>"']/g, (c) => map[c]);
+  }
+
+  private async toast(message: string, color: 'success' | 'danger' | 'warning'): Promise<void> {
+    const t = await this.toastCtrl.create({ message, duration: 2500, color, position: 'bottom' });
+    await t.present();
   }
 }
