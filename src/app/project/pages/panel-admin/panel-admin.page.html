@@ -1,0 +1,192 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-title>Panel de Administración</ion-title>
+    <ion-buttons slot="end">
+      @if (tieneRolProfesor) {
+        <ion-button
+          fill="clear"
+          color="light"
+          (click)="cambiarPanel()"
+          title="Cambiar al panel docente"
+        >
+          <ion-icon slot="icon-only" name="swap-horizontal-outline"></ion-icon>
+        </ion-button>
+      }
+      <ion-button
+        fill="clear"
+        color="light"
+        (click)="cerrarSesion()"
+        title="Cerrar sesión"
+      >
+        <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  <div class="admin-hero">
+    <ion-icon name="shield-checkmark-outline" class="hero-icon"></ion-icon>
+    <div>
+      <h1>Hola, {{ usuario?.nombre || 'Administrador' }}</h1>
+      <ion-text color="medium">
+        <p class="hero-subtitle">
+          Estás en el panel de administración del sistema.
+          <ion-badge color="primary">SUPERADMIN</ion-badge>
+        </p>
+      </ion-text>
+    </div>
+  </div>
+
+  <!-- ========================== GESTIÓN DE PROFESORES (RF-76..RF-87) ========================== -->
+  <ion-card class="card-profesores">
+    <ion-card-header>
+      <ion-icon name="people-outline" class="card-icon"></ion-icon>
+      <ion-card-title>Gestión de profesores</ion-card-title>
+      <ion-card-subtitle>
+        Invita nuevos profesores por correo y revisa el estado de cada invitación.
+      </ion-card-subtitle>
+    </ion-card-header>
+
+    <ion-card-content>
+      <!-- FORM: invitar nuevo profesor -->
+      <div class="invitar-form">
+        <ion-item lines="full" class="invitar-input">
+          <ion-icon name="mail-outline" slot="start"></ion-icon>
+          <ion-label position="stacked">Correo del profesor</ion-label>
+          <ion-input
+            type="email"
+            inputmode="email"
+            placeholder="nombre.apellido@uchile.cl"
+            [(ngModel)]="invitarCorreo"
+            [disabled]="invitando"
+            (keyup.enter)="invitar()"
+          ></ion-input>
+        </ion-item>
+
+        <ion-button
+          (click)="invitar()"
+          [disabled]="invitando || !invitarCorreo"
+          color="primary"
+        >
+          @if (invitando) {
+            <ion-spinner name="dots"></ion-spinner>
+          } @else {
+            <ion-icon slot="start" name="send-outline"></ion-icon>
+            Enviar invitación
+          }
+        </ion-button>
+      </div>
+
+      @if (invitarError) {
+        <ion-text color="danger" class="invitar-error">
+          {{ invitarError }}
+        </ion-text>
+      }
+
+      @if (invitacionRecienCreada) {
+        <div class="dev-link-box">
+          <p>
+            <strong>Modo desarrollo:</strong> el correo no se envió realmente.
+            Copia este enlace y compártelo con el profesor invitado:
+          </p>
+          <code class="dev-link">{{ invitacionRecienCreada.link }}</code>
+          <ion-button
+            size="small"
+            fill="outline"
+            (click)="copiarLink()"
+            color="primary"
+          >
+            <ion-icon slot="start" name="copy-outline"></ion-icon>
+            Copiar
+          </ion-button>
+          <p class="dev-link-meta">
+            Expira: {{ formatoFecha(invitacionRecienCreada.expira_en) }}
+          </p>
+        </div>
+      }
+
+      <!-- LISTADO: invitaciones existentes (RF-83) -->
+      <div class="invitaciones-header">
+        <h3>Invitaciones enviadas</h3>
+        <ion-button
+          size="small"
+          fill="clear"
+          (click)="recargarInvitaciones()"
+          [disabled]="cargandoLista"
+        >
+          <ion-icon slot="icon-only" name="refresh-outline"></ion-icon>
+        </ion-button>
+      </div>
+
+      @if (cargandoLista) {
+        <ion-spinner></ion-spinner>
+      } @else if (errorLista) {
+        <ion-text color="danger">{{ errorLista }}</ion-text>
+      } @else if (invitaciones.length === 0) {
+        <ion-note>Aún no se han enviado invitaciones.</ion-note>
+      } @else {
+        <div class="tabla-wrapper">
+          <table class="invitaciones-tabla">
+            <thead>
+              <tr>
+                <th>Correo</th>
+                <th>Estado</th>
+                <th>Enviada</th>
+                <th>Expira</th>
+                <th>Completada</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (inv of invitaciones; track inv.invitacion_id) {
+                <tr>
+                  <td>{{ inv.correo_destino }}</td>
+                  <td>
+                    <ion-chip [color]="badgeColor(inv.estado)" class="estado-chip">
+                      <ion-icon [name]="badgeIcon(inv.estado)"></ion-icon>
+                      <ion-label>{{ inv.estado }}</ion-label>
+                    </ion-chip>
+                  </td>
+                  <td>{{ formatoFecha(inv.creada_en) }}</td>
+                  <td>{{ formatoFecha(inv.expira_en) }}</td>
+                  <td>{{ formatoFecha(inv.completada_en) }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </ion-card-content>
+  </ion-card>
+
+  <!-- ========================== OTROS MÓDULOS (placeholders) ========================== -->
+  <ion-grid class="admin-grid">
+    <ion-row>
+      <ion-col size="12" size-md="6" size-lg="4">
+        <ion-card button>
+          <ion-card-header>
+            <ion-icon name="school-outline" class="card-icon"></ion-icon>
+            <ion-card-title>Cursos</ion-card-title>
+            <ion-card-subtitle>Crear, editar y desactivar</ion-card-subtitle>
+          </ion-card-header>
+          <ion-card-content>
+            Administra el catálogo de cursos.
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+
+      <ion-col size="12" size-md="6" size-lg="4">
+        <ion-card button>
+          <ion-card-header>
+            <ion-icon name="analytics-outline" class="card-icon"></ion-icon>
+            <ion-card-title>Visión general</ion-card-title>
+            <ion-card-subtitle>Cursos, profesores y asignaciones</ion-card-subtitle>
+          </ion-card-header>
+          <ion-card-content>
+            Vista de auditoría y resumen del sistema.
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>

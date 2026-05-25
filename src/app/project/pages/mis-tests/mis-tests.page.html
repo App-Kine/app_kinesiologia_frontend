@@ -1,0 +1,63 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="secondary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/panel-docente"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Mis tests</ion-title>
+    <ion-buttons slot="end">
+      <ion-button fill="clear" color="light" (click)="recargar()" [disabled]="cargando">
+        <ion-icon slot="icon-only" name="refresh-outline"></ion-icon>
+      </ion-button>
+      <ion-button fill="clear" color="light" (click)="irACrear()">
+        <ion-icon slot="icon-only" name="add-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  @if (cargando) {
+    <div class="centro"><ion-spinner></ion-spinner><p>Cargando tests...</p></div>
+  } @else if (error) {
+    <ion-text color="danger"><p>{{ error }}</p></ion-text>
+  } @else if (tests.length === 0) {
+    <div class="vacio">
+      <ion-note>Aún no has creado tests.</ion-note>
+      <ion-button (click)="irACrear()">
+        <ion-icon slot="start" name="add-outline"></ion-icon>
+        Crear el primero
+      </ion-button>
+    </div>
+  } @else {
+    <div class="tabla-wrapper">
+      <table class="tabla">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Nombre</th>
+            <th>Preguntas</th>
+            <th>Orden</th>
+            <th>Creado</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (t of tests; track t.test_id) {
+            <tr class="row-click" (click)="abrirDetalle(t)" title="Abrir detalle">
+              <td>{{ t.test_id }}</td>
+              <td>{{ t.nombre }}</td>
+              <td>{{ t.cantidad_preguntas }}</td>
+              <td>
+                @if (t.orden_aleatorio) {
+                  <ion-chip color="tertiary"><ion-icon name="shuffle-outline"></ion-icon><ion-label>aleatorio</ion-label></ion-chip>
+                } @else {
+                  <ion-chip color="medium"><ion-icon name="list-outline"></ion-icon><ion-label>secuencial</ion-label></ion-chip>
+                }
+              </td>
+              <td>{{ formatoFecha(t.created_at) }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</ion-content>

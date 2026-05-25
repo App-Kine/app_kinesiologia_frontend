@@ -129,7 +129,10 @@
     }
   },
   "cli": {
-    "schematicCollections": ["@ionic/angular-toolkit"]
+    "schematicCollections": [
+      "@ionic/angular-toolkit"
+    ],
+    "analytics": "1cf61a32-0552-4793-a00d-2a867f7924ec"
   },
   "schematics": {
     "@ionic/angular-toolkit:component": {

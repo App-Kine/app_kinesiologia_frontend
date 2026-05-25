@@ -1,0 +1,152 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="secondary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/mis-tests"></ion-back-button>
+    </ion-buttons>
+    <ion-title>{{ test?.nombre || 'Detalle del test' }}</ion-title>
+    <ion-buttons slot="end">
+      @if (test) {
+        <ion-button fill="clear" color="light" (click)="irAEditarTest()" title="Editar test">
+          <ion-icon slot="icon-only" name="create-outline"></ion-icon>
+        </ion-button>
+        <ion-button fill="clear" color="light" (click)="confirmarEliminarTest()" title="Eliminar test">
+          <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+        </ion-button>
+      }
+      <ion-button fill="clear" color="light" (click)="recargar()" [disabled]="cargando" title="Recargar">
+        <ion-icon slot="icon-only" name="refresh-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+
+  @if (cargando && !test) {
+    <div class="centro">
+      <ion-spinner></ion-spinner>
+      <p>Cargando test...</p>
+    </div>
+  } @else if (errorCarga) {
+    <div class="centro">
+      <ion-icon name="alert-circle-outline" color="danger" style="font-size:48px"></ion-icon>
+      <h2>{{ errorCarga }}</h2>
+      <ion-button fill="outline" routerLink="/mis-tests">Volver al listado</ion-button>
+    </div>
+  } @else if (test) {
+
+    <!-- Hero con info del test -->
+    <div class="test-hero">
+      <div class="hero-icon">
+        <ion-icon name="document-text-outline"></ion-icon>
+      </div>
+      <div class="hero-text">
+        <div class="hero-title">
+          <h1>{{ test.nombre }}</h1>
+          <ion-chip color="medium" class="id-chip">
+            <ion-label>#{{ test.test_id }}</ion-label>
+          </ion-chip>
+        </div>
+        @if (test.descripcion) {
+          <p class="hero-desc">{{ test.descripcion }}</p>
+        }
+        <div class="hero-meta">
+          <ion-chip [color]="test.preguntas.length > 0 ? 'success' : 'warning'">
+            <ion-icon name="help-circle-outline"></ion-icon>
+            <ion-label>{{ test.preguntas.length }} {{ test.preguntas.length === 1 ? 'pregunta' : 'preguntas' }}</ion-label>
+          </ion-chip>
+          @if (test.orden_aleatorio) {
+            <ion-chip color="tertiary">
+              <ion-icon name="shuffle-outline"></ion-icon>
+              <ion-label>orden aleatorio</ion-label>
+            </ion-chip>
+          } @else {
+            <ion-chip color="medium">
+              <ion-icon name="list-outline"></ion-icon>
+              <ion-label>orden secuencial</ion-label>
+            </ion-chip>
+          }
+        </div>
+      </div>
+    </div>
+
+    <div class="body-wrapper">
+
+      <div class="seccion-header">
+        <h2>Preguntas del test</h2>
+        <ion-button color="secondary" (click)="agregarPregunta()" size="small">
+          <ion-icon slot="start" name="add-outline"></ion-icon>
+          Agregar pregunta
+        </ion-button>
+      </div>
+
+      @if (test.preguntas.length === 0) {
+        <div class="empty">
+          <div class="empty-icon">
+            <ion-icon name="sparkles-outline"></ion-icon>
+          </div>
+          <h3>Aún no hay preguntas en este test</h3>
+          <p>Agrega la primera pregunta para que los estudiantes puedan responderla.</p>
+          <ion-button color="secondary" (click)="agregarPregunta()">
+            <ion-icon slot="start" name="add-outline"></ion-icon>
+            Agregar primera pregunta
+          </ion-button>
+        </div>
+      } @else {
+        <div class="preguntas-list">
+          @for (p of test.preguntas; track p.pregunta_id; let i = $index) {
+            <div class="pregunta-card">
+              <div class="card-top">
+                <div class="orden-badge">{{ p.orden }}</div>
+                <div class="multimedia-chips">
+                  @if (p.audio_grid_id) {
+                    <ion-chip color="tertiary"><ion-icon name="musical-notes-outline"></ion-icon><ion-label>audio</ion-label></ion-chip>
+                  }
+                  @if (p.imagen_grid_id) {
+                    <ion-chip color="primary"><ion-icon name="image-outline"></ion-icon><ion-label>imagen</ion-label></ion-chip>
+                  }
+                  @if (p.cantidad_alternativas != null) {
+                    <ion-chip color="medium">
+                      <ion-icon name="list-outline"></ion-icon>
+                      <ion-label>{{ p.cantidad_alternativas }} alt.</ion-label>
+                    </ion-chip>
+                  }
+                </div>
+              </div>
+
+              <p class="card-enunciado">{{ p.enunciado }}</p>
+
+              <div class="card-actions">
+                <ion-button
+                  fill="clear" size="small" color="medium"
+                  (click)="editarPregunta(p.pregunta_id)"
+                  class="action-btn"
+                >
+                  <ion-icon slot="start" name="create-outline"></ion-icon>
+                  Editar
+                </ion-button>
+                <ion-button
+                  fill="clear" size="small" color="danger"
+                  (click)="confirmarQuitar(p)"
+                  class="action-btn"
+                >
+                  <ion-icon slot="start" name="trash-outline"></ion-icon>
+                  Quitar
+                </ion-button>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- FAB cuando ya hay preguntas -->
+    @if (test.preguntas.length > 0) {
+      <ion-fab slot="fixed" vertical="bottom" horizontal="end">
+        <ion-fab-button color="secondary" (click)="agregarPregunta()" title="Agregar pregunta">
+          <ion-icon name="add-outline"></ion-icon>
+        </ion-fab-button>
+      </ion-fab>
+    }
+  }
+</ion-content>

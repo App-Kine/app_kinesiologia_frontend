@@ -1,4 +1,31 @@
-# App Base Frontend
+# Auris · Frontend (Ionic + Angular 20)
+
+UI del MVP: login, paneles diferenciados (admin / docente / selector), registro de profesores por invitación. Hace POST `arg=urlencoded(JSON)` al controlador (`http://localhost:3023/controlador_base/`).
+
+> **Setup completo del entorno (BD + 3 servicios):** ver [`app_kinesiologia_logica/database/SETUP.md`](../app_kinesiologia_logica/database/SETUP.md)
+
+## Quick start
+
+```bash
+npm install
+npm start
+# abre http://localhost:4200
+```
+
+## Rutas principales
+
+| Ruta | Acceso |
+|---|---|
+| `/login` | público (RF-51) |
+| `/registro-profesor/:token` | público — landing del email de invitación (RF-79) |
+| `/panel-admin` | requiere rol SUPERADMIN |
+| `/panel-docente` | requiere rol PROFESOR |
+| `/seleccion-panel` | requiere sesión — para usuarios con ambos roles (RF-56) |
+| `/tabs/home` | público (app del estudiante, en desarrollo) |
+
+---
+
+## Descripción técnica del template base
 
 Este es el proyecto frontend base construido con Ionic y Angular.
 

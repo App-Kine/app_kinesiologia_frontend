@@ -1,0 +1,55 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Selecciona tu panel</ion-title>
+    <ion-buttons slot="end">
+      <ion-button fill="clear" (click)="cerrarSesion()" title="Cerrar sesión">
+        <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  <div class="seleccion-wrapper">
+    <ion-text>
+      <h1 class="seleccion-titulo">
+        Hola, {{ usuario?.nombre || 'usuario' }}
+      </h1>
+      <p class="seleccion-subtitulo">
+        Tienes acceso a ambos paneles. ¿Cuál quieres usar ahora?
+      </p>
+    </ion-text>
+
+    <div class="cards">
+      <ion-card class="card-admin" button (click)="irAAdmin()">
+        <ion-card-content>
+          <ion-icon name="shield-checkmark-outline" class="card-icon admin"></ion-icon>
+          <h2>Panel de Administración</h2>
+          <p>
+            Gestiona cursos, profesores e invitaciones. Visión global del sistema.
+          </p>
+          <ion-button expand="block" color="primary" class="card-btn">
+            Entrar como administrador
+          </ion-button>
+        </ion-card-content>
+      </ion-card>
+
+      <ion-card class="card-docente" button (click)="irADocente()">
+        <ion-card-content>
+          <ion-icon name="school-outline" class="card-icon docente"></ion-icon>
+          <h2>Panel Docente</h2>
+          <p>
+            Administra preguntas, tests, aplicaciones y consulta analítica de tus cursos.
+          </p>
+          <ion-button expand="block" color="secondary" class="card-btn">
+            Entrar como profesor
+          </ion-button>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <ion-text color="medium" class="hint">
+      <small>Puedes cambiar entre paneles en cualquier momento desde la barra superior.</small>
+    </ion-text>
+  </div>
+</ion-content>
