@@ -40,79 +40,58 @@
 
   <ion-grid class="docente-grid">
     <ion-row>
+      <!-- Mis cursos: punto de entrada principal -->
       <ion-col size="12" size-md="6" size-lg="4">
-<<<<<<< HEAD
-        <ion-card button (click)="irA('/mis-tests')">
+        <ion-card button (click)="irA('/mis-cursos')">
           <ion-card-header>
-            <ion-icon name="document-text-outline" class="card-icon"></ion-icon>
-            <ion-card-title>Tests y preguntas</ion-card-title>
-            <ion-card-subtitle>Componer evaluaciones</ion-card-subtitle>
+            <ion-icon name="school-outline" class="card-icon"></ion-icon>
+            <ion-card-title>Mis cursos</ion-card-title>
+            <ion-card-subtitle>Crear cursos y aplicar tests</ion-card-subtitle>
           </ion-card-header>
           <ion-card-content>
-            Crea tests y dentro de cada uno agrega, edita o quita preguntas.
-            (RF-62 a RF-73)
+            Arma cursos y dentro agrega los tests que tus estudiantes responderán.
           </ion-card-content>
         </ion-card>
       </ion-col>
 
+      <!-- Banco de tests + preguntas -->
+      <ion-col size="12" size-md="6" size-lg="4">
+        <ion-card button (click)="irA('/mis-tests')">
+          <ion-card-header>
+            <ion-icon name="document-text-outline" class="card-icon"></ion-icon>
+            <ion-card-title>Tests y preguntas</ion-card-title>
+            <ion-card-subtitle>Banco de tests del profesor</ion-card-subtitle>
+          </ion-card-header>
+          <ion-card-content>
+            Crea tests y dentro de cada uno agrega, edita o quita preguntas.
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+
+      <!-- Aplicaciones (vista cross-curso) -->
       <ion-col size="12" size-md="6" size-lg="4">
         <ion-card button (click)="irA('/mis-aplicaciones')">
           <ion-card-header>
             <ion-icon name="clipboard-outline" class="card-icon"></ion-icon>
             <ion-card-title>Aplicaciones</ion-card-title>
-            <ion-card-subtitle>Asignar tests a cursos</ion-card-subtitle>
+            <ion-card-subtitle>Tests aplicados a cursos</ion-card-subtitle>
           </ion-card-header>
           <ion-card-content>
-            Activa o desactiva aplicaciones por curso. (RF-71, RF-72, RF-91)
-=======
-        <ion-card button (click)="irA('/mis-cursos')">
-          <ion-card-header>
-            <ion-icon name="school-outline" class="card-icon"></ion-icon>
-            <ion-card-title>Mis cursos</ion-card-title>
-            <ion-card-subtitle>Tus cursos asignados</ion-card-subtitle>
-          </ion-card-header>
-          <ion-card-content>
-            Entra a un curso para ver y aplicar tests del banco. (RF-61, RF-71)
+            Activa o desactiva aplicaciones (visible u oculto al estudiante).
           </ion-card-content>
         </ion-card>
       </ion-col>
 
+      <!-- Analítica -->
       <ion-col size="12" size-md="6" size-lg="4">
-        <ion-card button (click)="irA('/preguntas')">
-          <ion-card-header>
-            <ion-icon name="help-circle-outline" class="card-icon"></ion-icon>
-            <ion-card-title>Banco de preguntas</ion-card-title>
-            <ion-card-subtitle>Reutilizables entre cursos</ion-card-subtitle>
-          </ion-card-header>
-          <ion-card-content>
-            Crea preguntas con audio e imagen sin atarlas a un curso. (RF-62 a RF-68)
-          </ion-card-content>
-        </ion-card>
-      </ion-col>
-
-      <ion-col size="12" size-md="6" size-lg="4">
-        <ion-card button (click)="irA('/tests')">
-          <ion-card-header>
-            <ion-icon name="document-text-outline" class="card-icon"></ion-icon>
-            <ion-card-title>Banco de tests</ion-card-title>
-            <ion-card-subtitle>Componer evaluaciones</ion-card-subtitle>
-          </ion-card-header>
-          <ion-card-content>
-            Combina preguntas y define orden secuencial o aleatorio. (RF-69, RF-70, RF-73)
->>>>>>> c1be50b161eba707808a3bf917f8d24005bc82c9
-          </ion-card-content>
-        </ion-card>
-      </ion-col>
-
-      <ion-col size="12" size-md="6" size-lg="4">
-        <ion-card button disabled>
+        <ion-card button (click)="irA('/analitica')">
           <ion-card-header>
             <ion-icon name="stats-chart-outline" class="card-icon"></ion-icon>
             <ion-card-title>Analítica</ion-card-title>
-            <ion-card-subtitle>Resultados por curso y test</ion-card-subtitle>
+            <ion-card-subtitle>Resultados por test y pregunta</ion-card-subtitle>
           </ion-card-header>
           <ion-card-content>
-            Tasa de error por pregunta, intentos totales. (RF-94 a RF-104) <em>— próximamente</em>
+            Porcentaje de aciertos, preguntas por tasa de error e intentos.
           </ion-card-content>
         </ion-card>
       </ion-col>

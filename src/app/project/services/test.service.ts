@@ -5,11 +5,13 @@ import { NativeStorage } from '@ionic-native/native-storage/ngx';
 
 import { BaseService } from '../../base/service/base.service';
 import { AnalyticsService } from './analytics.service';
-<<<<<<< HEAD
+import { createLogger } from './logger';
+
+const log = createLogger('test');
 
 export interface PreguntaEnTest {
   preguntaId: number;
-  orden: number; // 1..N
+  orden: number;
 }
 
 export interface TestInput {
@@ -18,23 +20,12 @@ export interface TestInput {
   ordenAleatorio?: boolean;
   cursoOrigenId?: number | null;
   preguntas: PreguntaEnTest[];
-=======
-import { createLogger } from './logger';
-
-const log = createLogger('test');
-
-export interface TestPreguntaInput {
-  preguntaId: number;
-  orden: number;
 }
 
-export interface CrearTestInput {
+export interface EditarTestInput {
   nombre: string;
   descripcion?: string | null;
-  ordenAleatorio: boolean;
-  cursoOrigenId?: number | null;
-  preguntas: TestPreguntaInput[];
->>>>>>> c1be50b161eba707808a3bf917f8d24005bc82c9
+  ordenAleatorio?: boolean;
 }
 
 export interface TestResumen {
@@ -49,7 +40,6 @@ export interface TestResumen {
   cantidad_preguntas: number;
 }
 
-<<<<<<< HEAD
 export interface TestDetalle extends TestResumen {
   creado_por: number;
   clonado_de_id: number | null;
@@ -63,24 +53,6 @@ export interface TestDetalle extends TestResumen {
     imagen_grid_id?: string | null;
     cantidad_alternativas?: number;
   }[];
-=======
-export interface TestDetalle {
-  test_id: number;
-  nombre: string;
-  descripcion: string | null;
-  orden_aleatorio: boolean;
-  creado_por: number;
-  curso_origen_id: number | null;
-  clonado_de_id: number | null;
-  activo: boolean;
-  created_at: string;
-  updated_at: string;
-  preguntas: Array<{
-    pregunta_id: number;
-    orden: number;
-    enunciado: string;
-  }>;
->>>>>>> c1be50b161eba707808a3bf917f8d24005bc82c9
 }
 
 @Injectable({ providedIn: 'root' })
@@ -97,24 +69,10 @@ export class TestService extends BaseService {
     this.url = this.BASE_URL;
   }
 
-<<<<<<< HEAD
-  crear(t: TestInput): Promise<{ test_id: number }> {
-    return this.post(this.url + 'crearTest', t);
-  }
-
-  listar(profesorId?: number): Promise<TestResumen[]> {
-    const args: any = {};
-    if (profesorId != null) args.profesorId = profesorId;
-    return this.post(this.url + 'listarTests', args);
-  }
-
-  obtener(testId: number): Promise<TestDetalle> {
-    return this.post(this.url + 'obtenerTest', { testId });
-=======
-  async crear(input: CrearTestInput): Promise<{ test_id: number }> {
-    log.info('crear', { preguntas: input.preguntas?.length });
+  async crear(t: TestInput): Promise<{ test_id: number }> {
+    log.info('crear', { nombre: t.nombre, preguntas: t.preguntas?.length });
     try {
-      const data = await this.post(this.url + 'crearTest', input);
+      const data = await this.post(this.url + 'crearTest', t);
       log.info('crear OK', data);
       return data;
     } catch (e) {
@@ -126,9 +84,9 @@ export class TestService extends BaseService {
   async listar(profesorId?: number): Promise<TestResumen[]> {
     log.info('listar', { profesorId });
     try {
-      const params: any = {};
-      if (Number.isInteger(profesorId)) params.profesorId = profesorId;
-      const data = await this.post(this.url + 'listarTests', params);
+      const args: any = {};
+      if (profesorId != null) args.profesorId = profesorId;
+      const data = await this.post(this.url + 'listarTests', args);
       log.info('listar OK', { filas: data?.length });
       return data;
     } catch (e) {
@@ -147,6 +105,29 @@ export class TestService extends BaseService {
       log.error('obtener', e);
       throw e;
     }
->>>>>>> c1be50b161eba707808a3bf917f8d24005bc82c9
+  }
+
+  async editar(testId: number, t: EditarTestInput): Promise<{ test_id: number }> {
+    log.info('editar', { testId });
+    try {
+      const data = await this.post(this.url + 'editarTest', { ...t, testId });
+      log.info('editar OK', data);
+      return data;
+    } catch (e) {
+      log.error('editar', e);
+      throw e;
+    }
+  }
+
+  async eliminar(testId: number): Promise<{ test_id: number }> {
+    log.info('eliminar', { testId });
+    try {
+      const data = await this.post(this.url + 'eliminarTest', { testId });
+      log.info('eliminar OK', data);
+      return data;
+    } catch (e) {
+      log.error('eliminar', e);
+      throw e;
+    }
   }
 }

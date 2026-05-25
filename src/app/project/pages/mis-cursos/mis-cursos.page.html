@@ -4,6 +4,11 @@
       <ion-back-button defaultHref="/panel-docente"></ion-back-button>
     </ion-buttons>
     <ion-title>Mis cursos</ion-title>
+    <ion-buttons slot="end">
+      <ion-button fill="clear" color="light" (click)="irACrearCurso()" title="Nuevo curso">
+        <ion-icon slot="icon-only" name="add-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
@@ -20,35 +25,64 @@
     </div>
   } @else if (cursos.length === 0) {
     <div class="centro">
-      <ion-icon name="school-outline" class="empty-icon"></ion-icon>
-      <p><ion-text color="medium">No tienes cursos asignados.</ion-text></p>
+      <ion-icon name="sparkles-outline" class="empty-icon" color="secondary"></ion-icon>
+      <p><ion-text color="medium"><strong>Aún no tienes cursos</strong></ion-text></p>
       <p>
         <ion-text color="medium">
-          Pide al superadmin que te asigne a un curso para empezar a trabajar.
+          Crea tu primer curso para organizar tus tests.
         </ion-text>
       </p>
+      <ion-button color="secondary" (click)="irACrearCurso()">
+        <ion-icon slot="start" name="add-outline"></ion-icon>
+        Crear mi primer curso
+      </ion-button>
     </div>
   } @else {
     <ion-text color="medium">
       <p class="hint">
-        Elige un curso para gestionar los tests aplicados y armar evaluaciones.
+        Elige un curso para gestionar los tests aplicados, o usa los botones para editarlo o eliminarlo.
       </p>
     </ion-text>
 
     <ion-list>
       @for (c of cursos; track c.curso_id) {
-        <ion-item button (click)="abrirCurso(c)" detail="false">
+        <ion-item button (click)="abrirCurso(c)" detail="false" class="curso-item">
           <ion-icon name="school-outline" slot="start" color="secondary"></ion-icon>
           <ion-label>
             <h2>{{ c.nombre }}</h2>
             <p><strong>{{ c.codigo }}</strong></p>
             @if (c.descripcion) {
-              <p>{{ c.descripcion }}</p>
+              <p class="desc-line">{{ c.descripcion }}</p>
             }
           </ion-label>
-          <ion-icon name="chevron-forward-outline" slot="end" color="medium"></ion-icon>
+          <div slot="end" class="acciones">
+            <ion-button
+              fill="clear"
+              size="small"
+              color="medium"
+              (click)="editarCurso(c, $event)"
+              title="Editar"
+            >
+              <ion-icon slot="icon-only" name="create-outline"></ion-icon>
+            </ion-button>
+            <ion-button
+              fill="clear"
+              size="small"
+              color="danger"
+              (click)="confirmarEliminar(c, $event)"
+              title="Eliminar"
+            >
+              <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+            </ion-button>
+          </div>
         </ion-item>
       }
     </ion-list>
+
+    <ion-fab slot="fixed" vertical="bottom" horizontal="end">
+      <ion-fab-button color="secondary" (click)="irACrearCurso()" title="Nuevo curso">
+        <ion-icon name="add-outline"></ion-icon>
+      </ion-fab-button>
+    </ion-fab>
   }
 </ion-content>

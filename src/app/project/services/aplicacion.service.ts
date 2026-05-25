@@ -5,16 +5,11 @@ import { NativeStorage } from '@ionic-native/native-storage/ngx';
 
 import { BaseService } from '../../base/service/base.service';
 import { AnalyticsService } from './analytics.service';
-<<<<<<< HEAD
-
-export interface AplicacionInput {
-=======
 import { createLogger } from './logger';
 
 const log = createLogger('aplicacion');
 
 export interface CrearAplicacionInput {
->>>>>>> c1be50b161eba707808a3bf917f8d24005bc82c9
   testId: number;
   cursoId: number;
 }
@@ -29,11 +24,8 @@ export interface AplicacionResumen {
   curso_nombre: string;
   profesor_id: number;
   activo: boolean;
-<<<<<<< HEAD
-=======
   visible_desde: string | null;
   visible_hasta: string | null;
->>>>>>> c1be50b161eba707808a3bf917f8d24005bc82c9
   created_at: string;
 }
 
@@ -51,23 +43,6 @@ export class AplicacionService extends BaseService {
     this.url = this.BASE_URL;
   }
 
-<<<<<<< HEAD
-  crear(a: AplicacionInput): Promise<{ aplicacion_id: number }> {
-    return this.post(this.url + 'crearAplicacion', a);
-  }
-
-  listar(profesorId?: number): Promise<AplicacionResumen[]> {
-    const args: any = {};
-    if (profesorId != null) args.profesorId = profesorId;
-    return this.post(this.url + 'listarAplicaciones', args);
-  }
-
-  setActivo(aplicacionId: number, activo: boolean): Promise<any> {
-    return this.post(this.url + 'setActivoAplicacion', {
-      aplicacionId,
-      activo,
-    });
-=======
   async crear(input: CrearAplicacionInput): Promise<{ aplicacion_id: number; aplicacion_uuid: string }> {
     log.info('crear', input);
     try {
@@ -80,10 +55,6 @@ export class AplicacionService extends BaseService {
     }
   }
 
-  /**
-   * Lista aplicaciones. Filtros opcionales por profesor y/o curso.
-   * En el panel docente, cursoId permite ver solo las del curso seleccionado.
-   */
   async listar(profesorId?: number, cursoId?: number): Promise<AplicacionResumen[]> {
     log.info('listar', { profesorId, cursoId });
     try {
@@ -109,6 +80,17 @@ export class AplicacionService extends BaseService {
       log.error('setActivo', e);
       throw e;
     }
->>>>>>> c1be50b161eba707808a3bf917f8d24005bc82c9
+  }
+
+  async eliminar(aplicacionId: number): Promise<{ aplicacion_id: number }> {
+    log.info('eliminar', { aplicacionId });
+    try {
+      const data = await this.post(this.url + 'eliminarAplicacion', { aplicacionId });
+      log.info('eliminar OK');
+      return data;
+    } catch (e) {
+      log.error('eliminar', e);
+      throw e;
+    }
   }
 }

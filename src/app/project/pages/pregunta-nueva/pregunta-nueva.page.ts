@@ -12,10 +12,11 @@ import {
   saveOutline, addOutline, trashOutline, helpCircleOutline,
   musicalNotesOutline, imageOutline, checkmarkCircle,
   chevronDownOutline, chevronForwardOutline, sparklesOutline,
-  alertCircleOutline, checkmarkOutline,
+  alertCircleOutline, checkmarkOutline, cloudUploadOutline, closeCircle,
 } from 'ionicons/icons';
 
 import { PreguntaService, AlternativaInput } from '../../services/pregunta.service';
+import { MultimediaService } from '../../services/multimedia.service';
 
 interface AltUI extends AlternativaInput {
   uid: number; // identidad estable para track-by
@@ -46,6 +47,12 @@ export class PreguntaNuevaPage implements OnInit {
   mostrarAvanzado = false;
   audioGridId = '';
   imagenGridId = '';
+  // Estado de subida de archivos
+  subiendoAudio = false;
+  subiendoImagen = false;
+  audioNombre = '';
+  imagenNombre = '';
+  mmError = '';
 
   // Alternativas
   private nextUid = 3;
@@ -61,6 +68,7 @@ export class PreguntaNuevaPage implements OnInit {
 
   constructor(
     private preguntaSvc: PreguntaService,
+    private multimediaSvc: MultimediaService,
     private router: Router,
     private route: ActivatedRoute
   ) {
@@ -68,13 +76,18 @@ export class PreguntaNuevaPage implements OnInit {
       saveOutline, addOutline, trashOutline, helpCircleOutline,
       musicalNotesOutline, imageOutline, checkmarkCircle,
       chevronDownOutline, chevronForwardOutline, sparklesOutline,
-      alertCircleOutline, checkmarkOutline,
+      alertCircleOutline, checkmarkOutline, cloudUploadOutline, closeCircle,
     });
   }
 
   ngOnInit(): void {
     const t = Number(this.route.snapshot.queryParamMap.get('testId'));
     this.testIdContexto = Number.isInteger(t) && t > 0 ? t : null;
+  }
+
+  /** A dónde vuelve el botón atrás: al test de origen o al banco de tests. */
+  get volverHref(): string {
+    return this.testIdContexto ? `/test-detalle/${this.testIdContexto}` : '/mis-tests';
   }
 
   // ----- alternativas -----
@@ -130,15 +143,73 @@ export class PreguntaNuevaPage implements OnInit {
     return this.pendientes.length === 0;
   }
 
-  // ----- guardar -----
+  // ----- multimedia (subida directa a la lógica/GridFS) -----
 
-  private validarMultimedia(): string | null {
-    if (this.audioGridId && !/^[a-f0-9]{24}$/i.test(this.audioGridId.trim()))
-      return 'El ID del audio debe ser ObjectId hex de 24 caracteres (o déjalo vacío).';
-    if (this.imagenGridId && !/^[a-f0-9]{24}$/i.test(this.imagenGridId.trim()))
-      return 'El ID de la imagen debe ser ObjectId hex de 24 caracteres (o déjalo vacío).';
-    return null;
+  get audioUrl(): string | null {
+    return this.audioGridId ? this.multimediaSvc.urlAudio(this.audioGridId) : null;
   }
+  get imagenUrl(): string | null {
+    return this.imagenGridId ? this.multimediaSvc.urlImagen(this.imagenGridId) : null;
+  }
+
+  async onAudioSeleccionado(ev: Event): Promise<void> {
+    const input = ev.target as HTMLInputElement;
+    const file = input.files && input.files[0];
+    input.value = ''; // permite re-seleccionar el mismo archivo
+    if (!file) return;
+    this.mmError = '';
+    // Si ya había uno, lo borramos primero (no dejar huérfanos)
+    if (this.audioGridId) await this.quitarAudio();
+    this.subiendoAudio = true;
+    try {
+      const res = await this.multimediaSvc.subirAudio(file);
+      this.audioGridId = res.grid_id;
+      this.audioNombre = file.name;
+    } catch (e: any) {
+      this.mmError = (e && e.message) || 'No se pudo subir el audio.';
+    } finally {
+      this.subiendoAudio = false;
+    }
+  }
+
+  async onImagenSeleccionada(ev: Event): Promise<void> {
+    const input = ev.target as HTMLInputElement;
+    const file = input.files && input.files[0];
+    input.value = '';
+    if (!file) return;
+    this.mmError = '';
+    if (this.imagenGridId) await this.quitarImagen();
+    this.subiendoImagen = true;
+    try {
+      const res = await this.multimediaSvc.subirImagen(file);
+      this.imagenGridId = res.grid_id;
+      this.imagenNombre = file.name;
+    } catch (e: any) {
+      this.mmError = (e && e.message) || 'No se pudo subir la imagen.';
+    } finally {
+      this.subiendoImagen = false;
+    }
+  }
+
+  async quitarAudio(): Promise<void> {
+    const id = this.audioGridId;
+    this.audioGridId = '';
+    this.audioNombre = '';
+    if (id) {
+      try { await this.multimediaSvc.eliminar(id, 'audio'); } catch { /* idempotente */ }
+    }
+  }
+
+  async quitarImagen(): Promise<void> {
+    const id = this.imagenGridId;
+    this.imagenGridId = '';
+    this.imagenNombre = '';
+    if (id) {
+      try { await this.multimediaSvc.eliminar(id, 'imagen'); } catch { /* idempotente */ }
+    }
+  }
+
+  // ----- guardar -----
 
   async guardar(): Promise<void> {
     this.errorMsg = '';
@@ -148,9 +219,8 @@ export class PreguntaNuevaPage implements OnInit {
       this.errorMsg = this.pendientes[0];
       return;
     }
-    const errMM = this.validarMultimedia();
-    if (errMM) {
-      this.errorMsg = errMM;
+    if (this.subiendoAudio || this.subiendoImagen) {
+      this.errorMsg = 'Espera a que termine de subir el archivo multimedia.';
       return;
     }
 

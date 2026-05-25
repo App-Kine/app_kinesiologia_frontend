@@ -14,9 +14,25 @@ export const routes: Routes = [
   {
     path: 'registro-profesor/:token',
     loadComponent: () =>
-      import(
-        './project/pages/registro-profesor/registro-profesor.page'
-      ).then((m) => m.RegistroProfesorPage),
+      import('./project/pages/registro-profesor/registro-profesor.page').then(
+        (m) => m.RegistroProfesorPage
+      ),
+  },
+  {
+    // RF-59: solicitar recuperación de contraseña
+    path: 'recuperar-password',
+    loadComponent: () =>
+      import('./project/pages/recuperar-password/recuperar-password.page').then(
+        (m) => m.RecuperarPasswordPage
+      ),
+  },
+  {
+    // RF-59: fijar nueva contraseña con el token del correo
+    path: 'restablecer-password/:token',
+    loadComponent: () =>
+      import('./project/pages/restablecer-password/restablecer-password.page').then(
+        (m) => m.RestablecerPasswordPage
+      ),
   },
 
   // -----------------------------------------------------------
@@ -48,15 +64,78 @@ export const routes: Routes = [
   },
 
   // -----------------------------------------------------------
-<<<<<<< HEAD
-  // Gestión docente: preguntas, tests, aplicaciones (RF-62..73, 88..93)
+  // Mis cursos: listar, crear, editar, detalle (RF-61 + CRUD)
   // -----------------------------------------------------------
   {
-    path: 'mis-preguntas',
+    path: 'mis-cursos',
     canActivate: [docenteGuard],
     loadComponent: () =>
-      import('./project/pages/mis-preguntas/mis-preguntas.page').then(
-        (m) => m.MisPreguntasPage
+      import('./project/pages/mis-cursos/mis-cursos.page').then(
+        (m) => m.MisCursosPage
+      ),
+  },
+  {
+    path: 'curso-nuevo',
+    canActivate: [docenteGuard],
+    loadComponent: () =>
+      import('./project/pages/curso-nuevo/curso-nuevo.page').then(
+        (m) => m.CursoNuevoPage
+      ),
+  },
+  {
+    path: 'curso-editar/:cursoId',
+    canActivate: [docenteGuard],
+    loadComponent: () =>
+      import('./project/pages/curso-editar/curso-editar.page').then(
+        (m) => m.CursoEditarPage
+      ),
+  },
+  {
+    path: 'curso/:cursoId',
+    canActivate: [docenteGuard],
+    loadComponent: () =>
+      import('./project/pages/curso-detalle/curso-detalle.page').then(
+        (m) => m.CursoDetallePage
+      ),
+  },
+
+  // -----------------------------------------------------------
+  // Gestión docente: tests + preguntas + aplicaciones
+  // (RF-62..RF-73, RF-88..RF-93)
+  //
+  // Las preguntas se gestionan dentro de cada test.
+  // Las aplicaciones se gestionan desde cada curso.
+  // -----------------------------------------------------------
+  {
+    path: 'mis-tests',
+    canActivate: [docenteGuard],
+    loadComponent: () =>
+      import('./project/pages/mis-tests/mis-tests.page').then(
+        (m) => m.MisTestsPage
+      ),
+  },
+  {
+    path: 'test-nuevo',
+    canActivate: [docenteGuard],
+    loadComponent: () =>
+      import('./project/pages/test-nuevo/test-nuevo.page').then(
+        (m) => m.TestNuevoPage
+      ),
+  },
+  {
+    path: 'test-detalle/:id',
+    canActivate: [docenteGuard],
+    loadComponent: () =>
+      import('./project/pages/test-detalle/test-detalle.page').then(
+        (m) => m.TestDetallePage
+      ),
+  },
+  {
+    path: 'test-editar/:id',
+    canActivate: [docenteGuard],
+    loadComponent: () =>
+      import('./project/pages/test-editar/test-editar.page').then(
+        (m) => m.TestEditarPage
       ),
   },
   {
@@ -76,30 +155,6 @@ export const routes: Routes = [
       ),
   },
   {
-    path: 'mis-tests',
-    canActivate: [docenteGuard],
-    loadComponent: () =>
-      import('./project/pages/mis-tests/mis-tests.page').then(
-        (m) => m.MisTestsPage
-      ),
-  },
-  {
-    path: 'test-detalle/:id',
-    canActivate: [docenteGuard],
-    loadComponent: () =>
-      import('./project/pages/test-detalle/test-detalle.page').then(
-        (m) => m.TestDetallePage
-      ),
-  },
-  {
-    path: 'test-nuevo',
-    canActivate: [docenteGuard],
-    loadComponent: () =>
-      import('./project/pages/test-nuevo/test-nuevo.page').then(
-        (m) => m.TestNuevoPage
-      ),
-  },
-  {
     path: 'mis-aplicaciones',
     canActivate: [docenteGuard],
     loadComponent: () =>
@@ -113,79 +168,79 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./project/pages/aplicacion-nueva/aplicacion-nueva.page').then(
         (m) => m.AplicacionNuevaPage
-=======
-  // Módulo docente: preguntas, tests, aplicaciones
-  // (RF-61..RF-73, RF-88..RF-93)
-  // -----------------------------------------------------------
-  {
-    path: 'mis-cursos',
-    canActivate: [docenteGuard],
-    loadComponent: () =>
-      import('./project/pages/mis-cursos/mis-cursos.page').then(
-        (m) => m.MisCursosPage
       ),
   },
   {
-    path: 'curso/:cursoId',
-    canActivate: [docenteGuard],
-    loadComponent: () =>
-      import('./project/pages/curso-detalle/curso-detalle.page').then(
-        (m) => m.CursoDetallePage
-      ),
-  },
-  {
-    path: 'preguntas',
-    canActivate: [docenteGuard],
-    loadComponent: () =>
-      import('./project/pages/preguntas/preguntas.page').then(
-        (m) => m.PreguntasPage
-      ),
-  },
-  {
-    path: 'crear-pregunta',
-    canActivate: [docenteGuard],
-    loadComponent: () =>
-      import('./project/pages/crear-pregunta/crear-pregunta.page').then(
-        (m) => m.CrearPreguntaPage
-      ),
-  },
-  {
-    path: 'tests',
-    canActivate: [docenteGuard],
-    loadComponent: () =>
-      import('./project/pages/tests/tests.page').then((m) => m.TestsPage),
-  },
-  {
-    path: 'crear-test',
-    canActivate: [docenteGuard],
-    loadComponent: () =>
-      import('./project/pages/crear-test/crear-test.page').then(
-        (m) => m.CrearTestPage
-      ),
-  },
-  {
-    path: 'aplicaciones',
-    canActivate: [docenteGuard],
-    loadComponent: () =>
-      import('./project/pages/aplicaciones/aplicaciones.page').then(
-        (m) => m.AplicacionesPage
-      ),
-  },
-  {
+    // Alias usado por curso-detalle.aplicarNuevoTest()
     path: 'crear-aplicacion',
     canActivate: [docenteGuard],
     loadComponent: () =>
-      import('./project/pages/crear-aplicacion/crear-aplicacion.page').then(
-        (m) => m.CrearAplicacionPage
->>>>>>> c1be50b161eba707808a3bf917f8d24005bc82c9
+      import('./project/pages/aplicacion-nueva/aplicacion-nueva.page').then(
+        (m) => m.AplicacionNuevaPage
       ),
   },
 
   // -----------------------------------------------------------
-  // Tabs / home: lo dejamos como vista pública del estudiante.
-  // Se monta SIN guard porque la app del estudiante es de acceso
-  // público según RF-01. Si en el futuro proteges algo, agrega
-  // el guard apropiado.
+  // Analítica docente (RF-94 a RF-104)
+  // -----------------------------------------------------------
+  {
+    path: 'analitica',
+    canActivate: [docenteGuard],
+    loadComponent: () =>
+      import('./project/pages/analitica/analitica.page').then(
+        (m) => m.AnaliticaPage
+      ),
+  },
+  {
+    path: 'analitica/:aplicacionId',
+    canActivate: [docenteGuard],
+    loadComponent: () =>
+      import('./project/pages/analitica-detalle/analitica-detalle.page').then(
+        (m) => m.AnaliticaDetallePage
+      ),
+  },
+
+  // -----------------------------------------------------------
+  // Flujo de evaluación del ESTUDIANTE (público, sin guard — RF-01 a RF-44)
+  // -----------------------------------------------------------
+  {
+    path: 'estudiante/cursos',
+    loadComponent: () =>
+      import('./project/pages/estudiante-cursos/estudiante-cursos.page').then(
+        (m) => m.EstudianteCursosPage
+      ),
+  },
+  {
+    path: 'estudiante/curso/:cursoId/tests',
+    loadComponent: () =>
+      import('./project/pages/estudiante-tests/estudiante-tests.page').then(
+        (m) => m.EstudianteTestsPage
+      ),
+  },
+  {
+    path: 'estudiante/inicio/:aplicacionId',
+    loadComponent: () =>
+      import('./project/pages/estudiante-inicio/estudiante-inicio.page').then(
+        (m) => m.EstudianteInicioPage
+      ),
+  },
+  {
+    path: 'estudiante/evaluacion/:evaluacionId',
+    loadComponent: () =>
+      import('./project/pages/estudiante-evaluacion/estudiante-evaluacion.page').then(
+        (m) => m.EstudianteEvaluacionPage
+      ),
+  },
+  {
+    path: 'estudiante/resultado/:evaluacionId',
+    loadComponent: () =>
+      import('./project/pages/estudiante-resultado/estudiante-resultado.page').then(
+        (m) => m.EstudianteResultadoPage
+      ),
+  },
+
+  // -----------------------------------------------------------
+  // Tabs / home (app del estudiante, RF-01, sin guard).
   // -----------------------------------------------------------
   {
     path: 'tabs',

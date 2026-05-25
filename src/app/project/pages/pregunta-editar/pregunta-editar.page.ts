@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import {
   IonContent, IonHeader, IonToolbar, IonTitle, IonButtons, IonBackButton,
   IonButton, IonIcon, IonItem, IonLabel, IonInput, IonTextarea, IonText,
@@ -13,9 +13,11 @@ import {
   musicalNotesOutline, imageOutline, checkmarkCircle,
   chevronDownOutline, chevronForwardOutline, createOutline,
   alertCircleOutline, checkmarkOutline, arrowBackOutline,
+  cloudUploadOutline, closeCircle,
 } from 'ionicons/icons';
 
 import { PreguntaService, AlternativaInput } from '../../services/pregunta.service';
+import { MultimediaService } from '../../services/multimedia.service';
 
 interface AltUI extends AlternativaInput {
   uid: number;
@@ -27,7 +29,7 @@ interface AltUI extends AlternativaInput {
   styleUrls: ['./pregunta-editar.page.scss'],
   standalone: true,
   imports: [
-    CommonModule, FormsModule, IonContent, IonHeader, IonToolbar, IonTitle,
+    CommonModule, FormsModule, RouterLink, IonContent, IonHeader, IonToolbar, IonTitle,
     IonButtons, IonBackButton, IonButton, IonIcon, IonItem, IonLabel, IonInput,
     IonTextarea, IonText, IonSpinner, IonNote, IonBadge, IonChip,
     IonRadio, IonRadioGroup,
@@ -44,6 +46,12 @@ export class PreguntaEditarPage implements OnInit {
   mostrarAvanzado = false;
   audioGridId = '';
   imagenGridId = '';
+  // Estado de subida
+  subiendoAudio = false;
+  subiendoImagen = false;
+  audioNombre = '';
+  imagenNombre = '';
+  mmError = '';
 
   private nextUid = 1;
   alternativas: AltUI[] = [];
@@ -57,6 +65,7 @@ export class PreguntaEditarPage implements OnInit {
 
   constructor(
     private preguntaSvc: PreguntaService,
+    private multimediaSvc: MultimediaService,
     private route: ActivatedRoute,
     private router: Router
   ) {
@@ -65,6 +74,7 @@ export class PreguntaEditarPage implements OnInit {
       musicalNotesOutline, imageOutline, checkmarkCircle,
       chevronDownOutline, chevronForwardOutline, createOutline,
       alertCircleOutline, checkmarkOutline, arrowBackOutline,
+      cloudUploadOutline, closeCircle,
     });
   }
 
@@ -97,6 +107,11 @@ export class PreguntaEditarPage implements OnInit {
     } finally {
       this.cargandoInicial = false;
     }
+  }
+
+  /** A dónde vuelve el botón atrás: al test de origen o al banco de tests. */
+  get volverHref(): string {
+    return this.testIdContexto ? `/test-detalle/${this.testIdContexto}` : '/mis-tests';
   }
 
   // ----- alternativas -----
@@ -143,12 +158,69 @@ export class PreguntaEditarPage implements OnInit {
   }
   get formularioCompleto(): boolean { return this.pendientes.length === 0; }
 
-  private validarMultimedia(): string | null {
-    if (this.audioGridId && !/^[a-f0-9]{24}$/i.test(this.audioGridId.trim()))
-      return 'El ID del audio debe ser ObjectId hex de 24 caracteres (o vacío).';
-    if (this.imagenGridId && !/^[a-f0-9]{24}$/i.test(this.imagenGridId.trim()))
-      return 'El ID de la imagen debe ser ObjectId hex de 24 caracteres (o vacío).';
-    return null;
+  // ----- multimedia (subida directa a la lógica/GridFS) -----
+
+  get audioUrl(): string | null {
+    return this.audioGridId ? this.multimediaSvc.urlAudio(this.audioGridId) : null;
+  }
+  get imagenUrl(): string | null {
+    return this.imagenGridId ? this.multimediaSvc.urlImagen(this.imagenGridId) : null;
+  }
+
+  async onAudioSeleccionado(ev: Event): Promise<void> {
+    const input = ev.target as HTMLInputElement;
+    const file = input.files && input.files[0];
+    input.value = '';
+    if (!file) return;
+    this.mmError = '';
+    if (this.audioGridId) await this.quitarAudio();
+    this.subiendoAudio = true;
+    try {
+      const res = await this.multimediaSvc.subirAudio(file, this.preguntaId);
+      this.audioGridId = res.grid_id;
+      this.audioNombre = file.name;
+    } catch (e: any) {
+      this.mmError = (e && e.message) || 'No se pudo subir el audio.';
+    } finally {
+      this.subiendoAudio = false;
+    }
+  }
+
+  async onImagenSeleccionada(ev: Event): Promise<void> {
+    const input = ev.target as HTMLInputElement;
+    const file = input.files && input.files[0];
+    input.value = '';
+    if (!file) return;
+    this.mmError = '';
+    if (this.imagenGridId) await this.quitarImagen();
+    this.subiendoImagen = true;
+    try {
+      const res = await this.multimediaSvc.subirImagen(file, this.preguntaId);
+      this.imagenGridId = res.grid_id;
+      this.imagenNombre = file.name;
+    } catch (e: any) {
+      this.mmError = (e && e.message) || 'No se pudo subir la imagen.';
+    } finally {
+      this.subiendoImagen = false;
+    }
+  }
+
+  async quitarAudio(): Promise<void> {
+    const id = this.audioGridId;
+    this.audioGridId = '';
+    this.audioNombre = '';
+    if (id) {
+      try { await this.multimediaSvc.eliminar(id, 'audio'); } catch { /* idempotente */ }
+    }
+  }
+
+  async quitarImagen(): Promise<void> {
+    const id = this.imagenGridId;
+    this.imagenGridId = '';
+    this.imagenNombre = '';
+    if (id) {
+      try { await this.multimediaSvc.eliminar(id, 'imagen'); } catch { /* idempotente */ }
+    }
   }
 
   async guardar(): Promise<void> {
@@ -158,8 +230,10 @@ export class PreguntaEditarPage implements OnInit {
       this.errorMsg = this.pendientes[0];
       return;
     }
-    const errMM = this.validarMultimedia();
-    if (errMM) { this.errorMsg = errMM; return; }
+    if (this.subiendoAudio || this.subiendoImagen) {
+      this.errorMsg = 'Espera a que termine de subir el archivo multimedia.';
+      return;
+    }
 
     this.guardando = true;
     try {

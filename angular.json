@@ -49,8 +49,8 @@
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "2kb",
-                  "maximumError": "4kb"
+                  "maximumWarning": "6kb",
+                  "maximumError": "10kb"
                 }
               ],
               "fileReplacements": [
@@ -132,7 +132,12 @@
     "schematicCollections": [
       "@ionic/angular-toolkit"
     ],
-    "analytics": "1cf61a32-0552-4793-a00d-2a867f7924ec"
+    "analytics": "1cf61a32-0552-4793-a00d-2a867f7924ec",
+    "cache": {
+      "enabled": true,
+      "environment": "all",
+      "path": "C:/Users/Lucci/.angular-cache/app_kinesiologia_frontend"
+    }
   },
   "schematics": {
     "@ionic/angular-toolkit:component": {

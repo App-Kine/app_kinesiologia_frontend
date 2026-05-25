@@ -73,6 +73,20 @@
           ¿Olvidaste tu contraseña?
         </ion-button>
       </form>
+
+      <div class="estudiante-acceso">
+        <p class="divisor"><span>o</span></p>
+        <ion-button
+          expand="block"
+          fill="outline"
+          color="primary"
+          (click)="accederComoEstudiante()"
+          [disabled]="cargando"
+        >
+          <ion-icon slot="start" name="school-outline"></ion-icon>
+          Acceder como estudiante
+        </ion-button>
+      </div>
     </div>
   </div>
 </ion-content>

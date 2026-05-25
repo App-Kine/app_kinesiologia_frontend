@@ -5,25 +5,49 @@ import { NativeStorage } from '@ionic-native/native-storage/ngx';
 
 import { BaseService } from '../../base/service/base.service';
 import { AnalyticsService } from './analytics.service';
-<<<<<<< HEAD
-
-export interface Curso {
-=======
 import { createLogger } from './logger';
 
 export interface CursoResumen {
->>>>>>> c1be50b161eba707808a3bf917f8d24005bc82c9
   curso_id: number;
   codigo: string;
   nombre: string;
   descripcion: string | null;
 }
 
-<<<<<<< HEAD
-=======
+export interface CursoConAplicaciones extends CursoResumen {
+  activo: boolean;
+  creado_por: number;
+  created_at: string;
+  updated_at: string;
+  aplicaciones: {
+    aplicacion_id: number;
+    aplicacion_uuid: string;
+    test_id: number;
+    test_nombre: string;
+    cantidad_preguntas: number;
+    profesor_id: number;
+    profesor_nombre: string;
+    activo: boolean;
+    visible_desde: string | null;
+    visible_hasta: string | null;
+    created_at: string;
+  }[];
+}
+
+export interface CrearCursoInput {
+  codigo: string;
+  nombre: string;
+  descripcion?: string | null;
+}
+
+export interface EditarCursoInput {
+  codigo: string;
+  nombre: string;
+  descripcion?: string | null;
+}
+
 const log = createLogger('curso');
 
->>>>>>> c1be50b161eba707808a3bf917f8d24005bc82c9
 @Injectable({ providedIn: 'root' })
 export class CursoService extends BaseService {
   private url: string;
@@ -38,16 +62,6 @@ export class CursoService extends BaseService {
     this.url = this.BASE_URL;
   }
 
-<<<<<<< HEAD
-  listarActivos(): Promise<Curso[]> {
-    return this.post(this.url + 'cursos/listar', {});
-  }
-
-  misCursos(profesorId?: number): Promise<Curso[]> {
-    const args: any = {};
-    if (profesorId != null) args.profesorId = profesorId;
-    return this.post(this.url + 'cursos/misCursos', args);
-=======
   /** Lista todos los cursos activos. */
   async listar(): Promise<CursoResumen[]> {
     log.info('listar');
@@ -72,6 +86,57 @@ export class CursoService extends BaseService {
       log.error('misCursos', e);
       throw e;
     }
->>>>>>> c1be50b161eba707808a3bf917f8d24005bc82c9
+  }
+
+  /** Crear un curso (el profesor queda como creador y asignado). */
+  async crear(input: CrearCursoInput): Promise<{ curso_id: number }> {
+    log.info('crear', input);
+    try {
+      const data = await this.post(this.url + 'cursos/crear', input);
+      log.info('crear OK', data);
+      return data;
+    } catch (e) {
+      log.error('crear', e);
+      throw e;
+    }
+  }
+
+  /** Editar un curso (solo el creador). */
+  async editar(cursoId: number, input: EditarCursoInput): Promise<{ curso_id: number }> {
+    log.info('editar', { cursoId });
+    try {
+      const data = await this.post(this.url + 'cursos/editar', { ...input, cursoId });
+      log.info('editar OK', data);
+      return data;
+    } catch (e) {
+      log.error('editar', e);
+      throw e;
+    }
+  }
+
+  /** Eliminar (soft-delete) un curso (solo el creador). */
+  async eliminar(cursoId: number): Promise<{ curso_id: number }> {
+    log.info('eliminar', { cursoId });
+    try {
+      const data = await this.post(this.url + 'cursos/eliminar', { cursoId });
+      log.info('eliminar OK');
+      return data;
+    } catch (e) {
+      log.error('eliminar', e);
+      throw e;
+    }
+  }
+
+  /** Obtiene un curso + sus aplicaciones de test. */
+  async obtenerConAplicaciones(cursoId: number): Promise<CursoConAplicaciones> {
+    log.info('obtenerConAplicaciones', { cursoId });
+    try {
+      const data = await this.post(this.url + 'cursos/obtener', { cursoId });
+      log.info('obtenerConAplicaciones OK');
+      return data;
+    } catch (e) {
+      log.error('obtenerConAplicaciones', e);
+      throw e;
+    }
   }
 }

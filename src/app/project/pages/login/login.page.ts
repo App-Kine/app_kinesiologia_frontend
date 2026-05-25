@@ -16,7 +16,7 @@ import {
   IonIcon,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { mailOutline, lockClosedOutline, logInOutline } from 'ionicons/icons';
+import { mailOutline, lockClosedOutline, logInOutline, schoolOutline } from 'ionicons/icons';
 
 import { AuthService } from '../../services/auth.service';
 
@@ -48,7 +48,12 @@ export class LoginPage {
   errorMsg = '';
 
   constructor(private auth: AuthService, private router: Router) {
-    addIcons({ mailOutline, lockClosedOutline, logInOutline });
+    addIcons({ mailOutline, lockClosedOutline, logInOutline, schoolOutline });
+  }
+
+  /** Acceso público del estudiante (RF-01: sin login). */
+  accederComoEstudiante(): void {
+    this.router.navigateByUrl('/estudiante/cursos');
   }
 
   async onSubmit(): Promise<void> {
@@ -80,12 +85,8 @@ export class LoginPage {
     }
   }
 
-  /**
-   * RF-59: recuperación de contraseña por correo.
-   * UI placeholder por ahora; el backend lo implementaremos en otra iteración.
-   */
-  async olvidasteContrasena(): Promise<void> {
-    this.errorMsg =
-      'La recuperación por correo se implementará en una próxima versión. Por ahora contacta a un administrador.';
+  /** RF-59: recuperación de contraseña por correo. */
+  olvidasteContrasena(): void {
+    this.router.navigateByUrl('/recuperar-password');
   }
 }

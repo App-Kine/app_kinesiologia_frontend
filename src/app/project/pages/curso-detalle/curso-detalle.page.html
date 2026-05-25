@@ -3,79 +3,155 @@
     <ion-buttons slot="start">
       <ion-back-button defaultHref="/mis-cursos"></ion-back-button>
     </ion-buttons>
-    <ion-title>
-      @if (curso) { {{ curso.codigo }} } @else { Curso }
-    </ion-title>
+    <ion-title>{{ curso?.nombre || 'Detalle del curso' }}</ion-title>
+    <ion-buttons slot="end">
+      @if (curso) {
+        <ion-button fill="clear" color="light" (click)="irAEditar()" title="Editar curso">
+          <ion-icon slot="icon-only" name="create-outline"></ion-icon>
+        </ion-button>
+        <ion-button fill="clear" color="light" (click)="confirmarEliminarCurso()" title="Eliminar curso">
+          <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+        </ion-button>
+      }
+      <ion-button fill="clear" color="light" (click)="recargar()" [disabled]="cargando" title="Recargar">
+        <ion-icon slot="icon-only" name="refresh-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true" class="ion-padding">
-  @if (cargando) {
+<ion-content [fullscreen]="true">
+
+  @if (cargando && !curso) {
     <div class="centro">
-      <ion-spinner name="crescent"></ion-spinner>
-      <p><ion-text color="medium">Cargando…</ion-text></p>
+      <ion-spinner></ion-spinner>
+      <p>Cargando curso...</p>
     </div>
-  } @else if (error) {
+  } @else if (errorCarga) {
     <div class="centro">
-      <ion-text color="danger"><p>{{ error }}</p></ion-text>
-      <ion-button (click)="cargar()">Reintentar</ion-button>
+      <ion-icon name="alert-circle-outline" color="danger" style="font-size:48px"></ion-icon>
+      <h2>{{ errorCarga }}</h2>
+      <ion-button fill="outline" routerLink="/mis-cursos">Volver al listado</ion-button>
     </div>
-  } @else {
-    @if (curso) {
-      <div class="curso-hero">
-        <ion-icon name="school-outline" class="hero-icon"></ion-icon>
-        <div>
+  } @else if (curso) {
+
+    <!-- Hero del curso -->
+    <div class="curso-hero">
+      <div class="hero-icon"><ion-icon name="school-outline"></ion-icon></div>
+      <div class="hero-text">
+        <div class="hero-title">
+          <ion-chip color="secondary" class="cod-chip">
+            <ion-label>{{ curso.codigo }}</ion-label>
+          </ion-chip>
           <h1>{{ curso.nombre }}</h1>
-          @if (curso.descripcion) {
-            <p>{{ curso.descripcion }}</p>
-          }
         </div>
+        @if (curso.descripcion) {
+          <p class="hero-desc">{{ curso.descripcion }}</p>
+        }
+        <ion-chip [color]="curso.aplicaciones.length > 0 ? 'success' : 'warning'" class="count-chip">
+          <ion-icon name="document-text-outline"></ion-icon>
+          <ion-label>
+            {{ curso.aplicaciones.length }}
+            {{ curso.aplicaciones.length === 1 ? 'test aplicado' : 'tests aplicados' }}
+          </ion-label>
+        </ion-chip>
       </div>
-    }
+    </div>
 
-    <h2 class="section-title">Tests aplicados a este curso</h2>
+    <div class="body-wrapper">
 
-    @if (aplicaciones.length === 0) {
-      <div class="centro">
-        <ion-icon name="document-text-outline" class="empty-icon"></ion-icon>
-        <p><ion-text color="medium">Aún no aplicaste ningún test a este curso.</ion-text></p>
-        <ion-button (click)="aplicarNuevoTest()">
-          <ion-icon name="add" slot="start"></ion-icon>
-          Aplicar primer test
+      <div class="seccion-header">
+        <h2>Tests aplicados</h2>
+        <ion-button color="secondary" size="small" (click)="agregarAplicacion()">
+          <ion-icon slot="start" name="add-outline"></ion-icon>
+          Agregar test
         </ion-button>
       </div>
-    } @else {
-      <ion-list>
-        @for (a of aplicaciones; track a.aplicacion_id) {
-          <ion-item>
-            <ion-icon name="document-text-outline" slot="start" color="secondary"></ion-icon>
-            <ion-label class="ion-text-wrap">
-              <h2>{{ a.test_nombre }}</h2>
-              <p>
-                @if (a.activo) {
-                  <ion-badge color="success">Activo</ion-badge>
-                } @else {
-                  <ion-badge color="medium">Inactivo</ion-badge>
+
+      @if (curso.aplicaciones.length === 0) {
+        <div class="empty">
+          <div class="empty-icon">
+            <ion-icon name="sparkles-outline"></ion-icon>
+          </div>
+          <h3>Aún no hay tests en este curso</h3>
+          <p>Agrega un test desde tu banco para que tus estudiantes puedan responderlo.</p>
+          <ion-button color="secondary" (click)="agregarAplicacion()">
+            <ion-icon slot="start" name="add-outline"></ion-icon>
+            Agregar primer test
+          </ion-button>
+        </div>
+      } @else {
+        <div class="apls-list">
+          @for (a of curso.aplicaciones; track a.aplicacion_id) {
+            <div class="apl-card">
+
+              <div class="apl-top">
+                <ion-chip color="medium"><ion-label>#{{ a.aplicacion_id }}</ion-label></ion-chip>
+                <ion-chip color="tertiary">
+                  <ion-icon name="help-circle-outline"></ion-icon>
+                  <ion-label>{{ a.cantidad_preguntas }} preguntas</ion-label>
+                </ion-chip>
+              </div>
+
+              <h4 class="apl-nombre">{{ a.test_nombre }}</h4>
+              <p class="apl-meta">
+                <ion-icon name="calendar-outline"></ion-icon>
+                Agregado: {{ formatoFecha(a.created_at) }}
+                @if (a.profesor_nombre) {
+                  · por {{ a.profesor_nombre }}
                 }
               </p>
-              <ion-note>Creada: {{ a.created_at | date: 'short' }}</ion-note>
-            </ion-label>
-            <ion-toggle
-              slot="end"
-              [checked]="a.activo"
-              (ionChange)="cambiarActivo(a, $event.detail.checked)"
-            ></ion-toggle>
-          </ion-item>
-        }
-      </ion-list>
-    }
-  }
 
-  @if (curso) {
-    <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-      <ion-fab-button color="secondary" (click)="aplicarNuevoTest()">
-        <ion-icon name="add"></ion-icon>
-      </ion-fab-button>
-    </ion-fab>
+              <div class="apl-bottom">
+                <div class="apl-toggle">
+                  <ion-toggle
+                    [checked]="a.activo"
+                    (ionChange)="toggleActivo(a, $event)"
+                    labelPlacement="end"
+                    justify="start"
+                  >
+                    <div class="toggle-label">
+                      <ion-icon
+                        [name]="a.activo ? 'play-circle' : 'pause-circle'"
+                        [color]="a.activo ? 'success' : 'medium'"
+                      ></ion-icon>
+                      {{ a.activo ? 'Visible para estudiantes' : 'Oculto' }}
+                    </div>
+                  </ion-toggle>
+                </div>
+                <ion-button
+                  fill="clear"
+                  size="small"
+                  color="secondary"
+                  (click)="verResultados(a)"
+                  title="Ver resultados de esta aplicación"
+                >
+                  <ion-icon slot="start" name="stats-chart-outline"></ion-icon>
+                  Resultados
+                </ion-button>
+                <ion-button
+                  fill="clear"
+                  size="small"
+                  color="danger"
+                  (click)="confirmarQuitarAplicacion(a)"
+                  title="Quitar test del curso"
+                >
+                  <ion-icon slot="start" name="trash-outline"></ion-icon>
+                  Quitar
+                </ion-button>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    @if (curso.aplicaciones.length > 0) {
+      <ion-fab slot="fixed" vertical="bottom" horizontal="end">
+        <ion-fab-button color="secondary" (click)="agregarAplicacion()" title="Agregar test">
+          <ion-icon name="add-outline"></ion-icon>
+        </ion-fab-button>
+      </ion-fab>
+    }
   }
 </ion-content>

@@ -1,7 +1,7 @@
 <ion-header [translucent]="true">
   <ion-toolbar color="secondary">
     <ion-buttons slot="start">
-      <ion-back-button defaultHref="/mis-preguntas"></ion-back-button>
+      <ion-back-button [defaultHref]="volverHref"></ion-back-button>
     </ion-buttons>
     <ion-title>Nueva pregunta</ion-title>
   </ion-toolbar>
@@ -167,34 +167,89 @@
           ></ion-icon>
           <span>Multimedia (opcional)</span>
           <ion-note class="avanzado-note">
-            Solo si ya subiste el archivo a MongoDB GridFS
+            Sube un audio (MP3/WAV ≤10MB) o imagen (JPG/PNG ≤2MB)
           </ion-note>
         </button>
 
         @if (mostrarAvanzado) {
           <div class="avanzado-body">
-            <ion-input
-              [(ngModel)]="audioGridId"
-              name="audioId"
-              label="Audio · ObjectId hex 24 chars"
-              labelPlacement="stacked"
-              fill="outline"
-              placeholder="Ej: 64a1f0b3c8d4e5f601020301"
-              [disabled]="guardando"
-            >
-              <ion-icon slot="start" name="musical-notes-outline"></ion-icon>
-            </ion-input>
-            <ion-input
-              [(ngModel)]="imagenGridId"
-              name="imagenId"
-              label="Imagen · ObjectId hex 24 chars"
-              labelPlacement="stacked"
-              fill="outline"
-              placeholder="Ej: 64a1f0b3c8d4e5f601020402"
-              [disabled]="guardando"
-            >
-              <ion-icon slot="start" name="image-outline"></ion-icon>
-            </ion-input>
+
+            <!-- AUDIO -->
+            <div class="media-block">
+              <div class="media-head">
+                <ion-icon name="musical-notes-outline"></ion-icon>
+                <span>Audio de auscultación</span>
+              </div>
+
+              @if (audioGridId) {
+                <div class="media-preview">
+                  <audio controls [src]="audioUrl" preload="metadata"></audio>
+                  <div class="media-row">
+                    <ion-note>{{ audioNombre || 'Audio subido' }}</ion-note>
+                    <ion-button fill="clear" color="danger" size="small"
+                      (click)="quitarAudio()" [disabled]="guardando">
+                      <ion-icon slot="start" name="close-circle"></ion-icon>
+                      Quitar
+                    </ion-button>
+                  </div>
+                </div>
+              } @else {
+                <input type="file" accept="audio/mpeg,audio/wav,audio/x-wav,.mp3,.wav"
+                  hidden #audioInput (change)="onAudioSeleccionado($event)" />
+                <ion-button fill="outline" expand="block"
+                  (click)="audioInput.click()"
+                  [disabled]="subiendoAudio || guardando">
+                  @if (subiendoAudio) {
+                    <ion-spinner name="dots"></ion-spinner>
+                  } @else {
+                    <ion-icon slot="start" name="cloud-upload-outline"></ion-icon>
+                    Subir audio
+                  }
+                </ion-button>
+              }
+            </div>
+
+            <!-- IMAGEN -->
+            <div class="media-block">
+              <div class="media-head">
+                <ion-icon name="image-outline"></ion-icon>
+                <span>Imagen de apoyo</span>
+              </div>
+
+              @if (imagenGridId) {
+                <div class="media-preview">
+                  <img [src]="imagenUrl" alt="Imagen de la pregunta" class="img-thumb" />
+                  <div class="media-row">
+                    <ion-note>{{ imagenNombre || 'Imagen subida' }}</ion-note>
+                    <ion-button fill="clear" color="danger" size="small"
+                      (click)="quitarImagen()" [disabled]="guardando">
+                      <ion-icon slot="start" name="close-circle"></ion-icon>
+                      Quitar
+                    </ion-button>
+                  </div>
+                </div>
+              } @else {
+                <input type="file" accept="image/jpeg,image/png,.jpg,.jpeg,.png"
+                  hidden #imagenInput (change)="onImagenSeleccionada($event)" />
+                <ion-button fill="outline" expand="block"
+                  (click)="imagenInput.click()"
+                  [disabled]="subiendoImagen || guardando">
+                  @if (subiendoImagen) {
+                    <ion-spinner name="dots"></ion-spinner>
+                  } @else {
+                    <ion-icon slot="start" name="cloud-upload-outline"></ion-icon>
+                    Subir imagen
+                  }
+                </ion-button>
+              }
+            </div>
+
+            @if (mmError) {
+              <div class="msg-box error">
+                <ion-icon name="alert-circle-outline"></ion-icon>
+                <span>{{ mmError }}</span>
+              </div>
+            }
           </div>
         }
       </div>

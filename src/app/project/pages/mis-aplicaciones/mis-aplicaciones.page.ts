@@ -7,7 +7,7 @@ import {
   IonButton, IonIcon, IonSpinner, IonNote, IonChip, IonLabel, IonText, IonToggle,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { addOutline, refreshOutline, playCircle, pauseCircle, clipboardOutline } from 'ionicons/icons';
+import { addOutline, refreshOutline, playCircle, pauseCircle, clipboardOutline, statsChartOutline } from 'ionicons/icons';
 
 import { AplicacionService, AplicacionResumen } from '../../services/aplicacion.service';
 
@@ -28,7 +28,7 @@ export class MisAplicacionesPage implements OnInit {
   error = '';
 
   constructor(private aplSvc: AplicacionService, private router: Router) {
-    addIcons({ addOutline, refreshOutline, playCircle, pauseCircle, clipboardOutline });
+    addIcons({ addOutline, refreshOutline, playCircle, pauseCircle, clipboardOutline, statsChartOutline });
   }
 
   ngOnInit(): void { this.recargar(); }
@@ -59,6 +59,10 @@ export class MisAplicacionesPage implements OnInit {
   }
 
   irACrear(): void { this.router.navigateByUrl('/aplicacion-nueva'); }
+
+  verResultados(a: AplicacionResumen): void {
+    this.router.navigateByUrl(`/analitica/${a.aplicacion_id}`);
+  }
 
   formatoFecha(f: string): string {
     try {
