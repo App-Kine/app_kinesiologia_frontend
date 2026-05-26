@@ -1,11 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import {
   IonContent, IonHeader, IonToolbar, IonTitle, IonButtons, IonBackButton,
-  IonButton, IonIcon, IonItem, IonLabel, IonInput, IonTextarea,
-  IonSelect, IonSelectOption, IonCheckbox, IonText, IonSpinner, IonNote,
+  IonButton, IonIcon, IonItem, IonTextarea,
+  IonCheckbox, IonSpinner, IonNote,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
@@ -14,7 +14,6 @@ import {
 } from 'ionicons/icons';
 
 import { TestService } from '../../services/test.service';
-import { CursoService, CursoResumen } from '../../services/curso.service';
 
 @Component({
   selector: 'app-test-nuevo',
@@ -23,46 +22,31 @@ import { CursoService, CursoResumen } from '../../services/curso.service';
   standalone: true,
   imports: [
     CommonModule, FormsModule, IonContent, IonHeader, IonToolbar, IonTitle,
-    IonButtons, IonBackButton, IonButton, IonIcon, IonItem, IonLabel, IonInput,
-    IonTextarea, IonSelect, IonSelectOption, IonCheckbox, IonText, IonSpinner, IonNote,
+    IonButtons, IonBackButton, IonButton, IonIcon, IonItem,
+    IonTextarea, IonCheckbox, IonSpinner, IonNote,
   ],
 })
-export class TestNuevoPage implements OnInit {
-  // Datos del test
+export class TestNuevoPage {
+  // Datos del test (un test es un banco reutilizable: NO se ata a un curso aquí.
+  // Para que los estudiantes lo respondan, se aplica a un curso desde el panel
+  // del curso → "agregar test", que crea una aplicación).
   nombre = '';
   descripcion = '';
   ordenAleatorio = false;
-  cursoOrigenId: number | null = null;
-
-  // Catálogos
-  cursos: CursoResumen[] = [];
 
   // Estado
-  cargando = false;
   guardando = false;
   errorMsg = '';
   okMsg = '';
 
   constructor(
     private testSvc: TestService,
-    private cursoSvc: CursoService,
     private router: Router
   ) {
     addIcons({
       saveOutline, shuffleOutline, listOutline, checkmarkCircle,
       documentTextOutline, alertCircleOutline,
     });
-  }
-
-  async ngOnInit(): Promise<void> {
-    this.cargando = true;
-    try {
-      this.cursos = await this.cursoSvc.listarMisCursos();
-    } catch {
-      this.cursos = [];
-    } finally {
-      this.cargando = false;
-    }
   }
 
   async guardar(): Promise<void> {
@@ -78,7 +62,6 @@ export class TestNuevoPage implements OnInit {
         nombre: this.nombre.trim(),
         descripcion: this.descripcion.trim() || null,
         ordenAleatorio: this.ordenAleatorio,
-        cursoOrigenId: this.cursoOrigenId,
         preguntas: [], // Test vacío, las preguntas se agregan en test-detalle
       });
       this.okMsg = `Test #${resp.test_id} creado. Ahora agrega las preguntas...`;

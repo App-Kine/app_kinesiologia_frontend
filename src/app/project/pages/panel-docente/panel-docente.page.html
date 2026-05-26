@@ -50,7 +50,6 @@
           </ion-card-header>
           <ion-card-content>
             Arma cursos y dentro agrega los tests que tus estudiantes responderán.
-            (RF-61, RF-71, RF-72)
           </ion-card-content>
         </ion-card>
       </ion-col>
@@ -65,7 +64,6 @@
           </ion-card-header>
           <ion-card-content>
             Crea tests y dentro de cada uno agrega, edita o quita preguntas.
-            (RF-62 a RF-73)
           </ion-card-content>
         </ion-card>
       </ion-col>
@@ -79,26 +77,21 @@
             <ion-card-subtitle>Tests aplicados a cursos</ion-card-subtitle>
           </ion-card-header>
           <ion-card-content>
-<<<<<<< HEAD
             Activa o desactiva aplicaciones (visible u oculto al estudiante).
-            (RF-71, RF-72, RF-91)
-=======
-            Activa o desactiva aplicaciones por curso. (RF-71, RF-72, RF-91)
->>>>>>> 876202e2368df665f01863ed9dd9fae585232ce3
           </ion-card-content>
         </ion-card>
       </ion-col>
 
-      <!-- Analítica (placeholder) -->
+      <!-- Analítica -->
       <ion-col size="12" size-md="6" size-lg="4">
-        <ion-card button disabled>
+        <ion-card button (click)="irA('/analitica')">
           <ion-card-header>
             <ion-icon name="stats-chart-outline" class="card-icon"></ion-icon>
             <ion-card-title>Analítica</ion-card-title>
-            <ion-card-subtitle>Resultados por curso y test</ion-card-subtitle>
+            <ion-card-subtitle>Resultados por test y pregunta</ion-card-subtitle>
           </ion-card-header>
           <ion-card-content>
-            Tasa de error por pregunta, intentos totales. (RF-94 a RF-104) <em>— próximamente</em>
+            Porcentaje de aciertos, preguntas por tasa de error e intentos.
           </ion-card-content>
         </ion-card>
       </ion-col>

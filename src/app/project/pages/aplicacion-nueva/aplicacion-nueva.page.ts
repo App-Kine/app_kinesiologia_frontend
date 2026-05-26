@@ -5,10 +5,13 @@ import { ActivatedRoute, Router } from '@angular/router';
 import {
   IonContent, IonHeader, IonToolbar, IonTitle, IonButtons, IonBackButton,
   IonButton, IonIcon, IonItem, IonLabel, IonSelect, IonSelectOption,
-  IonText, IonSpinner, IonNote,
+  IonText, IonSpinner, IonNote, IonChip,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { saveOutline, checkmarkCircle, clipboardOutline } from 'ionicons/icons';
+import {
+  saveOutline, checkmarkCircle, clipboardOutline, schoolOutline,
+  alertCircleOutline,
+} from 'ionicons/icons';
 
 import { TestService, TestResumen } from '../../services/test.service';
 import { CursoService, CursoResumen } from '../../services/curso.service';
@@ -22,7 +25,7 @@ import { AplicacionService } from '../../services/aplicacion.service';
   imports: [
     CommonModule, FormsModule, IonContent, IonHeader, IonToolbar, IonTitle,
     IonButtons, IonBackButton, IonButton, IonIcon, IonItem, IonLabel,
-    IonSelect, IonSelectOption, IonText, IonSpinner, IonNote,
+    IonSelect, IonSelectOption, IonText, IonSpinner, IonNote, IonChip,
   ],
 })
 export class AplicacionNuevaPage implements OnInit {
@@ -31,8 +34,11 @@ export class AplicacionNuevaPage implements OnInit {
 
   tests: TestResumen[] = [];
   cursos: CursoResumen[] = [];
+
   /** Si se llegó desde /curso/:id → "Aplicar test", precargamos y al guardar volvemos. */
   cursoIdPreseleccionado: number | null = null;
+  /** Datos del curso preseleccionado (para mostrar como contexto fijo). */
+  cursoContexto: CursoResumen | null = null;
 
   cargando = false;
   guardando = false;
@@ -46,7 +52,10 @@ export class AplicacionNuevaPage implements OnInit {
     private router: Router,
     private route: ActivatedRoute
   ) {
-    addIcons({ saveOutline, checkmarkCircle, clipboardOutline });
+    addIcons({
+      saveOutline, checkmarkCircle, clipboardOutline, schoolOutline,
+      alertCircleOutline,
+    });
   }
 
   async ngOnInit(): Promise<void> {
@@ -63,8 +72,18 @@ export class AplicacionNuevaPage implements OnInit {
     } catch { this.tests = []; }
     try {
       this.cursos = await this.cursoSvc.listarMisCursos();
+      // Si hay contexto, resolver el nombre/código para el chip
+      if (this.cursoIdPreseleccionado != null) {
+        this.cursoContexto = this.cursos.find(
+          (c) => c.curso_id === this.cursoIdPreseleccionado
+        ) || null;
+      }
     } catch { this.cursos = []; }
     this.cargando = false;
+  }
+
+  get vieneDeCurso(): boolean {
+    return this.cursoIdPreseleccionado != null;
   }
 
   async guardar(): Promise<void> {
@@ -78,6 +97,11 @@ export class AplicacionNuevaPage implements OnInit {
       this.errorMsg = 'Selecciona un curso.';
       return;
     }
+    const sel = this.tests.find((t) => t.test_id === this.testId);
+    if (sel && (sel.cantidad_preguntas || 0) === 0) {
+      this.errorMsg = 'Ese test no tiene preguntas. Agrégale preguntas antes de aplicarlo a un curso.';
+      return;
+    }
     this.guardando = true;
     try {
       const resp = await this.aplSvc.crear({
@@ -85,7 +109,6 @@ export class AplicacionNuevaPage implements OnInit {
         cursoId: this.cursoId,
       });
       this.okMsg = `Aplicación #${resp.aplicacion_id} creada.`;
-      // Si veníamos de un curso específico, volvemos ahí; si no, al listado general.
       const destino = this.cursoIdPreseleccionado
         ? `/curso/${this.cursoIdPreseleccionado}`
         : '/mis-aplicaciones';

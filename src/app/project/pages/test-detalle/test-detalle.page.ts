@@ -74,6 +74,54 @@ export class TestDetallePage implements OnInit {
     }
   }
 
+  // -------- Acciones sobre el test --------
+
+  irAEditarTest(): void {
+    this.router.navigateByUrl(`/test-editar/${this.testId}`);
+  }
+
+  async confirmarEliminarTest(): Promise<void> {
+    if (!this.test) return;
+    const alert = await this.alertCtrl.create({
+      header: '¿Eliminar este test?',
+      message: `
+        <p>El test "<strong>${this.escapar(this.test.nombre)}</strong>" se marcará como inactivo.</p>
+        <p>Las aplicaciones y evaluaciones de estudiantes se conservan para histórico.</p>
+      `,
+      buttons: [
+        { text: 'Cancelar', role: 'cancel' },
+        {
+          text: 'Eliminar',
+          role: 'destructive',
+          handler: () => this.ejecutarEliminarTest(),
+        },
+      ],
+    });
+    await alert.present();
+  }
+
+  private async ejecutarEliminarTest(): Promise<void> {
+    try {
+      await this.testSvc.eliminar(this.testId);
+      const t = await this.toastCtrl.create({
+        message: 'Test eliminado.',
+        duration: 2000,
+        color: 'success',
+        position: 'bottom',
+      });
+      await t.present();
+      this.router.navigateByUrl('/mis-tests', { replaceUrl: true });
+    } catch (err: any) {
+      const t = await this.toastCtrl.create({
+        message: (err && err.message) || 'No se pudo eliminar el test.',
+        duration: 3000,
+        color: 'danger',
+        position: 'bottom',
+      });
+      await t.present();
+    }
+  }
+
   // Navegación a crear pregunta dentro del test
   agregarPregunta(): void {
     this.router.navigate(['/pregunta-nueva'], {

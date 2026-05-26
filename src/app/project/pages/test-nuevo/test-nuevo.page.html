@@ -23,9 +23,6 @@
       </div>
     </div>
 
-    @if (cargando) {
-      <div class="centro"><ion-spinner></ion-spinner><p>Cargando datos...</p></div>
-    } @else {
       <form (ngSubmit)="guardar()" novalidate>
 
         <div class="section-card">
@@ -58,27 +55,6 @@
             maxlength="1000"
             [counter]="true"
           ></ion-textarea>
-        </div>
-
-        <div class="section-card">
-          <ion-item lines="none">
-            <ion-select
-              [(ngModel)]="cursoOrigenId"
-              name="curso"
-              label="Curso origen (opcional)"
-              labelPlacement="stacked"
-              placeholder="Sin curso asociado"
-              [disabled]="guardando"
-              interface="popover"
-            >
-              <ion-select-option [value]="null">— Ninguno —</ion-select-option>
-              @for (c of cursos; track c.curso_id) {
-                <ion-select-option [value]="c.curso_id">
-                  {{ c.codigo }} · {{ c.nombre }}
-                </ion-select-option>
-              }
-            </ion-select>
-          </ion-item>
         </div>
 
         <div class="section-card">
@@ -135,6 +111,5 @@
         </ion-button>
 
       </form>
-    }
   </div>
 </ion-content>

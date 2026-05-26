@@ -18,6 +18,22 @@ export const routes: Routes = [
         (m) => m.RegistroProfesorPage
       ),
   },
+  {
+    // RF-59: solicitar recuperación de contraseña
+    path: 'recuperar-password',
+    loadComponent: () =>
+      import('./project/pages/recuperar-password/recuperar-password.page').then(
+        (m) => m.RecuperarPasswordPage
+      ),
+  },
+  {
+    // RF-59: fijar nueva contraseña con el token del correo
+    path: 'restablecer-password/:token',
+    loadComponent: () =>
+      import('./project/pages/restablecer-password/restablecer-password.page').then(
+        (m) => m.RestablecerPasswordPage
+      ),
+  },
 
   // -----------------------------------------------------------
   // Paneles internos (RF-54 / RF-55 / RF-56)
@@ -48,11 +64,7 @@ export const routes: Routes = [
   },
 
   // -----------------------------------------------------------
-<<<<<<< HEAD
-  // Mis cursos (RF-61, + creación de cursos por profesor)
-=======
-  // Gestión docente: preguntas, tests, aplicaciones (RF-62..73, 88..93)
->>>>>>> 876202e2368df665f01863ed9dd9fae585232ce3
+  // Mis cursos: listar, crear, editar, detalle (RF-61 + CRUD)
   // -----------------------------------------------------------
   {
     path: 'mis-cursos',
@@ -71,6 +83,14 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'curso-editar/:cursoId',
+    canActivate: [docenteGuard],
+    loadComponent: () =>
+      import('./project/pages/curso-editar/curso-editar.page').then(
+        (m) => m.CursoEditarPage
+      ),
+  },
+  {
     path: 'curso/:cursoId',
     canActivate: [docenteGuard],
     loadComponent: () =>
@@ -83,8 +103,8 @@ export const routes: Routes = [
   // Gestión docente: tests + preguntas + aplicaciones
   // (RF-62..RF-73, RF-88..RF-93)
   //
-  // Las preguntas se gestionan dentro de cada test (no como banco standalone).
-  // Las aplicaciones se gestionan desde cada curso ("agregar test al curso").
+  // Las preguntas se gestionan dentro de cada test.
+  // Las aplicaciones se gestionan desde cada curso.
   // -----------------------------------------------------------
   {
     path: 'mis-tests',
@@ -111,6 +131,14 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'test-editar/:id',
+    canActivate: [docenteGuard],
+    loadComponent: () =>
+      import('./project/pages/test-editar/test-editar.page').then(
+        (m) => m.TestEditarPage
+      ),
+  },
+  {
     path: 'pregunta-nueva',
     canActivate: [docenteGuard],
     loadComponent: () =>
@@ -127,14 +155,6 @@ export const routes: Routes = [
       ),
   },
   {
-    path: 'mis-preguntas',
-    canActivate: [docenteGuard],
-    loadComponent: () =>
-      import('./project/pages/mis-preguntas/mis-preguntas.page').then(
-        (m) => m.MisPreguntasPage
-      ),
-  },
-  {
     path: 'mis-aplicaciones',
     canActivate: [docenteGuard],
     loadComponent: () =>
@@ -148,7 +168,6 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./project/pages/aplicacion-nueva/aplicacion-nueva.page').then(
         (m) => m.AplicacionNuevaPage
-<<<<<<< HEAD
       ),
   },
   {
@@ -158,8 +177,65 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./project/pages/aplicacion-nueva/aplicacion-nueva.page').then(
         (m) => m.AplicacionNuevaPage
-=======
->>>>>>> 876202e2368df665f01863ed9dd9fae585232ce3
+      ),
+  },
+
+  // -----------------------------------------------------------
+  // Analítica docente (RF-94 a RF-104)
+  // -----------------------------------------------------------
+  {
+    path: 'analitica',
+    canActivate: [docenteGuard],
+    loadComponent: () =>
+      import('./project/pages/analitica/analitica.page').then(
+        (m) => m.AnaliticaPage
+      ),
+  },
+  {
+    path: 'analitica/:aplicacionId',
+    canActivate: [docenteGuard],
+    loadComponent: () =>
+      import('./project/pages/analitica-detalle/analitica-detalle.page').then(
+        (m) => m.AnaliticaDetallePage
+      ),
+  },
+
+  // -----------------------------------------------------------
+  // Flujo de evaluación del ESTUDIANTE (público, sin guard — RF-01 a RF-44)
+  // -----------------------------------------------------------
+  {
+    path: 'estudiante/cursos',
+    loadComponent: () =>
+      import('./project/pages/estudiante-cursos/estudiante-cursos.page').then(
+        (m) => m.EstudianteCursosPage
+      ),
+  },
+  {
+    path: 'estudiante/curso/:cursoId/tests',
+    loadComponent: () =>
+      import('./project/pages/estudiante-tests/estudiante-tests.page').then(
+        (m) => m.EstudianteTestsPage
+      ),
+  },
+  {
+    path: 'estudiante/inicio/:aplicacionId',
+    loadComponent: () =>
+      import('./project/pages/estudiante-inicio/estudiante-inicio.page').then(
+        (m) => m.EstudianteInicioPage
+      ),
+  },
+  {
+    path: 'estudiante/evaluacion/:evaluacionId',
+    loadComponent: () =>
+      import('./project/pages/estudiante-evaluacion/estudiante-evaluacion.page').then(
+        (m) => m.EstudianteEvaluacionPage
+      ),
+  },
+  {
+    path: 'estudiante/resultado/:evaluacionId',
+    loadComponent: () =>
+      import('./project/pages/estudiante-resultado/estudiante-resultado.page').then(
+        (m) => m.EstudianteResultadoPage
       ),
   },
 

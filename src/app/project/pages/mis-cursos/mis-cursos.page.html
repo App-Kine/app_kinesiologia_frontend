@@ -40,22 +40,41 @@
   } @else {
     <ion-text color="medium">
       <p class="hint">
-        Elige un curso para gestionar los tests aplicados y armar evaluaciones.
+        Elige un curso para gestionar los tests aplicados, o usa los botones para editarlo o eliminarlo.
       </p>
     </ion-text>
 
     <ion-list>
       @for (c of cursos; track c.curso_id) {
-        <ion-item button (click)="abrirCurso(c)" detail="false">
+        <ion-item button (click)="abrirCurso(c)" detail="false" class="curso-item">
           <ion-icon name="school-outline" slot="start" color="secondary"></ion-icon>
           <ion-label>
             <h2>{{ c.nombre }}</h2>
             <p><strong>{{ c.codigo }}</strong></p>
             @if (c.descripcion) {
-              <p>{{ c.descripcion }}</p>
+              <p class="desc-line">{{ c.descripcion }}</p>
             }
           </ion-label>
-          <ion-icon name="chevron-forward-outline" slot="end" color="medium"></ion-icon>
+          <div slot="end" class="acciones">
+            <ion-button
+              fill="clear"
+              size="small"
+              color="medium"
+              (click)="editarCurso(c, $event)"
+              title="Editar"
+            >
+              <ion-icon slot="icon-only" name="create-outline"></ion-icon>
+            </ion-button>
+            <ion-button
+              fill="clear"
+              size="small"
+              color="danger"
+              (click)="confirmarEliminar(c, $event)"
+              title="Eliminar"
+            >
+              <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+            </ion-button>
+          </div>
         </ion-item>
       }
     </ion-list>

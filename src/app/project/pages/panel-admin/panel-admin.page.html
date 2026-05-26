@@ -85,25 +85,50 @@
       }
 
       @if (invitacionRecienCreada) {
-        <div class="dev-link-box">
-          <p>
-            <strong>Modo desarrollo:</strong> el correo no se envió realmente.
-            Copia este enlace y compártelo con el profesor invitado:
-          </p>
-          <code class="dev-link">{{ invitacionRecienCreada.link }}</code>
-          <ion-button
-            size="small"
-            fill="outline"
-            (click)="copiarLink()"
-            color="primary"
-          >
-            <ion-icon slot="start" name="copy-outline"></ion-icon>
-            Copiar
-          </ion-button>
-          <p class="dev-link-meta">
-            Expira: {{ formatoFecha(invitacionRecienCreada.expira_en) }}
-          </p>
-        </div>
+        @if (invitacionRecienCreada.correo_enviado) {
+          <!-- Modo real: el correo se envió por SMTP -->
+          <div class="invitar-ok">
+            <ion-text color="success">
+              <ion-icon name="checkmark-circle"></ion-icon>
+              Invitación enviada por correo a
+              <strong>{{ invitacionRecienCreada.correo_destino }}</strong>.
+            </ion-text>
+            <p class="dev-link-meta">
+              Expira: {{ formatoFecha(invitacionRecienCreada.expira_en) }}
+            </p>
+          </div>
+        } @else if (invitacionRecienCreada.link) {
+          <!-- Respaldo: enlace directo (solo expuesto si no hay envío por SMTP) -->
+          <div class="dev-link-box">
+            <p>
+              <strong>Enlace de invitación.</strong> Si el profesor no recibe el
+              correo, puedes compartirle este enlace directamente:
+            </p>
+            <code class="dev-link">{{ invitacionRecienCreada.link }}</code>
+            <ion-button
+              size="small"
+              fill="outline"
+              (click)="copiarLink()"
+              color="primary"
+            >
+              <ion-icon slot="start" name="copy-outline"></ion-icon>
+              Copiar
+            </ion-button>
+            <p class="dev-link-meta">
+              Expira: {{ formatoFecha(invitacionRecienCreada.expira_en) }}
+            </p>
+          </div>
+        } @else {
+          <!-- Modo real pero el envío falló: la invitación quedó creada -->
+          <div class="invitar-warn">
+            <ion-text color="warning">
+              <ion-icon name="time-outline"></ion-icon>
+              La invitación se creó, pero el correo no pudo enviarse a
+              <strong>{{ invitacionRecienCreada.correo_destino }}</strong>.
+              Revisa la configuración de correo (SMTP) e inténtalo de nuevo.
+            </ion-text>
+          </div>
+        }
       }
 
       <!-- LISTADO: invitaciones existentes (RF-83) -->
@@ -170,7 +195,7 @@
             <ion-card-subtitle>Crear, editar y desactivar</ion-card-subtitle>
           </ion-card-header>
           <ion-card-content>
-            Administra el catálogo de cursos. (RF-74, RF-75)
+            Administra el catálogo de cursos.
           </ion-card-content>
         </ion-card>
       </ion-col>
@@ -183,7 +208,7 @@
             <ion-card-subtitle>Cursos, profesores y asignaciones</ion-card-subtitle>
           </ion-card-header>
           <ion-card-content>
-            Vista de auditoría y resumen del sistema. (RF-87)
+            Vista de auditoría y resumen del sistema.
           </ion-card-content>
         </ion-card>
       </ion-col>
