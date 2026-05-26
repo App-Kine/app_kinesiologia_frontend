@@ -18,6 +18,22 @@ export const routes: Routes = [
         (m) => m.RegistroProfesorPage
       ),
   },
+  {
+    // RF-59: solicitar recuperación de contraseña
+    path: 'recuperar-password',
+    loadComponent: () =>
+      import('./project/pages/recuperar-password/recuperar-password.page').then(
+        (m) => m.RecuperarPasswordPage
+      ),
+  },
+  {
+    // RF-59: fijar nueva contraseña con el token del correo
+    path: 'restablecer-password/:token',
+    loadComponent: () =>
+      import('./project/pages/restablecer-password/restablecer-password.page').then(
+        (m) => m.RestablecerPasswordPage
+      ),
+  },
 
   // -----------------------------------------------------------
   // Paneles internos (RF-54 / RF-55 / RF-56)
@@ -181,6 +197,45 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./project/pages/analitica-detalle/analitica-detalle.page').then(
         (m) => m.AnaliticaDetallePage
+      ),
+  },
+
+  // -----------------------------------------------------------
+  // Flujo de evaluación del ESTUDIANTE (público, sin guard — RF-01 a RF-44)
+  // -----------------------------------------------------------
+  {
+    path: 'estudiante/cursos',
+    loadComponent: () =>
+      import('./project/pages/estudiante-cursos/estudiante-cursos.page').then(
+        (m) => m.EstudianteCursosPage
+      ),
+  },
+  {
+    path: 'estudiante/curso/:cursoId/tests',
+    loadComponent: () =>
+      import('./project/pages/estudiante-tests/estudiante-tests.page').then(
+        (m) => m.EstudianteTestsPage
+      ),
+  },
+  {
+    path: 'estudiante/inicio/:aplicacionId',
+    loadComponent: () =>
+      import('./project/pages/estudiante-inicio/estudiante-inicio.page').then(
+        (m) => m.EstudianteInicioPage
+      ),
+  },
+  {
+    path: 'estudiante/evaluacion/:evaluacionId',
+    loadComponent: () =>
+      import('./project/pages/estudiante-evaluacion/estudiante-evaluacion.page').then(
+        (m) => m.EstudianteEvaluacionPage
+      ),
+  },
+  {
+    path: 'estudiante/resultado/:evaluacionId',
+    loadComponent: () =>
+      import('./project/pages/estudiante-resultado/estudiante-resultado.page').then(
+        (m) => m.EstudianteResultadoPage
       ),
   },
 

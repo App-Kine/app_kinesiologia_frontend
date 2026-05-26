@@ -165,7 +165,7 @@ export class PanelAdminPage implements OnInit {
   }
 
   async copiarLink(): Promise<void> {
-    if (!this.invitacionRecienCreada) return;
+    if (!this.invitacionRecienCreada || !this.invitacionRecienCreada.link) return;
     try {
       await navigator.clipboard.writeText(this.invitacionRecienCreada.link);
     } catch (e) {

@@ -1,0 +1,81 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-title>Resultados</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  @if (!resultado) {
+    <div class="centro">
+      <ion-text color="medium"><p>No hay resultados para mostrar.</p></ion-text>
+      <ion-button (click)="volver()">Volver a cursos</ion-button>
+    </div>
+  } @else {
+    <div class="hero">
+      <ion-icon name="ribbon-outline" class="hero-icon"></ion-icon>
+      <h1>¡Evaluación completada!</h1>
+      @if (testNombre) { <p class="test-name">{{ testNombre }}</p> }
+    </div>
+
+    <!-- Porcentaje global (RF-40) -->
+    <div class="pct-box {{ colorPct }}">
+      <span class="pct-num">{{ resultado.porcentaje_global }}%</span>
+      <span class="pct-label">de aciertos</span>
+    </div>
+
+    <div class="desglose">
+      <div class="row">
+        <span><ion-icon name="checkmark-circle" color="success"></ion-icon> Correctas (1er intento)</span>
+        <strong>{{ resultado.aciertos_primer }}</strong>
+      </div>
+      <div class="row">
+        <span><ion-icon name="refresh-circle" color="warning"></ion-icon> Correctas (2do intento)</span>
+        <strong>{{ resultado.aciertos_segundo }}</strong>
+      </div>
+      <div class="row">
+        <span><ion-icon name="close-circle" color="danger"></ion-icon> Incorrectas</span>
+        <strong>{{ resultado.incorrectas }}</strong>
+      </div>
+      <div class="row total">
+        <span>Total de preguntas</span>
+        <strong>{{ resultado.total_preguntas }}</strong>
+      </div>
+    </div>
+
+    <!-- RF-41/42: envío del informe al correo registrado -->
+    @if (resultado.modalidad === 'IDENTIFICADA') {
+      @if (informeEnviado) {
+        <p class="nota">
+          <ion-text color="success">
+            <ion-icon name="checkmark-done-outline"></ion-icon>
+            Informe enviado a {{ correoEnviado }}. Revisa tu bandeja de entrada (y spam).
+          </ion-text>
+        </p>
+      } @else {
+        <ion-button
+          expand="block"
+          fill="outline"
+          color="primary"
+          class="ion-margin-top"
+          [disabled]="enviandoInforme"
+          (click)="enviarInforme()"
+        >
+          @if (enviandoInforme) {
+            <ion-spinner name="dots"></ion-spinner>
+          } @else {
+            <ion-icon name="mail-outline" slot="start"></ion-icon>
+            Enviar informe a mi correo
+          }
+        </ion-button>
+        @if (errorInforme) {
+          <p class="nota"><ion-text color="danger">{{ errorInforme }}</ion-text></p>
+        }
+      }
+    }
+
+    <ion-button expand="block" color="primary" class="ion-margin-top" (click)="volver()">
+      <ion-icon name="home-outline" slot="start"></ion-icon>
+      Volver a cursos
+    </ion-button>
+  }
+</ion-content>

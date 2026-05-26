@@ -1,0 +1,14 @@
+.privacidad {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 12px;
+  margin-bottom: 16px;
+  background: rgba(var(--ion-color-primary-rgb), 0.08);
+  border-radius: 12px;
+  ion-icon { font-size: 24px; flex-shrink: 0; margin-top: 2px; }
+  p { margin: 0; font-size: 0.9rem; line-height: 1.45; }
+}
+.correo-item { margin-top: 8px; }
+.hint { display: block; margin: 6px 4px 0; font-size: 0.8rem; }
+.error { margin: 12px 4px 0; }

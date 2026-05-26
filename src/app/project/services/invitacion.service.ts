@@ -27,7 +27,9 @@ export interface CrearInvitacionResp {
   invitacion_id: string;
   correo_destino: string;
   expira_en: string;
-  link: string; // visible solo en modo dev
+  correo_enviado?: boolean; // true = el correo salió por SMTP real
+  modo?: 'dev' | 'smtp';
+  link?: string | null;     // presente solo en modo dev (respaldo de pruebas)
 }
 
 @Injectable({ providedIn: 'root' })
