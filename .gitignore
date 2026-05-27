@@ -29,6 +29,11 @@ yarn.lock
 # ---------------------------------------------------------------------------
 /.angular
 /.angular/cache
+.angular-cache/
+
+# Carpetas basura que se crean en Linux/Mac si Windows leakea paths absolutos
+# (eg "C:" como carpeta literal en lugar de la unidad).
+/C:/
 
 # ---------------------------------------------------------------------------
 # Ionic / Capacitor / Cordova

@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Auris — App del estudiante (móvil)",
   "author": "Auris",
+  "private": true,
   "scripts": {
     "ng": "ng",
     "start": "ng serve --port 4201",
@@ -11,7 +12,6 @@
     "test": "ng test",
     "lint": "ng lint"
   },
-  "private": true,
   "dependencies": {
     "@angular/animations": "^20.0.0",
     "@angular/common": "^20.0.0",
@@ -63,6 +63,5 @@
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
     "typescript": "~5.9.0"
-  },
-  "description": "An Ionic project"
+  }
 }
