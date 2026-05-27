@@ -73,6 +73,26 @@
       }
     }
 
+    <!-- Descargar PDF (pedido cliente 2026-05-26): para anónimos e identificados -->
+    <ion-button
+      expand="block"
+      fill="outline"
+      color="secondary"
+      class="ion-margin-top"
+      [disabled]="generandoPdf"
+      (click)="descargarInforme()"
+    >
+      @if (generandoPdf) {
+        <ion-spinner name="dots"></ion-spinner>
+      } @else {
+        <ion-icon name="download-outline" slot="start"></ion-icon>
+        Descargar informe (PDF)
+      }
+    </ion-button>
+    @if (errorPdf) {
+      <p class="nota"><ion-text color="danger">{{ errorPdf }}</ion-text></p>
+    }
+
     <ion-button expand="block" color="primary" class="ion-margin-top" (click)="volver()">
       <ion-icon name="home-outline" slot="start"></ion-icon>
       Volver a cursos
