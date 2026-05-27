@@ -1,177 +1,245 @@
-# Auris · Frontend (Ionic + Angular 20)
+# Auris · App Móvil del Estudiante
 
-UI del MVP: login, paneles diferenciados (admin / docente / selector), registro de profesores por invitación. Hace POST `arg=urlencoded(JSON)` al controlador (`http://localhost:3023/controlador_base/`).
+**App Ionic + Angular 20 + Capacitor** para iOS/Android. Es la app que usa el estudiante para rendir tests de auscultación.
 
-> **Setup completo del entorno (BD + 3 servicios):** ver [`app_kinesiologia_logica/database/SETUP.md`](../app_kinesiologia_logica/database/SETUP.md)
+**100 % pública** — sin login. El estudiante entra y elige curso/test directo. Puede rendir como anónimo o identificarse con email para recibir el informe.
 
-## Quick start
-
-```bash
-npm install
-npm start
-# abre http://localhost:4200
-```
-
-## Rutas principales
-
-| Ruta | Acceso |
-|---|---|
-| `/login` | público (RF-51) |
-| `/registro-profesor/:token` | público — landing del email de invitación (RF-79) |
-| `/panel-admin` | requiere rol SUPERADMIN |
-| `/panel-docente` | requiere rol PROFESOR |
-| `/seleccion-panel` | requiere sesión — para usuarios con ambos roles (RF-56) |
-| `/tabs/home` | público (app del estudiante, en desarrollo) |
+> **Setup completo del entorno (BD + 3 servicios):** ver [`../app_kinesiologia_logica/database/SETUP.md`](../app_kinesiologia_logica/database/SETUP.md)
 
 ---
 
-## Descripción técnica del template base
+## 🧭 ¿Dónde encaja esto?
 
-Este es el proyecto frontend base construido con Ionic y Angular.
-
-## Características Implementadas
-
-### Home Page (Vista Principal)
-Ruta: `src/app/project/pages/home`
-
-La vista de inicio incluye una demostración de integración entre la interfaz de usuario de Ionic y el consumo de servicios HTTP.
-
-**Detalles de Implementación:**
-- **Consumo de API:** Al inicializar el componente (`ngOnInit`), se ejecuta una petición mediante el servicio `EnlacesService.getExampleData({})`.
-- **Procesamiento de Datos:** La respuesta del servicio se extrae de forma segura y se almacena en una variable local `options` (un arreglo).
-- **Interfaz Gráfica:** 
-  - Se implementó un `<ion-select>` dentro de un `<ion-list>` para mostrar los datos obtenidos (ej. listado de Facultades).
-  - Se utiliza la sintaxis de control de flujo nativa de Angular (`@for (option of options; track $index)`) para iterar y renderizar dinámicamente cada `<ion-select-option>` con el nombre de cada opción (`option.nombre`).
-- **Arquitectura Standalone:** El componente está diseñado utilizando la arquitectura *standalone* de Angular 14+, importando directamente los módulos necesarios de Ionic (`IonItem`, `IonSelect`, `IonList`, etc.) sin depender de un módulo tradicional (`NgModule`).
-
-### Servicios
-Ruta: `src/app/project/services`
-
-- **`servicio-ejemplo.service.ts` (EnlacesService):**
-  Extiende de `BaseService` y proporciona el método `getExampleData()`, el cual realiza una petición HTTP POST (`this.post(this.url + 'getData', args)`) hacia el backend para recuperar los datos mostrados en la vista.
-
-## Requisitos y Configuración Local
-
-- **Node.js**: El proyecto requiere la versión **v20.19** o **v22.12** como mínimo debido a la versión de Angular CLI utilizada (Angular v20). 
-- **Ionic CLI**: Instalado globalmente (`npm install -g @ionic/cli`).
-- **Angular CLI**: Instalado globalmente (`npm install -g @angular/cli`).
-- **Puerto de desarrollo**: El comando `ionic serve` suele ejecutarse por defecto en el puerto `8100`. Si el puerto base está ocupado, se ejecutará en otro disponible.
-
-### Uso de NVM (Node Version Manager)
-
-Si tienes problemas con las versiones de node, se recomienda utilizar **NVM** para gestionar las versiones.
-
-**Pasos útiles con NVM:**
-1. **Verificar versión actual:**
-   ```bash
-   node -v
-   ```
-2. **Instalar la versión requerida de Node.js** (por ejemplo la versión 20.19.0):
-   ```bash
-   nvm install 20.19.0
-   ```
-3. **Cambiar a la versión requerida:**
-   ```bash
-   nvm use 20.19.0
-   ```
-4. **Establecer una versión por defecto** en el sistema:
-   ```bash
-   nvm alias default 20.19.0
-   ```
-Una vez que hayas cambiado a la versión `v20.19.x` o superior, podrás ejecutar los comandos de compilación y levantamiento sin problemas.
-## Instalación y Ejecución
-
-1. **Clonar el repositorio:**
-   ```bash
-   git clone <url-del-repositorio>
-   cd app_base_frontend
-   ```
-
-2. **Instalar dependencias:**
-   Ejecuta el siguiente comando en la raíz del proyecto para descargar todas las dependencias necesarias:
-   ```bash
-   npm install
-   ```
-
-3. **Ejecutar en modo desarrollo:**
-   Levanta un servidor local con recarga en vivo (live-reload):
-   ```bash
-   ionic serve
-   # O alternativamente:
-   npm start
-   ```
-   La aplicación debería abrirse automáticamente en tu navegador por defecto (usualmente en `http://localhost:8100/`).
-
-4. **Compilar para producción:**
-   Para generar la versión optimizada de la aplicación lista para despliegue web:
-   ```bash
-   ionic build
-   # O alternativamente:
-   npm run build
-   ```
-
-## Configuración de Entorno (Conexión al Backend)
-
-El frontend está preconfigurado para comunicarse con el servicio backend (Controlador Base) ejecutándose de manera local en el **puerto 3023**.
-
-Puedes modificar las variables de entorno relacionadas a la URL de conexión dentro del directorio `src/environments/`:
-
-- **Desarrollo** (`src/environments/environment.ts`):
-  ```typescript
-  export const environment = {
-    production: false,
-    BASE_API_URL: 'http://localhost:3023/controlador_base/',
-    // ...
-  };
-  ```
-
-- **Producción** (`src/environments/environment.prod.ts`):
-  ```typescript
-  export const environment = {
-    production: true,
-    BASE_API_URL: 'http://localhost:3023/controlador_base/', // Cambiar por dominio real en prod
-    // ...
-  };
-  ```
-  
-Asegúrate de que tu [Controlador Base](https://github.com/dticuv/app_base_controlador) y su [Lógica Base](https://github.com/dticuv/app_base_logica) se encuentren en ejecución para que la petición de `home.page.ts` responda correctamente al arrancar el proyecto.
-
-## Compilación para Dispositivos Móviles (iOS y Android)
-
-Este proyecto utiliza **Capacitor** para empaquetar la aplicación web en plataformas nativas. Sigue estos pasos para agregar y compilar las plataformas móviles:
-
-### 1. Requisitos Previos para Móviles
-- **Para Android:** Necesitas tener instalado [Android Studio](https://developer.android.com/studio) y las variables de entorno de Android configuradas.
-- **Para iOS:** Necesitas un entorno macOS con [Xcode](https://developer.apple.com/xcode/) instalado.
-
-### 2. Generar el Build Web
-Antes de agregar las plataformas nativas, debes compilar el proyecto web:
-```bash
-ionic build
+```
+┌─────────────────────┐   ┌──────────────────────┐
+│  Panel WEB          │   │  APP MÓVIL           │ ← TÚ ESTÁS ACÁ
+│  (docente/admin)    │   │  (estudiante)        │
+│  app_kinesiologia   │   │  Ionic + Capacitor   │
+│  _panel · :4200     │   │  :4201 / iOS/Android │
+└─────────┬───────────┘   └──────────┬───────────┘
+          │                          │
+          │  JWT                     │  Público
+          └────────────┬─────────────┘
+                       │
+                ┌──────▼──────┐
+                │ Controlador │ :3023
+                └──────┬──────┘
+                       │
+                ┌──────▼──────┐
+                │   Lógica    │ :2000
+                └──────┬──────┘
+                       │
+              ┌────────┴────────┐
+              ▼                 ▼
+          SQL Server         MongoDB
 ```
 
-### 3. Agregar Plataformas
-Para inicializar y añadir las carpetas de los proyectos nativos (esto solo se hace una vez por plataforma):
+**Comparte backend** con el panel web — ambos pegan al mismo controlador (`localhost:3023`).
 
-**Agregar Android:**
-```bash
-npm install @capacitor/android
-npx cap add android
+---
+
+## 📦 Stack
+
+- **Ionic 8** + **Angular 20** standalone components (`@if`, `@for`, no NgModule)
+- **Capacitor 7** (iOS/Android)
+- **NativeStorage** para token persistente en mobile (legacy de Cordova, fallback a localStorage en web)
+- **rxjs 7**
+
+⚠️ **Node 20 requerido**, NO Node 22. Capacitor 7 está fijado para que funcione con Node 20 (la versión que usa el equipo).
+
+---
+
+## 🗂 Estructura
+
+```
+app_kinesiologia_frontend/
+├── src/
+│   ├── app/
+│   │   ├── app.routes.ts                    # solo rutas /estudiante/*
+│   │   ├── app.component.ts/html            # shell mínimo (router-outlet)
+│   │   ├── base/                            # framework genérico
+│   │   │   └── service/base.service.ts      # HTTP client + storage abstraction
+│   │   └── project/
+│   │       ├── pages/
+│   │       │   ├── estudiante-cursos/        # lista de cursos
+│   │       │   ├── estudiante-tests/         # tests del curso elegido
+│   │       │   ├── estudiante-inicio/        # splash, elegir modalidad
+│   │       │   ├── estudiante-evaluacion/    # responder preguntas (timer)
+│   │       │   └── estudiante-resultado/     # ver score + descargar PDF
+│   │       ├── pipes/safe-html.pipe.ts       # renderiza HTML rich-text seguro
+│   │       └── services/
+│   │           ├── evaluacion.service.ts     # iniciar, responder, finalizar, descargar
+│   │           ├── multimedia.service.ts     # streaming de audio/imagen/video
+│   │           ├── analytics.service.ts      # base del BaseService
+│   │           └── logger.ts
+│   ├── environments/
+│   │   ├── environment.ts                    # URLs del backend (localhost por defecto)
+│   │   └── environment.prod.ts
+│   ├── theme/variables.scss                  # paleta Ionic
+│   ├── index.html, main.ts, styles.scss
+│   └── assets/
+├── capacitor.config.ts                       # appId, appName, webDir
+├── setup-ios.command                         # script de setup iOS (ver abajo)
+├── setup-ios.sh                              # idem (alternativo)
+├── angular.json, tsconfig.*, package.json
+└── README.md
 ```
 
-**Agregar iOS:**
+---
+
+## 🚀 Setup web (5 min)
+
+Solo para correr en navegador (testing rápido del flujo).
+
 ```bash
-npm install @capacitor/ios
-npx cap add ios
+npm install --legacy-peer-deps
+npm start
+# abre http://localhost:4201
+# cae directo en /estudiante/cursos
 ```
 
-### 4. Sincronizar Cambios y Abrir IDEs
-Cada vez que hagas un cambio en tu código de Angular/Ionic, debes compilar el proyecto web y sincronizar los cambios con los proyectos nativos:
+⚠️ El `--legacy-peer-deps` es necesario por un conflicto entre `@ionic-native/native-storage` (que pide rxjs 5/6) y el resto del proyecto (rxjs 7). Sin ese flag, npm rechaza la instalación.
+
+---
+
+## 📱 Setup iOS (Xcode)
+
+Tenés un script que hace TODO automático. Lo único manual es correrlo una vez:
+
 ```bash
-ionic build
-npx cap sync
+cd ~/Desktop/Auris/app_kinesiologia_frontend
+bash setup-ios.command
 ```
 
-Para abrir los proyectos en sus respectivos IDEs y probar en emuladores o dispositivos físicos:
-- **Abrir Android Studio:** `npx cap open android`
-- **Abrir Xcode:** `npx cap open ios`
+Lo que hace:
+1. Verifica que tengas Xcode, CocoaPods y Node 20 instalados.
+2. `npm install @capacitor/ios --legacy-peer-deps`
+3. `npm run build` (genera `www/`)
+4. `npx cap add ios` (crea carpeta `ios/`, corre `pod install`)
+5. Parchea `Info.plist` para permitir HTTP plano a `localhost` (NSAppTransportSecurity)
+6. `npx cap sync ios && npx cap open ios` → abre Xcode con el proyecto
+
+Después en Xcode: elegís simulador (iPhone 15 Pro recomendado) y ▶ Play.
+
+### Loop de desarrollo iOS
+
+Cuando cambies código TS/HTML/SCSS:
+```bash
+npm run build && npx cap sync ios
+```
+Y volvés a apretar ▶ Play en Xcode.
+
+### Para correr en iPhone físico
+
+`localhost` no funciona en un dispositivo real (apunta al teléfono). Hay que:
+
+1. IP de tu Mac: `ipconfig getifaddr en0` → ej `192.168.1.42`
+2. Editá `src/environments/environment.ts` y `environment.prod.ts`:
+   ```ts
+   BASE_API_URL: 'http://192.168.1.42:3023/controlador_base/',
+   LOGICA_API_URL: 'http://192.168.1.42:2000/base_logica/',
+   ```
+3. `npm run build && npx cap sync ios`
+4. Conectá tu iPhone por cable, elegilo en Xcode, ▶ Play.
+
+---
+
+## 🛠 Convenciones del código
+
+### Rutas
+
+Todo el flujo es público. Solo 5 rutas:
+
+```
+/estudiante/cursos                    → home (lista de cursos)
+/estudiante/curso/:cursoId/tests       → tests disponibles del curso
+/estudiante/inicio/:aplicacionId       → splash, elegir anónima vs identificada
+/estudiante/evaluacion/:evaluacionId   → responder preguntas
+/estudiante/resultado/:evaluacionId    → score + descargar informe PDF
+```
+
+Raíz (`/`) y wildcard (`**`) redirigen a `/estudiante/cursos`.
+
+### Llamadas al backend
+
+Para todo lo del flujo (cursos, tests, evaluación), va al **controlador** vía `BASE_API_URL`:
+```ts
+this.post(this.url + 'evaluacion/iniciar', { aplicacionId, modalidad });
+```
+
+Para multimedia (streaming de audio/imagen/video del estudiante), va DIRECTO a la **lógica** vía `LOGICA_API_URL`:
+```ts
+this.media.urlAudio(pregunta.audio_grid_id);    // → http://localhost:2000/base_logica/multimedia/audio/<gridId>
+```
+
+### Render seguro de HTML
+
+Los enunciados y explicaciones de las preguntas vienen con formato HTML (negrita, listas, etc., generadas por el rich text editor del panel docente). Para renderizarlas:
+
+```html
+<div [innerHTML]="pregunta.enunciado | safeHtml"></div>
+```
+
+El pipe `safeHtml` está en `src/app/project/pipes/safe-html.pipe.ts` — usa `DomSanitizer.bypassSecurityTrustHtml`. Angular sigue bloqueando scripts/iframes/handlers por defecto.
+
+### Timer por pregunta
+
+`estudiante-evaluacion.page.ts` arranca un `inicioPreguntaMs = Date.now()` cuando se muestra cada pregunta y lo manda al confirmar la respuesta. El backend lo persiste solo si ese intento finaliza la pregunta (acierto en 1°, acierto en 2°, o incorrecta tras 2 intentos).
+
+### Descarga PDF
+
+`estudiante-resultado.page.ts` tiene un método `descargarInforme()` que:
+1. Hace POST a `/evaluacion/informeCompleto` (público).
+2. Recibe cabecera + preguntas con alternativas, qué eligió, tiempo, explicación.
+3. Construye HTML imprimible inline.
+4. `window.open()` + `window.print()` → el usuario guarda como PDF desde el diálogo del navegador.
+
+**Cero dependencias externas** — sin jsPDF ni nada.
+
+---
+
+## 🧪 Verificar que todo compile
+
+```bash
+node_modules/.bin/ngc --noEmit -p tsconfig.app.json
+# (exit 0 + sin "error TS" = OK)
+```
+
+---
+
+## 🐛 Troubleshooting
+
+**`The Capacitor CLI requires NodeJS >=22`** → estás corriendo `npx cap add ios` con Node viejo, pero también significa que tu `package.json` se actualizó a Capacitor 8. Restaurá `package.json` a `^7.0.0` para todas las deps `@capacitor/*` (ya lo dejamos así en este repo).
+
+**`npm install` falla con `ERESOLVE could not resolve`** → siempre instalá con `--legacy-peer-deps`. Es por el conflicto rxjs/Cordova-legacy.
+
+**`Http failure response: 0 Unknown Error`** al subir/cargar multimedia → CORS preflight. Verificá que la lógica esté respondiendo `204` al `OPTIONS` antes del POST (ya está implementado en `index.js` de la lógica).
+
+**El audio/video no reproduce en iOS** → revisá que el Info.plist tenga `NSAllowsArbitraryLoads = true` (el `setup-ios.command` lo hace solo). Sin eso, iOS bloquea HTTP plano.
+
+**Pantalla blanca en el simulator** → el `www/` está viejo. `npm run build && npx cap sync ios` y volvé a apretar Play.
+
+**`pod install` falla con error de FFI en Mac M1/M2** → `sudo arch -x86_64 gem install ffi` y reintentá.
+
+---
+
+## 🤝 Convenciones de equipo
+
+- **No commitear `package-lock.json`** (está en `.gitignore`).
+- **No commitear la carpeta `ios/`** ni `www/` (gitignored). Cada dev se regenera con `setup-ios.command`.
+- Si cambiás algo en `capacitor.config.ts` (appId, appName), hay que volver a correr `npx cap sync ios` para que se propague al proyecto nativo.
+- No agregar componentes que no se usen en el flujo de estudiante (este repo es solo para él).
+
+---
+
+## 📌 Diferencia con el panel web
+
+Si te confundís y querés tocar algo de docente/admin, **estás en el repo equivocado**. Andá a [`../app_kinesiologia_panel`](../app_kinesiologia_panel) — ahí vive todo el panel.
+
+| | Este repo (`_frontend`) | Panel web (`_panel`) |
+|---|---|---|
+| Para quién | Estudiante (público) | Docente + Admin (login JWT) |
+| Plataforma | iOS / Android | Web (Chrome, Safari, etc.) |
+| Tecnología | Ionic + Capacitor | Angular + Ionic (sin Capacitor) |
+| Puerto dev | 4201 | 4200 |
+| Rutas | `/estudiante/*` | `/login`, `/panel-*`, `/mis-*`, `/curso/*`, `/test-*`, `/analitica/*` |
