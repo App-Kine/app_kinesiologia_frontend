@@ -81,12 +81,16 @@
                 </ion-chip>
                 <span class="preg-resp">{{ p.total_respuestas }} respuestas</span>
               </div>
-              <p class="preg-enunciado">{{ p.enunciado }}</p>
+              <div class="preg-enunciado" [innerHTML]="p.enunciado"></div>
               <div class="preg-stats">
                 <span class="ok">✓ {{ p.aciertos_int1 }} al 1er intento</span>
                 <span class="ok">✓ {{ p.aciertos_int2 }} al 2do intento</span>
                 <span class="bad">✗ {{ p.errores }} incorrectas</span>
                 <span class="neutral">{{ p.total_intentos }} intentos totales</span>
+                <!-- Tiempo promedio (agregado anónimos + identificados) -->
+                <span class="neutral" title="Tiempo promedio dedicado a la pregunta">
+                  ⏱ {{ fmtSeg(p.tiempo_promedio_segundos) }} prom.
+                </span>
               </div>
             </div>
           }
@@ -104,6 +108,7 @@
                   <th>Correctas 1°</th>
                   <th>Correctas 2°</th>
                   <th>Incorrectas</th>
+                  <th>Tiempo total</th>
                   <th>Fecha</th>
                 </tr>
               </thead>
@@ -128,12 +133,41 @@
                     <td>{{ e.aciertos_primer ?? '—' }}</td>
                     <td>{{ e.aciertos_segundo ?? '—' }}</td>
                     <td>{{ e.incorrectas ?? '—' }}</td>
+                    <td>{{ fmtSeg(e.tiempo_total_segundos) }}</td>
                     <td>{{ formatoFecha(e.finalizada_en) }}</td>
                   </tr>
                 }
               </tbody>
             </table>
           </div>
+
+          <!-- Detalle de tiempo por pregunta SOLO para identificados (pedido cliente 2026-05-26) -->
+          @if (tiemposPorEstudiante.length > 0) {
+            <h3 class="seccion-titulo">
+              ⏱ Tiempo por pregunta — estudiantes registrados
+            </h3>
+            <ion-note class="hint">
+              Esto solo aplica a evaluaciones identificadas. Para anónimas
+              mostramos el <strong>promedio agregado</strong> en la vista
+              "Por pregunta".
+            </ion-note>
+            @for (est of tiemposPorEstudiante; track est.evaluacion_id) {
+              <div class="estud-tiempo">
+                <div class="estud-tiempo-head">
+                  <strong>{{ est.correo }}</strong>
+                  <ion-note>Evaluación #{{ est.evaluacion_id }}</ion-note>
+                </div>
+                <div class="estud-tiempo-grid">
+                  @for (q of est.pregs; track q.orden) {
+                    <span class="tiempo-cell">
+                      P{{ q.orden }}: <strong>{{ fmtSeg(q.tiempo) }}</strong>
+                    </span>
+                  }
+                </div>
+              </div>
+            }
+          }
+
           <ion-note class="privacidad">
             <ion-icon name="eye-off-outline"></ion-icon>
             Las evaluaciones anónimas no exponen ningún dato del estudiante.
@@ -143,3 +177,23 @@
     </div>
   }
 </ion-content>
+
+<style>
+  .seccion-titulo { margin: 24px 12px 4px; }
+  .hint { display: block; margin: 0 12px 12px; color: var(--ion-color-medium); }
+  .estud-tiempo {
+    background: var(--ion-color-light);
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin: 8px 12px;
+  }
+  .estud-tiempo-head {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 6px;
+  }
+  .estud-tiempo-grid {
+    display: flex; flex-wrap: wrap; gap: 6px 14px;
+    font-size: 13px;
+  }
+  .tiempo-cell { color: var(--ion-text-color); }
+</style>

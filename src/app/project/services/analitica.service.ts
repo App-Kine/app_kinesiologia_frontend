@@ -32,6 +32,8 @@ export interface AnaliticaPregunta {
   errores: number;
   total_intentos: number;
   tasa_error: number; // 0..1
+  /** Tiempo promedio en segundos (agregado anónimo + identificadas). null si todavía no hay tiempos registrados. */
+  tiempo_promedio_segundos: number | null;
 }
 
 export interface AnaliticaEvaluacion {
@@ -44,12 +46,27 @@ export interface AnaliticaEvaluacion {
   incorrectas: number | null;
   porcentaje_global: number | null;
   finalizada_en: string | null;
+  /** Suma de tiempos por pregunta. null si todas las respuestas son pre-migración 2026-05-26. */
+  tiempo_total_segundos: number | null;
+}
+
+/** Tiempo individual por pregunta para estudiantes IDENTIFICADOS. */
+export interface AnaliticaTiempoIndividual {
+  evaluacion_id: number;
+  modalidad: 'IDENTIFICADA';
+  correo_estudiante: string | null;
+  pregunta_id: number;
+  orden_presentacion: number;
+  resultado: string | null;
+  intentos_usados: number;
+  tiempo_segundos: number;
 }
 
 export interface AnaliticaDetalle {
   resumen: AnaliticaResumen;
   preguntas: AnaliticaPregunta[];
   evaluaciones: AnaliticaEvaluacion[];
+  tiempos_identificados: AnaliticaTiempoIndividual[];
 }
 
 @Injectable({ providedIn: 'root' })

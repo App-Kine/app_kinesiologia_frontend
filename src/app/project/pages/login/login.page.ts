@@ -16,7 +16,7 @@ import {
   IonIcon,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { mailOutline, lockClosedOutline, logInOutline, schoolOutline } from 'ionicons/icons';
+import { mailOutline, lockClosedOutline, logInOutline } from 'ionicons/icons';
 
 import { AuthService } from '../../services/auth.service';
 
@@ -48,12 +48,7 @@ export class LoginPage {
   errorMsg = '';
 
   constructor(private auth: AuthService, private router: Router) {
-    addIcons({ mailOutline, lockClosedOutline, logInOutline, schoolOutline });
-  }
-
-  /** Acceso público del estudiante (RF-01: sin login). */
-  accederComoEstudiante(): void {
-    this.router.navigateByUrl('/estudiante/cursos');
+    addIcons({ mailOutline, lockClosedOutline, logInOutline });
   }
 
   async onSubmit(): Promise<void> {

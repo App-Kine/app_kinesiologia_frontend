@@ -41,47 +41,32 @@
 
       <form (ngSubmit)="guardar()" novalidate>
 
-        <!-- Enunciado -->
+        <!-- Enunciado (rich text) -->
         <div class="section-card">
           <div class="section-title">
             <span class="step">1</span>
             <h2>Enunciado de la pregunta</h2>
+            <ion-note>Puedes dar formato: <strong>negrita</strong>, <em>cursiva</em>, listas.</ion-note>
           </div>
-          <ion-textarea
-            [(ngModel)]="enunciado"
-            name="enunciado"
-            label="Enunciado"
-            labelPlacement="stacked"
-            fill="outline"
-            rows="4"
-            autoGrow="true"
-            placeholder="Enunciado..."
+          <app-rich-text-editor
+            [(value)]="enunciado"
             [disabled]="guardando"
-            maxlength="2000"
-            [counter]="true"
-          ></ion-textarea>
+            placeholder="Enunciado..."
+          ></app-rich-text-editor>
         </div>
 
-        <!-- Explicación -->
+        <!-- Explicación (rich text) -->
         <div class="section-card">
           <div class="section-title">
             <span class="step">2</span>
             <h2>Explicación clínica</h2>
-            <ion-note>Se muestra al estudiante tras responder.</ion-note>
+            <ion-note>Se muestra al estudiante tras responder. Acepta formato.</ion-note>
           </div>
-          <ion-textarea
-            [(ngModel)]="explicacionClinica"
-            name="explicacion"
-            label="Explicación clínica"
-            labelPlacement="stacked"
-            fill="outline"
-            rows="4"
-            autoGrow="true"
-            placeholder="Explicación..."
+          <app-rich-text-editor
+            [(value)]="explicacionClinica"
             [disabled]="guardando"
-            maxlength="4000"
-            [counter]="true"
-          ></ion-textarea>
+            placeholder="Explicación..."
+          ></app-rich-text-editor>
         </div>
 
         <!-- Alternativas -->
@@ -244,6 +229,41 @@
                     } @else {
                       <ion-icon slot="start" name="cloud-upload-outline"></ion-icon>
                       Subir imagen
+                    }
+                  </ion-button>
+                }
+              </div>
+
+              <!-- VIDEO (pedido cliente 2026-05-26) -->
+              <div class="media-block">
+                <div class="media-head">
+                  <ion-icon name="videocam-outline"></ion-icon>
+                  <span>Video de apoyo (máx 50 MB)</span>
+                </div>
+
+                @if (videoGridId) {
+                  <div class="media-preview">
+                    <video controls [src]="videoUrl" preload="metadata" style="max-width:100%;border-radius:8px;"></video>
+                    <div class="media-row">
+                      <ion-note>{{ videoNombre || 'Video actual' }}</ion-note>
+                      <ion-button fill="clear" color="danger" size="small"
+                        (click)="quitarVideo()" [disabled]="guardando">
+                        <ion-icon slot="start" name="close-circle"></ion-icon>
+                        Quitar
+                      </ion-button>
+                    </div>
+                  </div>
+                } @else {
+                  <input type="file" accept="video/mp4,video/webm,video/quicktime,.mp4,.webm,.mov"
+                    hidden #videoInput (change)="onVideoSeleccionado($event)" />
+                  <ion-button fill="outline" expand="block"
+                    (click)="videoInput.click()"
+                    [disabled]="subiendoVideo || guardando">
+                    @if (subiendoVideo) {
+                      <ion-spinner name="dots"></ion-spinner>
+                    } @else {
+                      <ion-icon slot="start" name="cloud-upload-outline"></ion-icon>
+                      Subir video
                     }
                   </ion-button>
                 }

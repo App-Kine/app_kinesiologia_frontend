@@ -13,11 +13,12 @@ import {
   musicalNotesOutline, imageOutline, checkmarkCircle,
   chevronDownOutline, chevronForwardOutline, createOutline,
   alertCircleOutline, checkmarkOutline, arrowBackOutline,
-  cloudUploadOutline, closeCircle,
+  cloudUploadOutline, closeCircle, videocamOutline,
 } from 'ionicons/icons';
 
 import { PreguntaService, AlternativaInput } from '../../services/pregunta.service';
 import { MultimediaService } from '../../services/multimedia.service';
+import { RichTextEditorComponent } from '../../components/rich-text-editor/rich-text-editor.component';
 
 interface AltUI extends AlternativaInput {
   uid: number;
@@ -32,7 +33,7 @@ interface AltUI extends AlternativaInput {
     CommonModule, FormsModule, RouterLink, IonContent, IonHeader, IonToolbar, IonTitle,
     IonButtons, IonBackButton, IonButton, IonIcon, IonItem, IonLabel, IonInput,
     IonTextarea, IonText, IonSpinner, IonNote, IonBadge, IonChip,
-    IonRadio, IonRadioGroup,
+    IonRadio, IonRadioGroup, RichTextEditorComponent,
   ],
 })
 export class PreguntaEditarPage implements OnInit {
@@ -46,11 +47,14 @@ export class PreguntaEditarPage implements OnInit {
   mostrarAvanzado = false;
   audioGridId = '';
   imagenGridId = '';
+  videoGridId = '';
   // Estado de subida
   subiendoAudio = false;
   subiendoImagen = false;
+  subiendoVideo = false;
   audioNombre = '';
   imagenNombre = '';
+  videoNombre = '';
   mmError = '';
 
   private nextUid = 1;
@@ -74,7 +78,7 @@ export class PreguntaEditarPage implements OnInit {
       musicalNotesOutline, imageOutline, checkmarkCircle,
       chevronDownOutline, chevronForwardOutline, createOutline,
       alertCircleOutline, checkmarkOutline, arrowBackOutline,
-      cloudUploadOutline, closeCircle,
+      cloudUploadOutline, closeCircle, videocamOutline,
     });
   }
 
@@ -94,7 +98,8 @@ export class PreguntaEditarPage implements OnInit {
       this.explicacionClinica = p.explicacion_clinica;
       this.audioGridId = p.audio_grid_id || '';
       this.imagenGridId = p.imagen_grid_id || '';
-      this.mostrarAvanzado = !!(p.audio_grid_id || p.imagen_grid_id);
+      this.videoGridId = (p as any).video_grid_id || '';
+      this.mostrarAvanzado = !!(p.audio_grid_id || p.imagen_grid_id || (p as any).video_grid_id);
       // Pasar alternativas a UI
       this.alternativas = p.alternativas.map((a) => ({
         uid: this.nextUid++,
@@ -146,10 +151,14 @@ export class PreguntaEditarPage implements OnInit {
     return this.alternativas.filter((a) => a.esCorrecta).length;
   }
 
+  private _texto(html: string): string {
+    if (!html) return '';
+    return html.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim();
+  }
   get pendientes(): string[] {
     const out: string[] = [];
-    if (!this.enunciado.trim()) out.push('Escribe el enunciado');
-    if (!this.explicacionClinica.trim()) out.push('Escribe la explicación clínica');
+    if (!this._texto(this.enunciado)) out.push('Escribe el enunciado');
+    if (!this._texto(this.explicacionClinica)) out.push('Escribe la explicación clínica');
     if (this.alternativas.some((a) => !a.texto.trim()))
       out.push('Completa el texto de todas las alternativas');
     if (this.cantCorrectas !== 1)
@@ -165,6 +174,9 @@ export class PreguntaEditarPage implements OnInit {
   }
   get imagenUrl(): string | null {
     return this.imagenGridId ? this.multimediaSvc.urlImagen(this.imagenGridId) : null;
+  }
+  get videoUrl(): string | null {
+    return this.videoGridId ? this.multimediaSvc.urlVideo(this.videoGridId) : null;
   }
 
   async onAudioSeleccionado(ev: Event): Promise<void> {
@@ -223,6 +235,34 @@ export class PreguntaEditarPage implements OnInit {
     }
   }
 
+  async onVideoSeleccionado(ev: Event): Promise<void> {
+    const input = ev.target as HTMLInputElement;
+    const file = input.files && input.files[0];
+    input.value = '';
+    if (!file) return;
+    this.mmError = '';
+    if (this.videoGridId) await this.quitarVideo();
+    this.subiendoVideo = true;
+    try {
+      const res = await this.multimediaSvc.subirVideo(file, this.preguntaId);
+      this.videoGridId = res.grid_id;
+      this.videoNombre = file.name;
+    } catch (e: any) {
+      this.mmError = (e && e.message) || 'No se pudo subir el video.';
+    } finally {
+      this.subiendoVideo = false;
+    }
+  }
+
+  async quitarVideo(): Promise<void> {
+    const id = this.videoGridId;
+    this.videoGridId = '';
+    this.videoNombre = '';
+    if (id) {
+      try { await this.multimediaSvc.eliminar(id, 'video'); } catch { /* idempotente */ }
+    }
+  }
+
   async guardar(): Promise<void> {
     this.errorMsg = '';
     this.okMsg = '';
@@ -230,7 +270,7 @@ export class PreguntaEditarPage implements OnInit {
       this.errorMsg = this.pendientes[0];
       return;
     }
-    if (this.subiendoAudio || this.subiendoImagen) {
+    if (this.subiendoAudio || this.subiendoImagen || this.subiendoVideo) {
       this.errorMsg = 'Espera a que termine de subir el archivo multimedia.';
       return;
     }
@@ -242,6 +282,7 @@ export class PreguntaEditarPage implements OnInit {
         explicacionClinica: this.explicacionClinica.trim(),
         audioGridId: this.audioGridId.trim() || null,
         imagenGridId: this.imagenGridId.trim() || null,
+        videoGridId: this.videoGridId.trim() || null,
         alternativas: this.alternativas.map((a) => ({
           texto: a.texto.trim(),
           esCorrecta: a.esCorrecta,

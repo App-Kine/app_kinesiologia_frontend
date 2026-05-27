@@ -20,6 +20,7 @@ export interface PreguntaInput {
   explicacionClinica: string;
   audioGridId?: string | null;
   imagenGridId?: string | null;
+  videoGridId?: string | null;
   cursoOrigenId?: number | null;
   alternativas: AlternativaInput[];
 }
@@ -31,6 +32,7 @@ export interface PreguntaResumen {
   curso_nombre: string | null;
   audio_grid_id: string | null;
   imagen_grid_id: string | null;
+  video_grid_id: string | null;
   activo: boolean;
   created_at: string;
   updated_at: string;

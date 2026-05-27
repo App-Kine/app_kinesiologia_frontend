@@ -2,9 +2,13 @@ import { Routes } from '@angular/router';
 import { authGuard } from './project/services/auth.guard';
 import { adminGuard, docenteGuard } from './project/services/role.guard';
 
+/**
+ * Rutas del PANEL WEB (docente + admin).
+ * El flujo del estudiante vive en el repo `app_kinesiologia_frontend` (app móvil).
+ */
 export const routes: Routes = [
   // -----------------------------------------------------------
-  // Públicas: login (RF-51) y registro de profesor por invitación (RF-79)
+  // Públicas: login + registro por invitación + recuperar contraseña
   // -----------------------------------------------------------
   {
     path: 'login',
@@ -19,7 +23,6 @@ export const routes: Routes = [
       ),
   },
   {
-    // RF-59: solicitar recuperación de contraseña
     path: 'recuperar-password',
     loadComponent: () =>
       import('./project/pages/recuperar-password/recuperar-password.page').then(
@@ -27,7 +30,6 @@ export const routes: Routes = [
       ),
   },
   {
-    // RF-59: fijar nueva contraseña con el token del correo
     path: 'restablecer-password/:token',
     loadComponent: () =>
       import('./project/pages/restablecer-password/restablecer-password.page').then(
@@ -64,7 +66,7 @@ export const routes: Routes = [
   },
 
   // -----------------------------------------------------------
-  // Mis cursos: listar, crear, editar, detalle (RF-61 + CRUD)
+  // Mis cursos
   // -----------------------------------------------------------
   {
     path: 'mis-cursos',
@@ -100,11 +102,7 @@ export const routes: Routes = [
   },
 
   // -----------------------------------------------------------
-  // Gestión docente: tests + preguntas + aplicaciones
-  // (RF-62..RF-73, RF-88..RF-93)
-  //
-  // Las preguntas se gestionan dentro de cada test.
-  // Las aplicaciones se gestionan desde cada curso.
+  // Tests + preguntas + aplicaciones (gestión docente)
   // -----------------------------------------------------------
   {
     path: 'mis-tests',
@@ -181,7 +179,7 @@ export const routes: Routes = [
   },
 
   // -----------------------------------------------------------
-  // Analítica docente (RF-94 a RF-104)
+  // Analítica docente
   // -----------------------------------------------------------
   {
     path: 'analitica',
@@ -201,74 +199,8 @@ export const routes: Routes = [
   },
 
   // -----------------------------------------------------------
-  // Flujo de evaluación del ESTUDIANTE (público, sin guard — RF-01 a RF-44)
-  // -----------------------------------------------------------
-  {
-    path: 'estudiante/cursos',
-    loadComponent: () =>
-      import('./project/pages/estudiante-cursos/estudiante-cursos.page').then(
-        (m) => m.EstudianteCursosPage
-      ),
-  },
-  {
-    path: 'estudiante/curso/:cursoId/tests',
-    loadComponent: () =>
-      import('./project/pages/estudiante-tests/estudiante-tests.page').then(
-        (m) => m.EstudianteTestsPage
-      ),
-  },
-  {
-    path: 'estudiante/inicio/:aplicacionId',
-    loadComponent: () =>
-      import('./project/pages/estudiante-inicio/estudiante-inicio.page').then(
-        (m) => m.EstudianteInicioPage
-      ),
-  },
-  {
-    path: 'estudiante/evaluacion/:evaluacionId',
-    loadComponent: () =>
-      import('./project/pages/estudiante-evaluacion/estudiante-evaluacion.page').then(
-        (m) => m.EstudianteEvaluacionPage
-      ),
-  },
-  {
-    path: 'estudiante/resultado/:evaluacionId',
-    loadComponent: () =>
-      import('./project/pages/estudiante-resultado/estudiante-resultado.page').then(
-        (m) => m.EstudianteResultadoPage
-      ),
-  },
-
-  // -----------------------------------------------------------
-  // Tabs / home (app del estudiante, RF-01, sin guard).
-  // -----------------------------------------------------------
-  {
-    path: 'tabs',
-    loadComponent: () =>
-      import('./project/pages/tabs/tabs.page').then((m) => m.TabsPage),
-    children: [
-      {
-        path: 'home',
-        loadComponent: () =>
-          import('./project/pages/home/home.page').then((m) => m.HomePage),
-      },
-      {
-        path: 'example-page-1',
-        loadComponent: () =>
-          import('./project/pages/example-page-1/example-page-1.page').then(
-            (m) => m.ExamplePage1Page
-          ),
-      },
-      {
-        path: '',
-        redirectTo: '/tabs/home',
-        pathMatch: 'full',
-      },
-    ],
-  },
-
-  // -----------------------------------------------------------
-  // Raíz y otros
+  // Raíz: login. Wildcard → login (las URLs viejas tipo /estudiante/*
+  // que llegan por error van a parar acá).
   // -----------------------------------------------------------
   {
     path: '',
@@ -276,10 +208,7 @@ export const routes: Routes = [
     pathMatch: 'full',
   },
   {
-    path: 'header',
-    loadComponent: () =>
-      import('./project/components/header/header.page').then(
-        (m) => m.HeaderPage
-      ),
+    path: '**',
+    redirectTo: '/login',
   },
 ];

@@ -13,10 +13,12 @@ import {
   musicalNotesOutline, imageOutline, checkmarkCircle,
   chevronDownOutline, chevronForwardOutline, sparklesOutline,
   alertCircleOutline, checkmarkOutline, cloudUploadOutline, closeCircle,
+  videocamOutline,
 } from 'ionicons/icons';
 
 import { PreguntaService, AlternativaInput } from '../../services/pregunta.service';
 import { MultimediaService } from '../../services/multimedia.service';
+import { RichTextEditorComponent } from '../../components/rich-text-editor/rich-text-editor.component';
 
 interface AltUI extends AlternativaInput {
   uid: number; // identidad estable para track-by
@@ -31,7 +33,7 @@ interface AltUI extends AlternativaInput {
     CommonModule, FormsModule, IonContent, IonHeader, IonToolbar, IonTitle,
     IonButtons, IonBackButton, IonButton, IonIcon, IonItem, IonLabel, IonInput,
     IonTextarea, IonText, IonSpinner, IonNote, IonBadge, IonChip,
-    IonRadio, IonRadioGroup,
+    IonRadio, IonRadioGroup, RichTextEditorComponent,
   ],
 })
 export class PreguntaNuevaPage implements OnInit {
@@ -47,11 +49,14 @@ export class PreguntaNuevaPage implements OnInit {
   mostrarAvanzado = false;
   audioGridId = '';
   imagenGridId = '';
+  videoGridId = '';
   // Estado de subida de archivos
   subiendoAudio = false;
   subiendoImagen = false;
+  subiendoVideo = false;
   audioNombre = '';
   imagenNombre = '';
+  videoNombre = '';
   mmError = '';
 
   // Alternativas
@@ -77,6 +82,7 @@ export class PreguntaNuevaPage implements OnInit {
       musicalNotesOutline, imageOutline, checkmarkCircle,
       chevronDownOutline, chevronForwardOutline, sparklesOutline,
       alertCircleOutline, checkmarkOutline, cloudUploadOutline, closeCircle,
+      videocamOutline,
     });
   }
 
@@ -128,11 +134,17 @@ export class PreguntaNuevaPage implements OnInit {
     return this.alternativas.filter((a) => a.esCorrecta).length;
   }
 
-  // Lista en vivo de lo que falta para enviar
+  // Lista en vivo de lo que falta para enviar.
+  // El enunciado y la explicación ahora son HTML del rich text editor:
+  // chequeamos texto plano para detectar "vacío visual" (sin etiquetas).
+  private _texto(html: string): string {
+    if (!html) return '';
+    return html.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim();
+  }
   get pendientes(): string[] {
     const out: string[] = [];
-    if (!this.enunciado.trim()) out.push('Escribe el enunciado');
-    if (!this.explicacionClinica.trim()) out.push('Escribe la explicación clínica');
+    if (!this._texto(this.enunciado)) out.push('Escribe el enunciado');
+    if (!this._texto(this.explicacionClinica)) out.push('Escribe la explicación clínica');
     if (this.alternativas.some((a) => !a.texto.trim()))
       out.push('Completa el texto de todas las alternativas');
     if (this.cantCorrectas !== 1)
@@ -150,6 +162,9 @@ export class PreguntaNuevaPage implements OnInit {
   }
   get imagenUrl(): string | null {
     return this.imagenGridId ? this.multimediaSvc.urlImagen(this.imagenGridId) : null;
+  }
+  get videoUrl(): string | null {
+    return this.videoGridId ? this.multimediaSvc.urlVideo(this.videoGridId) : null;
   }
 
   async onAudioSeleccionado(ev: Event): Promise<void> {
@@ -209,6 +224,34 @@ export class PreguntaNuevaPage implements OnInit {
     }
   }
 
+  async onVideoSeleccionado(ev: Event): Promise<void> {
+    const input = ev.target as HTMLInputElement;
+    const file = input.files && input.files[0];
+    input.value = '';
+    if (!file) return;
+    this.mmError = '';
+    if (this.videoGridId) await this.quitarVideo();
+    this.subiendoVideo = true;
+    try {
+      const res = await this.multimediaSvc.subirVideo(file);
+      this.videoGridId = res.grid_id;
+      this.videoNombre = file.name;
+    } catch (e: any) {
+      this.mmError = (e && e.message) || 'No se pudo subir el video.';
+    } finally {
+      this.subiendoVideo = false;
+    }
+  }
+
+  async quitarVideo(): Promise<void> {
+    const id = this.videoGridId;
+    this.videoGridId = '';
+    this.videoNombre = '';
+    if (id) {
+      try { await this.multimediaSvc.eliminar(id, 'video'); } catch { /* idempotente */ }
+    }
+  }
+
   // ----- guardar -----
 
   async guardar(): Promise<void> {
@@ -219,7 +262,7 @@ export class PreguntaNuevaPage implements OnInit {
       this.errorMsg = this.pendientes[0];
       return;
     }
-    if (this.subiendoAudio || this.subiendoImagen) {
+    if (this.subiendoAudio || this.subiendoImagen || this.subiendoVideo) {
       this.errorMsg = 'Espera a que termine de subir el archivo multimedia.';
       return;
     }
@@ -231,6 +274,7 @@ export class PreguntaNuevaPage implements OnInit {
         explicacionClinica: this.explicacionClinica.trim(),
         audioGridId: this.audioGridId.trim() || null,
         imagenGridId: this.imagenGridId.trim() || null,
+        videoGridId: this.videoGridId.trim() || null,
         alternativas: this.alternativas.map((a) => ({
           texto: a.texto.trim(),
           esCorrecta: a.esCorrecta,

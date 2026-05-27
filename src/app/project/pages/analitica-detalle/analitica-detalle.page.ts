@@ -100,4 +100,50 @@ export class AnaliticaDetallePage implements OnInit {
       });
     } catch { return f; }
   }
+
+  /**
+   * Formatea segundos a "Xm Ys" o "Ys" (pedido cliente 2026-05-26).
+   */
+  fmtSeg(s: number | null | undefined): string {
+    if (s == null) return '—';
+    const seg = Math.round(Number(s));
+    if (seg < 60) return `${seg}s`;
+    const m = Math.floor(seg / 60);
+    const r = seg % 60;
+    return r === 0 ? `${m}m` : `${m}m ${r}s`;
+  }
+
+  /**
+   * Para la vista por estudiante identificado: agrupa los tiempos individuales
+   * por evaluación, devolviendo [{evaluacion_id, correo, pregs: [...]}].
+   * Solo incluye estudiantes identificados (los anónimos van como promedio
+   * agregado en la vista "Por pregunta").
+   */
+  get tiemposPorEstudiante(): Array<{
+    evaluacion_id: number;
+    correo: string;
+    pregs: Array<{ orden: number; tiempo: number; resultado: string | null }>;
+  }> {
+    if (!this.data) return [];
+    const map: Record<string, { evaluacion_id: number; correo: string; pregs: any[] }> = {};
+    for (const t of this.data.tiempos_identificados || []) {
+      const key = String(t.evaluacion_id);
+      if (!map[key]) {
+        map[key] = {
+          evaluacion_id: t.evaluacion_id,
+          correo: t.correo_estudiante || '—',
+          pregs: [],
+        };
+      }
+      map[key].pregs.push({
+        orden: t.orden_presentacion,
+        tiempo: t.tiempo_segundos,
+        resultado: t.resultado,
+      });
+    }
+    return Object.values(map).map((e) => ({
+      ...e,
+      pregs: e.pregs.sort((a, b) => a.orden - b.orden),
+    }));
+  }
 }
