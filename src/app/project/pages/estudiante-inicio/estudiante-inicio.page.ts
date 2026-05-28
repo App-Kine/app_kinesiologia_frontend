@@ -62,9 +62,11 @@ export class EstudianteInicioPage implements OnInit {
     this.iniciando = true;
     try {
       const ev = await this.evalSvc.iniciar(this.aplicacionId, this.modalidad, correoEnviar);
-      // Pasamos la evaluación + preguntas por router state (no se vuelve a llamar
-      // a iniciar para no crear evaluaciones duplicadas).
-      this.router.navigateByUrl(`/estudiante/evaluacion/${ev.evaluacion_id}`, {
+      // Auditoría 2026-05-28: `iniciar` ya NO crea evaluacion en BD.
+      // Navegamos con el aplicacion_id en la URL. Las preguntas viajan por
+      // router state. El persistir queda para cuando el estudiante envíe el
+      // test completo desde la página de evaluación.
+      this.router.navigateByUrl(`/estudiante/evaluacion/${ev.aplicacion_id}`, {
         state: { evaluacion: ev },
       });
     } catch (e: any) {
