@@ -5,8 +5,8 @@
     </ion-buttons>
     <ion-title>Cursos disponibles</ion-title>
     <ion-buttons slot="end">
-      <ion-button (click)="cargar()" [disabled]="cargando" title="Recargar">
-        <ion-icon slot="icon-only" name="refresh-outline"></ion-icon>
+      <ion-button (click)="cargar()" [disabled]="cargando" title="Recargar" aria-label="Recargar cursos">
+        <ion-icon slot="icon-only" name="refresh-outline" aria-hidden="true"></ion-icon>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>

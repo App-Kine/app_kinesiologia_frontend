@@ -13,7 +13,7 @@ import {
 } from 'ionicons/icons';
 
 import {
-  PUNTOS_AUSCULTACION, PuntoAuscultacion,
+  PUNTOS_AUSCULTACION, PuntoAuscultacion, construirPuntos,
 } from '../../data/puntos-auscultacion.data';
 
 /**
@@ -112,11 +112,12 @@ export class EstudianteAuscultacionPage implements OnInit {
     const mv: any = this.modelViewerRef?.nativeElement;
     if (!mv) return;
     if (cara === 'anterior') {
-      // Cámara mirando el FRENTE del modelo.
-      // En este modelo, la cara anterior (chest) está en el lado +Z del world.
+      // PECHO: la cara anterior está en el lado +Z del world (Z ≈ 0). En
+      // model-viewer, azimut 0° ubica la cámara en +Z mirando hacia el modelo,
+      // así que vemos el pecho de frente.
       mv.cameraOrbit = '0deg 90deg 5m';
     } else {
-      // Cámara mirando la ESPALDA del modelo (lado -Z del world).
+      // ESPALDA: la cara posterior está en el lado -Z (Z ≈ -1.0) → azimut 180°.
       mv.cameraOrbit = '180deg 90deg 5m';
     }
     mv.cameraTarget = '2.5m 1.25m -0.6m';
@@ -168,6 +169,13 @@ export class EstudianteAuscultacionPage implements OnInit {
         '\n  hotspots:', this.puntosVisibles.length,
         '\n  bbox center (world):', center,
         '\n  bbox dims (world):', dims);
+
+      // Re-espejar con el centro X REAL del modelo: así el lado izquierdo
+      // queda simétrico al derecho aunque el bounding box no esté centrado
+      // exactamente en X = 2.5 (el modelo trae brazos y puede descentrarse).
+      if (center && typeof center.x === 'number' && isFinite(center.x)) {
+        this.puntos = construirPuntos(center.x);
+      }
     } catch (_) {
       // eslint-disable-next-line no-console
       console.log('[auscultacion] Modelo cargado (sin info de bbox)');
