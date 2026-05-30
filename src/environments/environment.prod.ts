@@ -1,10 +1,14 @@
 export const environment = {
   production: true,
-  BASE_API_URL: 'http://localhost:3023/controlador_base/',
 
-  // La multimedia (audios/imágenes) se sube/sirve DIRECTO desde la lógica
-  // (no pasa por el controlador, porque es multipart/form-data + streaming).
-  LOGICA_API_URL: 'http://localhost:2000/base_logica/',
+  // ⚠️ PRODUCCIÓN: reemplazar por el dominio HTTPS real antes de compilar.
+  // NO debe quedar http:// ni localhost en producción (lo define DTIC/infra).
+  //   Ej: 'https://auris.uv.cl/api/controlador_base/'
+  BASE_API_URL: 'https://CAMBIAR-DOMINIO-PRODUCCION/controlador_base/',
+
+  // Multimedia: se sube/sirve DIRECTO desde la lógica (multipart/streaming).
+  //   Ej: 'https://auris.uv.cl/media/base_logica/'
+  LOGICA_API_URL: 'https://CAMBIAR-DOMINIO-PRODUCCION/base_logica/',
 
 
   DATA_KEY_TOKEN: 'token',

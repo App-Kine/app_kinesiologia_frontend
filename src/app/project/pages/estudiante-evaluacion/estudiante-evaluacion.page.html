@@ -33,11 +33,11 @@
     <!-- Enunciado con formato HTML (rich text editor) -->
     <div class="enunciado" [innerHTML]="p.enunciado | safeHtml"></div>
 
-    <!-- Audio clínico (RF-17/18) -->
+    <!-- Audio clínico + espectrograma (RF-17/18) -->
     @if (p.audio_grid_id) {
       <div class="audio-box">
         <ion-icon name="volume-high-outline" color="primary"></ion-icon>
-        <audio [src]="audioUrl(p)" controls preload="none"></audio>
+        <app-audio-spectro [src]="audioUrl(p)"></app-audio-spectro>
       </div>
     }
 

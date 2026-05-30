@@ -65,6 +65,14 @@
 	--ion-color-dark-shade: #292929;
 	--ion-color-dark-tint: #444444;
 
+	/* ---- Tipografía (usa la fuente nativa del sistema: SF en iOS, Roboto en
+	   Android) para que se vea nítida y consistente sin depender de internet. */
+	--ion-font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+		Roboto, 'Helvetica Neue', Arial, sans-serif;
+
+	/* ---- Radios consistentes para botones / tarjetas (look más cohesivo) */
+	--auris-radius: 12px;
+	--auris-radius-sm: 10px;
 }
 
 /*
