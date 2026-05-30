@@ -1,8 +1,10 @@
 # Auris · App Móvil del Estudiante
 
-**App Ionic + Angular 20 + Capacitor** para iOS/Android. Es la app que usa el estudiante para rendir tests de auscultación.
+**App Ionic + Angular 20 + Capacitor** para iOS/Android. Es la app del estudiante, con dos partes:
+- **Exploración 3D de auscultación**: un modelo del torso (`<model-viewer>` + three.js) con *hotspots* numerados; al tocar uno se ve nombre, ubicación y descripción clínica del punto.
+- **Tests**: el estudiante elige curso → test → responde preguntas (con audio/imagen/video y **espectrograma** en vivo bajo el audio) → ve resultado y descarga el informe.
 
-**100 % pública** — sin login. El estudiante entra y elige curso/test directo. Puede rendir como anónimo o identificarse con email para recibir el informe.
+**100 % pública** — sin login. Puede rendir como anónimo o identificarse con email para recibir el informe.
 
 > **Setup completo del entorno (BD + 3 servicios):** ver [`../app_kinesiologia_logica/database/SETUP.md`](../app_kinesiologia_logica/database/SETUP.md)
 
@@ -42,6 +44,8 @@
 
 - **Ionic 8** + **Angular 20** standalone components (`@if`, `@for`, no NgModule)
 - **Capacitor 7** (iOS/Android)
+- **@google/model-viewer** + **three.js** para el torso 3D con hotspots
+- **Web Audio API** (AnalyserNode + canvas) para el espectrograma en vivo
 - **NativeStorage** para token persistente en mobile (legacy de Cordova, fallback a localStorage en web)
 - **rxjs 7**
 
@@ -61,12 +65,18 @@ app_kinesiologia_frontend/
 │   │   │   └── service/base.service.ts      # HTTP client + storage abstraction
 │   │   └── project/
 │   │       ├── pages/
+│   │       │   ├── estudiante-home/          # home: auscultación 3D | tests
+│   │       │   ├── estudiante-auscultacion/  # modelo 3D del torso + hotspots
 │   │       │   ├── estudiante-cursos/        # lista de cursos
 │   │       │   ├── estudiante-tests/         # tests del curso elegido
 │   │       │   ├── estudiante-inicio/        # splash, elegir modalidad
-│   │       │   ├── estudiante-evaluacion/    # responder preguntas (timer)
+│   │       │   ├── estudiante-evaluacion/    # responder preguntas (timer + audio/espectrograma)
 │   │       │   └── estudiante-resultado/     # ver score + descargar PDF
-│   │       ├── pipes/safe-html.pipe.ts       # renderiza HTML rich-text seguro
+│   │       ├── components/
+│   │       │   └── audio-spectro/            # reproductor + espectrograma en vivo (Web Audio API)
+│   │       ├── data/
+│   │       │   └── puntos-auscultacion.data.ts  # hotspots del torso (con espejado L/R)
+│   │       ├── pipes/safe-html.pipe.ts       # renderiza HTML rich-text seguro (sanitizado)
 │   │       └── services/
 │   │           ├── evaluacion.service.ts     # iniciar, responder, finalizar, descargar
 │   │           ├── multimedia.service.ts     # streaming de audio/imagen/video
@@ -148,17 +158,19 @@ Y volvés a apretar ▶ Play en Xcode.
 
 ### Rutas
 
-Todo el flujo es público. Solo 5 rutas:
+Todo el flujo es público:
 
 ```
-/estudiante/cursos                    → home (lista de cursos)
+/estudiante/home                       → home con 2 opciones (auscultación 3D | tests)
+/estudiante/auscultacion               → modelo 3D del torso con hotspots (modo libre)
+/estudiante/cursos                     → lista de cursos (flujo tests)
 /estudiante/curso/:cursoId/tests       → tests disponibles del curso
 /estudiante/inicio/:aplicacionId       → splash, elegir anónima vs identificada
-/estudiante/evaluacion/:evaluacionId   → responder preguntas
+/estudiante/evaluacion/:aplicacionId   → responder preguntas
 /estudiante/resultado/:evaluacionId    → score + descargar informe PDF
 ```
 
-Raíz (`/`) y wildcard (`**`) redirigen a `/estudiante/cursos`.
+Raíz (`/`) y wildcard (`**`) redirigen a `/estudiante/home`.
 
 ### Llamadas al backend
 
@@ -180,7 +192,7 @@ Los enunciados y explicaciones de las preguntas vienen con formato HTML (negrita
 <div [innerHTML]="pregunta.enunciado | safeHtml"></div>
 ```
 
-El pipe `safeHtml` está en `src/app/project/pipes/safe-html.pipe.ts` — usa `DomSanitizer.bypassSecurityTrustHtml`. Angular sigue bloqueando scripts/iframes/handlers por defecto.
+El pipe `safeHtml` (`src/app/project/pipes/safe-html.pipe.ts`) primero **sanitiza** con `DomSanitizer.sanitize(SecurityContext.HTML, …)` —conserva el formato seguro (`<p>`, `<strong>`, listas…) y elimina `<script>`, atributos `on*=`, etc.— y solo después confía el resultado **ya limpio**. Así se cierra el riesgo de XSS almacenado proveniente del rich-text del panel.
 
 ### Timer por pregunta
 
@@ -201,8 +213,8 @@ El pipe `safeHtml` está en `src/app/project/pipes/safe-html.pipe.ts` — usa `D
 ## 🧪 Verificar que todo compile
 
 ```bash
-node_modules/.bin/ngc --noEmit -p tsconfig.app.json
-# (exit 0 + sin "error TS" = OK)
+npm run build
+# (exit 0 + sin "error TS" = OK). Para iOS: npm run build && npx cap sync ios
 ```
 
 ---
