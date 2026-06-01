@@ -35,3 +35,60 @@
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
 @import '@ionic/angular/css/palettes/dark.system.css';
+
+/* ============================================================================
+ * Pulido visual global de Auris (tipografía, botones, tarjetas)
+ * Funciona en claro y oscuro porque usa variables de tema Ionic.
+ * ========================================================================== */
+
+/* Tipografía nítida y consistente */
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--ion-font-family);
+}
+
+/* Títulos de la barra superior: un poco más definidos */
+ion-title {
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+
+/* Botones: esquinas redondeadas, peso medio, sin MAYÚSCULAS forzadas y con
+ * una sombra sutil en los sólidos para que "encajen" mejor con las tarjetas. */
+ion-button {
+  --border-radius: var(--auris-radius-sm, 10px);
+  font-weight: 600;
+  letter-spacing: 0.1px;
+  text-transform: none;
+  --box-shadow: none;
+}
+
+ion-button[fill='solid'],
+ion-button:not([fill]) {
+  --box-shadow: 0 2px 8px rgba(0, 0, 0, 0.14);
+}
+
+ion-button[shape='round'] {
+  --border-radius: 999px;
+}
+
+/* Tarjetas y listas: radios suaves y sombra discreta */
+ion-card {
+  border-radius: var(--auris-radius, 12px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+ion-item {
+  --border-radius: var(--auris-radius-sm, 10px);
+}
+
+/* Inputs/areas de texto con borde redondeado coherente */
+ion-input,
+ion-textarea,
+ion-select {
+  --border-radius: var(--auris-radius-sm, 10px);
+}

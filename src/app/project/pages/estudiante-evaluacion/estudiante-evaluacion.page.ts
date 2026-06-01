@@ -18,6 +18,7 @@ import {
 } from '../../services/evaluacion.service';
 import { MultimediaService } from '../../services/multimedia.service';
 import { SafeHtmlPipe } from '../../pipes/safe-html.pipe';
+import { AudioSpectroComponent } from '../../components/audio-spectro/audio-spectro.component';
 
 /**
  * Estado bufferado por pregunta (NO se persiste hasta finalizar).
@@ -41,7 +42,7 @@ interface BufferRespuesta {
   imports: [
     CommonModule, IonContent, IonHeader, IonToolbar, IonTitle, IonButton,
     IonIcon, IonText, IonSpinner, IonProgressBar, IonChip, IonLabel,
-    SafeHtmlPipe,
+    SafeHtmlPipe, AudioSpectroComponent,
   ],
 })
 export class EstudianteEvaluacionPage implements OnInit {
