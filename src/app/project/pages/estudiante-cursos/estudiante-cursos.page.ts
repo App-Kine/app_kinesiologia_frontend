@@ -1,9 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import {
   IonContent, IonHeader, IonToolbar, IonTitle, IonButtons, IonButton,
-  IonIcon, IonList, IonItem, IonLabel, IonNote, IonText, IonSpinner,
+  IonBackButton, IonIcon, IonList, IonItem, IonLabel, IonNote, IonText, IonSpinner,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { schoolOutline, chevronForwardOutline, refreshOutline } from 'ionicons/icons';
@@ -17,10 +17,10 @@ import { EvaluacionService, CursoPublico } from '../../services/evaluacion.servi
   standalone: true,
   imports: [
     CommonModule, IonContent, IonHeader, IonToolbar, IonTitle, IonButtons,
-    IonButton, IonIcon, IonList, IonItem, IonLabel, IonNote, IonText, IonSpinner,
+    IonButton, IonBackButton, IonIcon, IonList, IonItem, IonLabel, IonNote, IonText, IonSpinner,
   ],
 })
-export class EstudianteCursosPage implements OnInit {
+export class EstudianteCursosPage {
   cursos: CursoPublico[] = [];
   cargando = true;
   error: string | null = null;
@@ -29,9 +29,12 @@ export class EstudianteCursosPage implements OnInit {
     addIcons({ schoolOutline, chevronForwardOutline, refreshOutline });
   }
 
-  async ngOnInit(): Promise<void> {
-    await this.cargar();
-  }
+  /**
+   * Refresca cada vez que se ENTRA a la página (incluye back-button).
+   * Asegura que el estudiante vea los cursos actualizados si el docente
+   * habilitó/deshabilitó alguno mientras navegaba.
+   */
+  ionViewWillEnter(): void { void this.cargar(); }
 
   async cargar(): Promise<void> {
     this.cargando = true;

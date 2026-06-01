@@ -1,0 +1,178 @@
+/*
+ * Variables propias del componente, light/dark mode aware.
+ * Mismo patrón que estudiante-auscultacion: definimos defaults light,
+ * y los sobrescribimos con @media (prefers-color-scheme: dark).
+ */
+:host {
+  display: block;
+
+  --home-bg:        var(--ion-background-color, #ffffff);
+  --home-bg-tint:   color-mix(in srgb, var(--ion-color-primary) 5%, #ffffff);
+  --home-surface:   #ffffff;
+  --home-surface-2: #f0f0f3;
+  --home-border:    #e5e5e7;
+  --home-text:      #1a1a1a;
+  --home-text-soft: #5a5a5e;
+  --home-text-muted:#80868b;
+  --home-shadow:    rgba(0, 0, 0, 0.06);
+  --home-shadow-hover: rgba(0, 0, 0, 0.10);
+
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :host {
+    --home-bg:        #0f1115;
+    --home-bg-tint:   color-mix(in srgb, var(--ion-color-primary) 8%, #0f1115);
+    --home-surface:   #1c1f25;
+    --home-surface-2: #262a31;
+    --home-border:    #2e323a;
+    --home-text:      #f1f1f2;
+    --home-text-soft: #c5c7cc;
+    --home-text-muted:#8b8e95;
+    --home-shadow:    rgba(0, 0, 0, 0.4);
+    --home-shadow-hover: rgba(0, 0, 0, 0.55);
+  }
+}
+
+.home-content {
+  --background: linear-gradient(180deg, var(--home-bg-tint) 0%, var(--home-bg) 100%);
+  color: var(--home-text);
+}
+
+.home-wrapper {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 32px 20px 40px;
+}
+
+.welcome {
+  text-align: center;
+  margin-bottom: 36px;
+}
+
+.welcome-icon {
+  font-size: 56px;
+  color: var(--ion-color-primary);
+  margin-bottom: 8px;
+}
+
+.welcome h1 {
+  font-size: 28px;
+  font-weight: 700;
+  margin: 4px 0;
+  color: var(--home-text);
+}
+
+.welcome p {
+  margin: 0;
+  font-size: 16px;
+  color: var(--home-text-soft);
+}
+
+.cards-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) {
+  .cards-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.big-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  text-align: left;
+  padding: 22px 18px;
+  background: var(--home-surface);
+  border: 1px solid var(--home-border);
+  border-radius: 16px;
+  box-shadow: 0 2px 12px var(--home-shadow);
+  cursor: pointer;
+  font-family: inherit;
+  color: var(--home-text);
+  transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
+}
+
+.big-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px var(--home-shadow-hover);
+}
+
+.big-card:active {
+  transform: translateY(0);
+}
+
+.big-card.auscultacion {
+  border-color: color-mix(in srgb, var(--ion-color-secondary) 30%, transparent);
+}
+
+.big-card.auscultacion:hover {
+  border-color: var(--ion-color-secondary);
+}
+
+.big-card.tests {
+  border-color: color-mix(in srgb, var(--ion-color-primary) 30%, transparent);
+}
+
+.big-card.tests:hover {
+  border-color: var(--ion-color-primary);
+}
+
+.card-icon-wrap {
+  flex: 0 0 56px;
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--home-surface-2);
+}
+
+.auscultacion .card-icon-wrap {
+  background: color-mix(in srgb, var(--ion-color-secondary) 18%, transparent);
+}
+
+.tests .card-icon-wrap {
+  background: color-mix(in srgb, var(--ion-color-primary) 18%, transparent);
+}
+
+.card-icon-wrap ion-icon {
+  font-size: 28px;
+  color: var(--ion-color-primary);
+}
+
+.auscultacion .card-icon-wrap ion-icon {
+  color: var(--ion-color-secondary);
+}
+
+.card-body {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.card-body h2 {
+  margin: 0 0 4px;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--home-text);
+}
+
+.card-body p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--home-text-muted);
+}
+
+.card-arrow {
+  flex: 0 0 auto;
+  font-size: 22px;
+  color: var(--home-text-muted);
+}
