@@ -30,19 +30,26 @@
       </ion-chip>
     </div>
 
-    <h2 class="enunciado">{{ p.enunciado }}</h2>
+    <!-- Enunciado con formato HTML (rich text editor) -->
+    <div class="enunciado" [innerHTML]="p.enunciado | safeHtml"></div>
 
-    <!-- Audio clínico (RF-17/18) -->
+    <!-- Audio clínico + espectrograma (RF-17/18) -->
     @if (p.audio_grid_id) {
       <div class="audio-box">
         <ion-icon name="volume-high-outline" color="primary"></ion-icon>
-        <audio [src]="audioUrl(p)" controls preload="none"></audio>
+        <app-audio-spectro [src]="audioUrl(p)"></app-audio-spectro>
       </div>
     }
 
     <!-- Imagen opcional (RF-19/20/21: nada si no hay) -->
     @if (p.imagen_grid_id) {
       <img class="pregunta-img" [src]="imagenUrl(p)" alt="Imagen de la pregunta" />
+    }
+
+    <!-- Video opcional (pedido cliente 2026-05-26) -->
+    @if (p.video_grid_id) {
+      <video class="pregunta-video" [src]="videoUrl(p)" controls preload="metadata"
+        style="max-width:100%;border-radius:10px;margin:12px 0;"></video>
     }
 
     <!-- Alternativas -->
@@ -79,9 +86,13 @@
         } @else {
           <p class="fb-title"><ion-icon name="close-circle"></ion-icon> Incorrecto. La respuesta correcta está marcada.</p>
         }
-        <!-- Explicación clínica solo al finalizar la pregunta (RF-36/38) -->
+        <!-- Explicación clínica solo al finalizar la pregunta (RF-36/38).
+             Render como HTML para respetar el formato del rich text editor. -->
         @if (ultimo.finalizadaPregunta && ultimo.explicacion) {
-          <p class="fb-exp"><ion-icon name="bulb-outline"></ion-icon> {{ ultimo.explicacion }}</p>
+          <div class="fb-exp">
+            <ion-icon name="bulb-outline"></ion-icon>
+            <div [innerHTML]="ultimo.explicacion | safeHtml"></div>
+          </div>
         }
       </div>
     }

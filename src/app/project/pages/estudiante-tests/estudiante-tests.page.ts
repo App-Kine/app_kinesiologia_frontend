@@ -35,9 +35,17 @@ export class EstudianteTestsPage implements OnInit {
     addIcons({ documentTextOutline, chevronForwardOutline, helpCircleOutline });
   }
 
-  async ngOnInit(): Promise<void> {
+  /**
+   * ngOnInit captura el cursoId de la URL una sola vez.
+   * La carga de datos va en ionViewWillEnter para refrescar al volver.
+   */
+  ngOnInit(): void {
     this.cursoId = Number(this.route.snapshot.paramMap.get('cursoId'));
-    await this.cargar();
+  }
+
+  /** Refresca cada vez que se ENTRA a la página (incluye back-button). */
+  ionViewWillEnter(): void {
+    if (this.cursoId) { void this.cargar(); }
   }
 
   async cargar(): Promise<void> {

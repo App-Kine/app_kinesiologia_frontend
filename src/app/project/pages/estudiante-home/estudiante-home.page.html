@@ -1,0 +1,47 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-title>Auris</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="home-content">
+  <div class="home-wrapper">
+
+    <div class="welcome">
+      <ion-icon name="medical-outline" class="welcome-icon"></ion-icon>
+      <h1>¡Hola!</h1>
+      <ion-text color="medium">
+        <p>¿Qué querés hacer hoy?</p>
+      </ion-text>
+    </div>
+
+    <div class="cards-grid">
+
+      <!-- Card 1: Puntos de auscultación (modo exploración 3D) -->
+      <button class="big-card auscultacion" (click)="irAAuscultacion()">
+        <div class="card-icon-wrap">
+          <ion-icon name="body-outline"></ion-icon>
+        </div>
+        <div class="card-body">
+          <h2>Puntos de auscultación</h2>
+          <p>Explorá el cuerpo en 3D y aprendé dónde se ausculta cada punto cardíaco y pulmonar.</p>
+        </div>
+        <ion-icon name="chevron-forward-outline" class="card-arrow"></ion-icon>
+      </button>
+
+      <!-- Card 2: Tests -->
+      <button class="big-card tests" (click)="irATests()">
+        <div class="card-icon-wrap">
+          <ion-icon name="school-outline"></ion-icon>
+        </div>
+        <div class="card-body">
+          <h2>Rendir un test</h2>
+          <p>Elegí un curso y rendí una evaluación de los tests disponibles.</p>
+        </div>
+        <ion-icon name="chevron-forward-outline" class="card-arrow"></ion-icon>
+      </button>
+
+    </div>
+
+  </div>
+</ion-content>
