@@ -14,9 +14,24 @@ import {
 
 import {
   EvaluacionService, EvaluacionIniciada, PreguntaEval, RespuestaResultado,
+  RespuestaParaEnviar,
 } from '../../services/evaluacion.service';
 import { MultimediaService } from '../../services/multimedia.service';
 import { SafeHtmlPipe } from '../../pipes/safe-html.pipe';
+
+/**
+ * Estado bufferado por pregunta (NO se persiste hasta finalizar).
+ * Si el estudiante abandona la página antes de enviar, este buffer se pierde
+ * y la BD queda intacta — política "como si no pasara nada"
+ * (auditoría 2026-05-28).
+ */
+interface BufferRespuesta {
+  preguntaId: number;
+  ordenPresentacion: number;
+  alternativaIntento1Id: number;
+  alternativaIntento2Id: number | null;
+  tiempoSegundos: number;
+}
 
 @Component({
   selector: 'app-estudiante-evaluacion',
@@ -44,11 +59,19 @@ export class EstudianteEvaluacionPage implements OnInit {
   finalizando = false;
   error: string | null = null;
 
+  /**
+   * Buffer en MEMORIA de las respuestas del estudiante.
+   * Se llena a medida que avanza por las preguntas y se envía como UN solo
+   * payload al finalizar el test. Si abandona la página, este array se pierde
+   * y nada se guarda en BD.
+   */
+  private bufferRespuestas: BufferRespuesta[] = [];
+
+  // Selección del intento 1 (para componer el buffer cuando hay intento 2)
+  private altIntento1: number | null = null;
+
   // Timer por pregunta (pedido cliente 2026-05-26).
-  // `inicioPreguntaMs`: timestamp del navegador cuando se mostró la pregunta
-  // actual por primera vez. Se reinicia al avanzar a la siguiente pregunta
-  // pero NO al pasar de intento 1 a intento 2 — el cliente quiere el tiempo
-  // total dedicado a la pregunta.
+  // Total dedicado, NO se reinicia al pasar de intento 1 a 2.
   private inicioPreguntaMs: number = Date.now();
 
   constructor(
@@ -118,26 +141,51 @@ export class EstudianteEvaluacionPage implements OnInit {
     return '';
   }
 
+  /**
+   * Confirma la respuesta del intento actual.
+   *
+   * Llama a /corregir que devuelve si fue correcta + (si finaliza la pregunta)
+   * la alternativa correcta y la explicación. NO PERSISTE NADA en backend.
+   *
+   * Si la pregunta queda finalizada (acierto en 1° o intento 2 ya gastado),
+   * registramos la respuesta en el buffer local. Al final del test, el
+   * buffer completo se envía a /enviar para persistencia atómica.
+   */
   async confirmar(): Promise<void> {
     if (!this.ev || !this.pregunta || this.seleccion == null) return;
     this.enviando = true;
     this.error = null;
-    // Tiempo total (segundos) dedicado a esta pregunta hasta este intento.
-    // El backend solo lo persiste si este intento finaliza la pregunta.
+
     const tiempoSeg = Math.max(0, Math.round((Date.now() - this.inicioPreguntaMs) / 1000));
+    const altElegida = this.seleccion;
+
     try {
-      const res = await this.evalSvc.responder(
-        this.ev.evaluacion_id,
+      const res = await this.evalSvc.corregir(
+        this.ev.aplicacion_id,
         this.pregunta.pregunta_id,
-        this.seleccion,
-        this.intento,
-        this.pregunta.orden_presentacion,
-        tiempoSeg
+        altElegida,
+        this.intento
       );
+
       this.ultimo = res;
       this.fase = 'feedback';
+
+      // Si la pregunta queda finalizada → bufferear para el envío final
+      if (res.finalizadaPregunta) {
+        this.bufferRespuestas.push({
+          preguntaId: this.pregunta.pregunta_id,
+          ordenPresentacion: this.pregunta.orden_presentacion,
+          alternativaIntento1Id: this.intento === 1 ? altElegida : (this.altIntento1 as number),
+          alternativaIntento2Id: this.intento === 2 ? altElegida : null,
+          tiempoSegundos: tiempoSeg,
+        });
+      } else if (this.intento === 1) {
+        // Recordamos la elección del intento 1 para componer la respuesta cuando
+        // venga el intento 2.
+        this.altIntento1 = altElegida;
+      }
     } catch (e: any) {
-      this.error = e?.message || 'No se pudo registrar la respuesta';
+      this.error = e?.message || 'No se pudo verificar la respuesta';
     } finally {
       this.enviando = false;
     }
@@ -163,17 +211,37 @@ export class EstudianteEvaluacionPage implements OnInit {
     this.intento = 1;
     this.seleccion = null;
     this.altBloqueada = null;
+    this.altIntento1 = null;
     this.ultimo = null;
     // Reset del timer al pasar a la próxima pregunta.
     this.inicioPreguntaMs = Date.now();
   }
 
+  /**
+   * Finaliza el test enviando TODO el buffer al backend en una única
+   * transacción. Antes de esta llamada NADA se ha persistido. Si esto falla,
+   * NADA queda en BD (rollback completo).
+   */
   private async finalizar(): Promise<void> {
     if (!this.ev) return;
     this.finalizando = true;
     try {
-      const resultado = await this.evalSvc.finalizar(this.ev.evaluacion_id);
-      this.router.navigateByUrl(`/estudiante/resultado/${this.ev.evaluacion_id}`, {
+      const respuestas: RespuestaParaEnviar[] = this.bufferRespuestas.map((b) => ({
+        preguntaId: b.preguntaId,
+        ordenPresentacion: b.ordenPresentacion,
+        alternativaIntento1Id: b.alternativaIntento1Id,
+        alternativaIntento2Id: b.alternativaIntento2Id,
+        tiempoSegundos: b.tiempoSegundos,
+      }));
+
+      const resultado = await this.evalSvc.enviar(
+        this.ev.aplicacion_id,
+        this.ev.modalidad,
+        respuestas,
+        this.ev.correo
+      );
+
+      this.router.navigateByUrl(`/estudiante/resultado/${resultado.evaluacion_id}`, {
         state: { resultado, testNombre: this.ev.test_nombre },
         replaceUrl: true,
       });

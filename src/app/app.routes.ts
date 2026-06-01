@@ -59,7 +59,9 @@ export const routes: Routes = [
       ),
   },
   {
-    path: 'estudiante/evaluacion/:evaluacionId',
+    // Auditoría 2026-05-28: ahora el param es aplicacionId, no evaluacionId.
+    // La evaluación no existe en BD hasta que el estudiante envía el test.
+    path: 'estudiante/evaluacion/:aplicacionId',
     loadComponent: () =>
       import('./project/pages/estudiante-evaluacion/estudiante-evaluacion.page').then(
         (m) => m.EstudianteEvaluacionPage

@@ -1,12 +1,16 @@
-import { Pipe, PipeTransform } from '@angular/core';
+import { Pipe, PipeTransform, SecurityContext } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 /**
- * Pipe para renderizar HTML "confiable" en plantillas Angular vía [innerHTML].
+ * Pipe para renderizar HTML enriquecido (proveniente del rich text editor)
+ * en plantillas Angular vía [innerHTML].
  *
- * El HTML viene del rich text editor (RichTextEditorComponent) y solo contiene
- * etiquetas seguras (<p>, <strong>, <em>, <u>, <ul>, <ol>, <li>, <br>).
- * Angular además sigue sanitizando contra <script>, on*= handlers, etc.
+ * El contenido se almacena en el backend como HTML crudo, así que NO podemos
+ * confiar en él ciegamente: lo pasamos primero por DomSanitizer.sanitize() con
+ * SecurityContext.HTML, que conserva el formato seguro (<p>, <strong>, <em>,
+ * <u>, <ul>, <ol>, <li>, <br>) y elimina <script>, atributos on*= y demás
+ * vectores de XSS almacenado. Solo después marcamos el resultado YA limpio
+ * como confiable.
  *
  * Uso:
  *   <div [innerHTML]="pregunta.enunciado | safeHtml"></div>
@@ -15,6 +19,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 export class SafeHtmlPipe implements PipeTransform {
   constructor(private sanitizer: DomSanitizer) {}
   transform(value: string | null | undefined): SafeHtml {
-    return this.sanitizer.bypassSecurityTrustHtml(value || '');
+    const limpio = this.sanitizer.sanitize(SecurityContext.HTML, value || '') || '';
+    return this.sanitizer.bypassSecurityTrustHtml(limpio);
   }
 }

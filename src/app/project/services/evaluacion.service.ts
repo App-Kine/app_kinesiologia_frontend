@@ -41,14 +41,28 @@ export interface PreguntaEval {
   alternativas: AlternativaPublica[];
 }
 
+/**
+ * NUEVA SHAPE (auditoría 2026-05-28).
+ * `iniciar` ya NO crea fila en BD, así que ya NO devuelve evaluacion_id.
+ * Trae la modalidad y el correo elegidos para que el cliente los recuerde
+ * y los reenvíe en /enviar al final.
+ */
 export interface EvaluacionIniciada {
-  evaluacion_id: number;
-  evaluacion_uuid: string;
   aplicacion_id: number;
   test_nombre: string;
   modalidad: 'ANONIMA' | 'IDENTIFICADA';
+  correo: string | null;          // null si ANONIMA
   total_preguntas: number;
   preguntas: PreguntaEval[];
+}
+
+/** Una respuesta bufferada en cliente que se mandará al final. */
+export interface RespuestaParaEnviar {
+  preguntaId: number;
+  ordenPresentacion: number;
+  alternativaIntento1Id: number;
+  alternativaIntento2Id: number | null;
+  tiempoSegundos: number | null;
 }
 
 /** Resultado de un intento (RF-32/34/35/36/38). */
@@ -149,32 +163,45 @@ export class EvaluacionService extends BaseService {
   }
 
   /**
-   * Registra un intento de respuesta (RF-25/26/31).
-   * `tiempoSegundos`: segundos en pantalla con la pregunta (pedido cliente
-   * 2026-05-26). El backend solo lo persiste cuando este intento finaliza
-   * la pregunta.
+   * Corrige un intento SIN persistir nada (auditoría 2026-05-28).
+   * Devuelve si la respuesta es correcta + (si la pregunta queda finalizada)
+   * la alternativa correcta y la explicación clínica.
+   *
+   * NADA se guarda en la BD: si el estudiante cierra el navegador ahora,
+   * no queda rastro alguno.
    */
-  responder(
-    evaluacionId: number,
+  corregir(
+    aplicacionId: number,
     preguntaId: number,
     alternativaId: number,
-    intento: 1 | 2,
-    ordenPresentacion: number,
-    tiempoSegundos?: number
+    intento: 1 | 2
   ): Promise<RespuestaResultado> {
-    return this.post(this.url + 'evaluacion/responder', {
-      evaluacionId,
+    return this.post(this.url + 'evaluacion/corregir', {
+      aplicacionId,
       preguntaId,
       alternativaId,
       intento,
-      ordenPresentacion,
-      tiempoSegundos,
     });
   }
 
-  /** Finaliza la evaluación y devuelve el resumen (RF-39/40). */
-  finalizar(evaluacionId: number): Promise<ResultadoFinal> {
-    return this.post(this.url + 'evaluacion/finalizar', { evaluacionId });
+  /**
+   * Envía la evaluación COMPLETA al final del test (auditoría 2026-05-28).
+   *
+   * Crea la fila auris.evaluacion, inserta todas las auris.respuesta_pregunta
+   * y calcula los totales — todo en UNA transacción atómica en backend.
+   *
+   * Es el único momento en el que algo se persiste. Si el estudiante NO llama
+   * a este método (cerró el navegador, perdió conexión), la BD no tiene rastro.
+   */
+  enviar(
+    aplicacionId: number,
+    modalidad: 'ANONIMA' | 'IDENTIFICADA',
+    respuestas: RespuestaParaEnviar[],
+    correo?: string | null
+  ): Promise<ResultadoFinal> {
+    const args: any = { aplicacionId, modalidad, respuestas };
+    if (modalidad === 'IDENTIFICADA' && correo) args.correo = correo;
+    return this.post(this.url + 'evaluacion/enviar', args);
   }
 
   /** Envía el informe de resultados al correo registrado (RF-41/42). */

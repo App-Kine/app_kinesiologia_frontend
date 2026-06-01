@@ -51,7 +51,7 @@
       [attr.src]="modelUrl"
       alt="Modelo 3D del torso humano para auscultación"
       camera-controls
-      touch-action="pan-y"
+      touch-action="none"
       shadow-intensity="0.8"
       exposure="1.0"
       interaction-prompt="none"
@@ -89,7 +89,7 @@
     <div class="ayuda-overlay">
       <p>
         <ion-icon name="refresh-outline"></ion-icon>
-        Arrastrá para rotar · Pellizcá para zoom · Tocá un número para detalle
+        Arrastrá para rotar · Pellizcá para zoom · 2 dedos para desplazar · Tocá un número para detalle
       </p>
     </div>
 
@@ -138,8 +138,8 @@
                 <ion-label>{{ labelCategoria(p.categoria) }}</ion-label>
               </ion-chip>
             </div>
-            <ion-button fill="clear" color="medium" (click)="cerrarPunto()">
-              <ion-icon slot="icon-only" name="close-outline"></ion-icon>
+            <ion-button fill="clear" color="medium" (click)="cerrarPunto()" aria-label="Cerrar detalle del punto">
+              <ion-icon slot="icon-only" name="close-outline" aria-hidden="true"></ion-icon>
             </ion-button>
           </div>
 

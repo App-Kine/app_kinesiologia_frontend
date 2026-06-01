@@ -136,7 +136,7 @@
     "cache": {
       "enabled": true,
       "environment": "all",
-      "path": "C:/Users/Lucci/.angular-cache/app_kinesiologia_frontend"
+      "path": ".angular/cache"
     }
   },
   "schematics": {
