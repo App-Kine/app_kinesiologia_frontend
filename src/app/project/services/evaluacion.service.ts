@@ -37,6 +37,7 @@ export interface PreguntaEval {
   enunciado: string;
   audio_grid_id: string | null;
   imagen_grid_id: string | null;
+  video_grid_id: string | null;
   alternativas: AlternativaPublica[];
 }
 
@@ -70,6 +71,46 @@ export interface ResultadoFinal {
   aciertos_segundo: number;
   incorrectas: number;
   porcentaje_global: number;
+}
+
+/** Cabecera del informe completo descargable. */
+export interface InformeCabecera {
+  evaluacion_id: number;
+  modalidad: 'ANONIMA' | 'IDENTIFICADA';
+  correo_estudiante: string | null;
+  test_nombre: string;
+  curso_nombre: string;
+  curso_codigo: string;
+  total_preguntas: number;
+  aciertos_primer: number;
+  aciertos_segundo: number;
+  incorrectas: number;
+  porcentaje_global: number;
+  finalizada_en: string;
+}
+
+/** Una pregunta dentro del informe completo. */
+export interface InformePregunta {
+  orden_presentacion: number;
+  pregunta_id: number;
+  enunciado: string;            // HTML sanitizado (puede tener <strong>, <ul>, etc.)
+  explicacion_clinica: string;  // HTML sanitizado
+  intentos_usados: number;
+  resultado: 'CORRECTA_INT1' | 'CORRECTA_INT2' | 'INCORRECTA' | null;
+  tiempo_segundos: number | null;
+  alternativa_intento1_id: number | null;
+  alternativa_intento2_id: number | null;
+  alternativas: Array<{
+    alternativa_id: number;
+    texto: string;
+    es_correcta: boolean;
+    orden: number;
+  }>;
+}
+
+export interface InformeCompleto {
+  cabecera: InformeCabecera;
+  preguntas: InformePregunta[];
 }
 
 @Injectable({ providedIn: 'root' })
@@ -107,13 +148,19 @@ export class EvaluacionService extends BaseService {
     return this.post(this.url + 'evaluacion/iniciar', args);
   }
 
-  /** Registra un intento de respuesta (RF-25/26/31). */
+  /**
+   * Registra un intento de respuesta (RF-25/26/31).
+   * `tiempoSegundos`: segundos en pantalla con la pregunta (pedido cliente
+   * 2026-05-26). El backend solo lo persiste cuando este intento finaliza
+   * la pregunta.
+   */
   responder(
     evaluacionId: number,
     preguntaId: number,
     alternativaId: number,
     intento: 1 | 2,
-    ordenPresentacion: number
+    ordenPresentacion: number,
+    tiempoSegundos?: number
   ): Promise<RespuestaResultado> {
     return this.post(this.url + 'evaluacion/responder', {
       evaluacionId,
@@ -121,6 +168,7 @@ export class EvaluacionService extends BaseService {
       alternativaId,
       intento,
       ordenPresentacion,
+      tiempoSegundos,
     });
   }
 
@@ -134,5 +182,14 @@ export class EvaluacionService extends BaseService {
     evaluacionId: number
   ): Promise<{ enviado: boolean; correo: string; modo: string }> {
     return this.post(this.url + 'evaluacion/enviarInforme', { evaluacionId });
+  }
+
+  /**
+   * Devuelve el informe completo (cabecera + todas las preguntas con
+   * alternativas, selección, tiempo, etc.) para descarga PDF.
+   * Pedido cliente 2026-05-26. Disponible para anónimas e identificadas.
+   */
+  informeCompleto(evaluacionId: number): Promise<InformeCompleto> {
+    return this.post(this.url + 'evaluacion/informeCompleto', { evaluacionId });
   }
 }

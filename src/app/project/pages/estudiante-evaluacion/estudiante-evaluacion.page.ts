@@ -8,13 +8,15 @@ import {
 import { addIcons } from 'ionicons';
 import {
   volumeHighOutline, checkmarkCircle, closeCircle, bulbOutline,
-  arrowForwardOutline, refreshOutline, ribbonOutline,
+  arrowForwardOutline, refreshOutline, ribbonOutline, videocamOutline,
+  timeOutline,
 } from 'ionicons/icons';
 
 import {
   EvaluacionService, EvaluacionIniciada, PreguntaEval, RespuestaResultado,
 } from '../../services/evaluacion.service';
 import { MultimediaService } from '../../services/multimedia.service';
+import { SafeHtmlPipe } from '../../pipes/safe-html.pipe';
 
 @Component({
   selector: 'app-estudiante-evaluacion',
@@ -24,6 +26,7 @@ import { MultimediaService } from '../../services/multimedia.service';
   imports: [
     CommonModule, IonContent, IonHeader, IonToolbar, IonTitle, IonButton,
     IonIcon, IonText, IonSpinner, IonProgressBar, IonChip, IonLabel,
+    SafeHtmlPipe,
   ],
 })
 export class EstudianteEvaluacionPage implements OnInit {
@@ -41,6 +44,13 @@ export class EstudianteEvaluacionPage implements OnInit {
   finalizando = false;
   error: string | null = null;
 
+  // Timer por pregunta (pedido cliente 2026-05-26).
+  // `inicioPreguntaMs`: timestamp del navegador cuando se mostró la pregunta
+  // actual por primera vez. Se reinicia al avanzar a la siguiente pregunta
+  // pero NO al pasar de intento 1 a intento 2 — el cliente quiere el tiempo
+  // total dedicado a la pregunta.
+  private inicioPreguntaMs: number = Date.now();
+
   constructor(
     private router: Router,
     private evalSvc: EvaluacionService,
@@ -48,7 +58,8 @@ export class EstudianteEvaluacionPage implements OnInit {
   ) {
     addIcons({
       volumeHighOutline, checkmarkCircle, closeCircle, bulbOutline,
-      arrowForwardOutline, refreshOutline, ribbonOutline,
+      arrowForwardOutline, refreshOutline, ribbonOutline, videocamOutline,
+      timeOutline,
     });
   }
 
@@ -56,6 +67,7 @@ export class EstudianteEvaluacionPage implements OnInit {
     const st = history.state as any;
     if (st && st.evaluacion && Array.isArray(st.evaluacion.preguntas)) {
       this.ev = st.evaluacion as EvaluacionIniciada;
+      this.inicioPreguntaMs = Date.now();
     } else {
       this.error = 'No se encontró la evaluación. Vuelve a iniciarla.';
     }
@@ -85,6 +97,10 @@ export class EstudianteEvaluacionPage implements OnInit {
     return p.imagen_grid_id ? this.media.urlImagen(p.imagen_grid_id) : '';
   }
 
+  videoUrl(p: PreguntaEval): string {
+    return p.video_grid_id ? this.media.urlVideo(p.video_grid_id) : '';
+  }
+
   seleccionar(altId: number): void {
     if (this.fase !== 'responder') return;
     if (altId === this.altBloqueada) return; // no re-elegir la fallida (RF-26)
@@ -106,13 +122,17 @@ export class EstudianteEvaluacionPage implements OnInit {
     if (!this.ev || !this.pregunta || this.seleccion == null) return;
     this.enviando = true;
     this.error = null;
+    // Tiempo total (segundos) dedicado a esta pregunta hasta este intento.
+    // El backend solo lo persiste si este intento finaliza la pregunta.
+    const tiempoSeg = Math.max(0, Math.round((Date.now() - this.inicioPreguntaMs) / 1000));
     try {
       const res = await this.evalSvc.responder(
         this.ev.evaluacion_id,
         this.pregunta.pregunta_id,
         this.seleccion,
         this.intento,
-        this.pregunta.orden_presentacion
+        this.pregunta.orden_presentacion,
+        tiempoSeg
       );
       this.ultimo = res;
       this.fase = 'feedback';
@@ -144,6 +164,8 @@ export class EstudianteEvaluacionPage implements OnInit {
     this.seleccion = null;
     this.altBloqueada = null;
     this.ultimo = null;
+    // Reset del timer al pasar a la próxima pregunta.
+    this.inicioPreguntaMs = Date.now();
   }
 
   private async finalizar(): Promise<void> {

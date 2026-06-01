@@ -11,7 +11,7 @@ import { createLogger } from './logger';
 
 const log = createLogger('multimedia');
 
-export type TipoMedia = 'audio' | 'imagen';
+export type TipoMedia = 'audio' | 'imagen' | 'video';
 
 export interface SubidaResult {
   grid_id: string;
@@ -19,17 +19,18 @@ export interface SubidaResult {
 }
 
 /**
- * Multimedia (audios/imágenes de las preguntas).
+ * Multimedia (audios/imágenes/videos de las preguntas).
  *
  * A diferencia del resto de servicios, este NO pasa por el controlador:
  * sube el archivo como multipart/form-data DIRECTO a la lógica
  * (environment.LOGICA_API_URL) y arma a mano el header Authorization con el
  * JWT guardado tras el login. El streaming de descarga se consume como una
- * URL pública (urlAudio / urlImagen) en <audio>/<img>.
+ * URL pública (urlAudio / urlImagen / urlVideo) en <audio>/<img>/<video>.
  *
  * Límites (validados también en el backend):
- *   audio  → MP3/WAV ≤ 10 MB
- *   imagen → JPG/PNG ≤ 2 MB (RNF-39)
+ *   audio  → MP3/WAV  ≤ 10 MB
+ *   imagen → JPG/PNG  ≤ 2 MB  (RNF-39)
+ *   video  → MP4/WebM ≤ 50 MB (pedido cliente 2026-05-26)
  */
 @Injectable({ providedIn: 'root' })
 export class MultimediaService extends BaseService {
@@ -37,8 +38,10 @@ export class MultimediaService extends BaseService {
 
   static readonly AUDIO_MAX = 10 * 1024 * 1024;
   static readonly IMAGEN_MAX = 2 * 1024 * 1024;
+  static readonly VIDEO_MAX = 50 * 1024 * 1024;
   static readonly AUDIO_MIME = ['audio/mpeg', 'audio/wav', 'audio/x-wav', 'audio/wave'];
   static readonly IMAGEN_MIME = ['image/jpeg', 'image/jpg', 'image/png'];
+  static readonly VIDEO_MIME = ['video/mp4', 'video/webm', 'video/quicktime'];
 
   constructor(
     protected override httpClient: HttpClient,
@@ -52,9 +55,18 @@ export class MultimediaService extends BaseService {
 
   /** Validación cliente previa (mensaje amigable antes de subir). */
   validar(file: File, tipo: TipoMedia): string | null {
-    const mimes = tipo === 'audio' ? MultimediaService.AUDIO_MIME : MultimediaService.IMAGEN_MIME;
-    const max = tipo === 'audio' ? MultimediaService.AUDIO_MAX : MultimediaService.IMAGEN_MAX;
-    const etiqueta = tipo === 'audio' ? 'MP3 o WAV, máx 10 MB' : 'JPG o PNG, máx 2 MB';
+    const mimes =
+      tipo === 'audio'  ? MultimediaService.AUDIO_MIME  :
+      tipo === 'imagen' ? MultimediaService.IMAGEN_MIME :
+                          MultimediaService.VIDEO_MIME;
+    const max =
+      tipo === 'audio'  ? MultimediaService.AUDIO_MAX  :
+      tipo === 'imagen' ? MultimediaService.IMAGEN_MAX :
+                          MultimediaService.VIDEO_MAX;
+    const etiqueta =
+      tipo === 'audio'  ? 'MP3 o WAV, máx 10 MB' :
+      tipo === 'imagen' ? 'JPG o PNG, máx 2 MB'  :
+                          'MP4, WebM o MOV, máx 50 MB';
     if (!mimes.includes(file.type)) {
       return `Formato no permitido (${file.type || 'desconocido'}). Se acepta: ${etiqueta}.`;
     }
@@ -72,6 +84,10 @@ export class MultimediaService extends BaseService {
     return this.subir('imagen', file, preguntaId);
   }
 
+  async subirVideo(file: File, preguntaId?: number): Promise<SubidaResult> {
+    return this.subir('video', file, preguntaId);
+  }
+
   private async subir(tipo: TipoMedia, file: File, preguntaId?: number): Promise<SubidaResult> {
     const errLocal = this.validar(file, tipo);
     if (errLocal) {
@@ -79,7 +95,10 @@ export class MultimediaService extends BaseService {
       throw new Error(errLocal);
     }
 
-    const endpoint = tipo === 'audio' ? 'multimedia/subirAudio' : 'multimedia/subirImagen';
+    const endpoint =
+      tipo === 'audio'  ? 'multimedia/subirAudio'  :
+      tipo === 'imagen' ? 'multimedia/subirImagen' :
+                          'multimedia/subirVideo';
     const form = new FormData();
     form.append('archivo', file, file.name);
     if (preguntaId != null) form.append('preguntaId', String(preguntaId));
@@ -125,6 +144,11 @@ export class MultimediaService extends BaseService {
   /** URL pública para mostrar una imagen en <img [src]>. */
   urlImagen(gridId: string): string {
     return this.logicaUrl + 'multimedia/imagen/' + gridId;
+  }
+
+  /** URL pública para reproducir un video en <video [src]>. */
+  urlVideo(gridId: string): string {
+    return this.logicaUrl + 'multimedia/video/' + gridId;
   }
 
   /** Header Authorization (Bearer) a partir del token guardado. */
