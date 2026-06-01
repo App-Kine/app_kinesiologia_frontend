@@ -187,6 +187,19 @@ const PUNTOS_UN_LADO: HotspotBase[] = [
     position: '2.777375871257683 1.0543073663572347 -0.965596046575867',
     normal: '-0.011654562670001995 -0.3323373833633462 -0.9430885614766915',
   },
+
+  // ---- CAMPO LATERAL (región infraaxilar) — pared lateral del tórax, bajo la
+  //      axila. Bilateral (se espeja al otro lado). ⚠ Posición ESTIMADA. ----
+  {
+    id: 'infraaxilar-1-der',
+    nombre: 'Campo infraaxilar (derecho)',
+    categoria: 'pulmonar',
+    ubicacion: 'Línea axilar media, por debajo de la axila (~6.º espacio intercostal).',
+    descripcion:
+      'Pared lateral del tórax, bajo la axila. Ausculta los segmentos laterales de los lóbulos inferiores (lóbulo medio derecho / língula izquierda). Útil cuando los hallazgos no se aprecian bien por delante o por detrás.',
+    position: '2.05 1.4 -0.35',
+    normal: '-0.9 0.05 0.43',
+  },
 ];
 
 /** Deriva la cara (pecho/espalda) a partir del signo de la normal en Z. */
@@ -235,13 +248,91 @@ export function espejar(
   };
 }
 
-/** Genera el set completo (costado medido + su espejo) con un eje X dado. */
+/** Genera el set completo: pulmonares (medidos + espejo) + focos cardíacos. */
 export function construirPuntos(centroX: number = CENTRO_X): PuntoAuscultacion[] {
-  return [...PUNTOS_BASE, ...PUNTOS_BASE.map((p) => espejar(p, centroX))];
+  return [
+    ...PUNTOS_BASE,
+    ...PUNTOS_BASE.map((p) => espejar(p, centroX)),
+    ...PUNTOS_CARDIACOS,
+  ];
 }
 
 /** El costado medido en el editor (lado derecho), ya expandido. */
 export const PUNTOS_BASE: PuntoAuscultacion[] = PUNTOS_UN_LADO.map(aPunto);
+
+/**
+ * Focos CARDÍACOS (cara anterior). NO se espejan: el corazón está a la
+ * izquierda, así que cada foco tiene una posición anatómica propia.
+ *
+ * ⚠️ Posiciones ESTIMADAS sobre el modelo — pueden requerir ajuste fino en el
+ * editor de model-viewer (mismo flujo que los demás puntos). El contenido
+ * clínico (nombres, ubicación, descripción) sí es correcto.
+ *
+ * Convención de este modelo: lado DERECHO del paciente en X < 2.5; IZQUIERDO
+ * en X > 2.5; pecho en Z ≈ 0 (normal hacia +Z).
+ */
+export const PUNTOS_CARDIACOS: PuntoAuscultacion[] = [
+  {
+    id: 'foco-aortico',
+    nombre: 'Foco aórtico',
+    categoria: 'cardiaco',
+    cara: 'anterior',
+    lado: 'derecho',
+    ubicacion: '2.º espacio intercostal derecho, línea paraesternal.',
+    descripcion:
+      'Cierre de la válvula aórtica (componente A2 del 2.º ruido). En la base, R2 suele ser más intenso que R1. Soplos sistólicos eyectivos sugieren estenosis aórtica; diastólicos, insuficiencia aórtica.',
+    position: '2.35 1.95 -0.18',
+    normal: '-0.15 0.1 0.98',
+  },
+  {
+    id: 'foco-pulmonar',
+    nombre: 'Foco pulmonar',
+    categoria: 'cardiaco',
+    cara: 'anterior',
+    lado: 'izquierdo',
+    ubicacion: '2.º espacio intercostal izquierdo, línea paraesternal.',
+    descripcion:
+      'Cierre de la válvula pulmonar (componente P2). El desdoblamiento fisiológico de R2 se acentúa en inspiración. Soplos sistólicos sugieren estenosis pulmonar.',
+    position: '2.68 1.95 -0.18',
+    normal: '0.15 0.1 0.98',
+  },
+  {
+    id: 'foco-erb',
+    nombre: 'Punto de Erb (aórtico accesorio)',
+    categoria: 'cardiaco',
+    cara: 'anterior',
+    lado: 'izquierdo',
+    ubicacion: '3.º espacio intercostal izquierdo, línea paraesternal.',
+    descripcion:
+      'Punto de referencia entre la base y el ápex. Es el mejor sitio para auscultar los soplos de insuficiencia aórtica y, en general, todos los ruidos cardíacos.',
+    position: '2.6 1.78 -0.14',
+    normal: '0.1 0.1 0.99',
+  },
+  {
+    id: 'foco-tricuspideo',
+    nombre: 'Foco tricuspídeo',
+    categoria: 'cardiaco',
+    cara: 'anterior',
+    lado: 'izquierdo',
+    ubicacion: '4.º-5.º espacio intercostal izquierdo, borde paraesternal.',
+    descripcion:
+      'Cierre de la válvula tricúspide. Los soplos pansistólicos sugieren insuficiencia tricuspídea, que aumenta en inspiración (signo de Rivero-Carvallo).',
+    position: '2.58 1.58 -0.1',
+    normal: '0.08 0.05 0.99',
+  },
+  {
+    id: 'foco-mitral',
+    nombre: 'Foco mitral (apexiano)',
+    categoria: 'cardiaco',
+    cara: 'anterior',
+    lado: 'izquierdo',
+    ubicacion: '5.º espacio intercostal izquierdo, línea medioclavicular (ápex).',
+    descripcion:
+      'Cierre de la válvula mitral y calidad del R1. Foco de elección para soplos de insuficiencia o estenosis mitral. El decúbito lateral izquierdo lo intensifica.',
+    position: '2.82 1.48 -0.07',
+    normal: '0.2 0.05 0.98',
+  },
+];
 
 /**
  * Set por defecto: costado medido + espejo respecto al centro nominal (2.5).

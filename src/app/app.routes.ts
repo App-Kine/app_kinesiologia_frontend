@@ -68,7 +68,10 @@ export const routes: Routes = [
       ),
   },
   {
-    path: 'estudiante/resultado/:evaluacionId',
+    // El segmento de URL es el UUID público de la evaluación (no el id
+    // secuencial). El detalle se carga desde history.state; el param solo
+    // da una URL estable/compartible sin exponer IDs enumerables.
+    path: 'estudiante/resultado/:evaluacionUuid',
     loadComponent: () =>
       import('./project/pages/estudiante-resultado/estudiante-resultado.page').then(
         (m) => m.EstudianteResultadoPage

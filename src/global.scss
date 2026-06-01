@@ -69,17 +69,19 @@ ion-button {
 
 ion-button[fill='solid'],
 ion-button:not([fill]) {
-  --box-shadow: 0 2px 8px rgba(0, 0, 0, 0.14);
+  /* Sombra teñida con el color de marca: se siente más "Auris" que un gris. */
+  --box-shadow: 0 2px 10px color-mix(in srgb, var(--ion-color-primary) 28%, transparent);
 }
 
 ion-button[shape='round'] {
   --border-radius: 999px;
 }
 
-/* Tarjetas y listas: radios suaves y sombra discreta */
+/* Tarjetas y listas: radio amplio, borde sutil + elevación en dos capas */
 ion-card {
-  border-radius: var(--auris-radius, 12px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  border-radius: var(--auris-radius-lg, 16px);
+  box-shadow: var(--auris-elev-2);
+  border: 1px solid var(--auris-border);
 }
 
 ion-item {
@@ -91,4 +93,91 @@ ion-input,
 ion-textarea,
 ion-select {
   --border-radius: var(--auris-radius-sm, 10px);
+}
+
+/* ============================================================================
+ * Área segura inferior (home indicator del iPhone) en TODAS las pantallas.
+ * Agrega espacio al final del scroll para que el último elemento de cualquier
+ * página no quede cortado por la barra de inicio. En navegador/Android sin
+ * notch el inset es 0, así que no afecta.
+ * ========================================================================== */
+ion-content::part(scroll) {
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
+}
+
+/* ============================================================================
+ * Toque moderno: micro-interacciones, foco accesible y utilidades de layout.
+ * Todo con tokens del sistema (theme/variables.scss) → claro/oscuro automático.
+ * ========================================================================== */
+
+/* Botones: leve hundimiento al presionar (feedback táctil visual) */
+ion-button::part(native) {
+  transition: transform 0.12s var(--auris-ease, ease);
+}
+ion-button:active::part(native) {
+  transform: translateY(1px);
+}
+
+/* Header plano moderno: quitamos la sombra/línea dura por defecto de Ionic */
+ion-header.header-md::after {
+  background-image: none;
+}
+ion-toolbar {
+  --border-width: 0;
+}
+
+/* Foco visible por teclado (accesibilidad WCAG 2.4.7) en elementos propios.
+   No afecta el clic con mouse/touch, solo navegación por teclado. */
+a:focus-visible,
+button:focus-visible,
+[tabindex]:focus-visible {
+  outline: none;
+  box-shadow: var(--auris-focus-ring);
+  border-radius: 8px;
+}
+
+/* Skeletons de carga con radio coherente */
+ion-skeleton-text {
+  --border-radius: 6px;
+  border-radius: 6px;
+}
+
+/* --------- Utilidades de layout reutilizables en cualquier página --------- */
+
+/* Contenedor centrado con ancho de lectura cómodo */
+.auris-page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: var(--auris-space-6) var(--auris-space-5) var(--auris-space-10);
+}
+
+/* Tarjeta-superficie genérica (para <div>/<button> que no son ion-card) */
+.auris-card {
+  background: var(--auris-surface);
+  border: 1px solid var(--auris-border);
+  border-radius: var(--auris-radius-lg);
+  box-shadow: var(--auris-elev-1);
+}
+
+/* Helpers de elevación */
+.auris-elev-1 { box-shadow: var(--auris-elev-1); }
+.auris-elev-2 { box-shadow: var(--auris-elev-2); }
+.auris-elev-3 { box-shadow: var(--auris-elev-3); }
+
+/* Título con gradiente de marca (navy → teal) para encabezados hero */
+.auris-gradient-text {
+  background: var(--auris-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* "Eyebrow": rótulo discreto sobre títulos de sección */
+.auris-eyebrow {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--auris-text-muted);
 }

@@ -13,6 +13,11 @@
 </ion-header>
 
 <ion-content [fullscreen]="true" class="ion-padding">
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content pullingText="Desliza para actualizar"
+                           refreshingText="Buscando cursos…"></ion-refresher-content>
+  </ion-refresher>
+
   @if (cargando) {
     <div class="centro">
       <ion-spinner name="crescent"></ion-spinner>

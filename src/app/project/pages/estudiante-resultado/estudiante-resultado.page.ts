@@ -70,7 +70,7 @@ export class EstudianteResultadoPage implements OnInit {
     this.errorInforme = '';
     this.enviandoInforme = true;
     try {
-      const r = await this.evalSvc.enviarInforme(this.resultado.evaluacion_id);
+      const r = await this.evalSvc.enviarInforme(this.resultado.evaluacion_uuid);
       this.informeEnviado = true;
       this.correoEnviado = r && r.correo ? r.correo : '';
     } catch (err: any) {
@@ -99,7 +99,7 @@ export class EstudianteResultadoPage implements OnInit {
     this.errorPdf = '';
     this.generandoPdf = true;
     try {
-      const informe = await this.evalSvc.informeCompleto(this.resultado.evaluacion_id);
+      const informe = await this.evalSvc.informeCompleto(this.resultado.evaluacion_uuid);
       const html = this._construirHtmlInforme(informe);
 
       const win = window.open('', '_blank', 'width=900,height=700');

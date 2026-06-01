@@ -309,7 +309,11 @@
    Lista de puntos abajo del visor
    ============================================================ */
 .lista-puntos {
-  padding: 8px 16px 32px;
+  /* Padding inferior generoso y fijo (48px) + área segura: garantiza que el
+     último punto se vea completo aunque env(safe-area-inset-bottom) no resuelva
+     en el WebView. El 48px solo ya despeja el home indicator del iPhone. */
+  padding: 8px 16px;
+  padding-bottom: calc(48px + env(safe-area-inset-bottom, 0px));
 }
 
 .lista-puntos h3 {
