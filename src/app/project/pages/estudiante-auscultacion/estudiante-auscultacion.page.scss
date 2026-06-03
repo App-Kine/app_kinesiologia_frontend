@@ -233,6 +233,21 @@
   opacity: 1;
 }
 
+/* Área táctil ≥44x44px (WCAG 2.5.5 / 2.1 AA target size): el círculo visual
+   sigue siendo pequeño, pero un pseudo-elemento transparente y centrado
+   extiende la zona tocable hasta 44x44px sin alterar el diseño. */
+.hotspot::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 44px;
+  height: 44px;
+  transform: translate(-50%, -50%);
+  /* Por debajo del número visible, pero captura el toque en todo el área. */
+  z-index: -1;
+}
+
 /* Cuando el hotspot está detrás de la geometría del modelo, model-viewer le
    agrega data-visible="false" (gracias a data-visibility-attribute="visible").
    Lo ocultamos para que el punto parezca pegado a la piel. */

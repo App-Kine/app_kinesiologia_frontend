@@ -36,6 +36,10 @@
 	--ion-color-warning-contrast-rgb: 0,0,0;
 	--ion-color-warning-shade: #e0ac08;
 	--ion-color-warning-tint: #ffca22;
+	/* Texto "warning" sobre fondo claro: #e0ac08 da ~2:1 (no cumple WCAG AA).
+	   Token dedicado, oscurecido a ~#8a6d00 (>=4.5:1) para usar SOLO como texto,
+	   sin tocar el color de los botones warning. */
+	--auris-warning-text: #8a6d00;
 
 	--ion-color-danger: #c5000f;
 	--ion-color-danger-rgb: 197,0,15;
@@ -105,7 +109,7 @@
 	--auris-border:     #e2e6ee;
 	--auris-text:       #16202b;
 	--auris-text-soft:  #4a5560;
-	--auris-text-muted: #7c8794;
+	--auris-text-muted: #6b7280; /* Oscurecido (antes #7c8794 ~3.6:1) -> ~4.8:1 sobre blanco (WCAG AA). */
 
 	/* Fondo de página con tinte sutil de marca */
 	--auris-bg-tint: color-mix(in srgb, var(--ion-color-primary) 5%, var(--ion-background-color, #ffffff));
