@@ -15,7 +15,10 @@ const config: CapacitorConfig = {
   appName: 'Auris',
   webDir: 'www',
   server: {
-    androidScheme: 'https',
+    // 'http' (no 'https') para que la app corra en http://localhost y pueda
+    // llamar al backend local por HTTP sin que el WebView bloquee por
+    // "mixed content". Para producción (dominio HTTPS real) volver a 'https'.
+    androidScheme: 'http',
     cleartext: true,
   },
 };
