@@ -6,6 +6,27 @@ import { Platform } from "@ionic/angular";
 import { AnalyticsService } from "../../project/services/analytics.service";
 import { environment } from "../../../environments/environment";
 
+/**
+ * BaseService — capa HTTP común de la app del estudiante.
+ *
+ * CÓMO SE LLAMA AL BACKEND:
+ *   - Único método público de red: post(url, args). Envía a `url` (normalmente
+ *     environment.BASE_API_URL = Controlador/gateway) el cuerpo
+ *     `arg=<JSON url-encoded>` con Content-Type application/x-www-form-urlencoded.
+ *
+ * DÓNDE SE GUARDA EL TOKEN (sesión efímera):
+ *   - getAngularHeaders() lee el token de storage (clave environment.DATA_KEY_TOKEN)
+ *     y, si existe, lo agrega como cabecera Authorization.
+ *   - Storage: en móvil (hybrid) usa NativeStorage; en web usa localStorage.
+ *     No se guardan credenciales, solo el token devuelto por el backend.
+ *
+ * MANEJO DE ERRORES / SESIÓN EXPIRADA:
+ *   - proccessResponse() interpreta la respuesta lógica del backend
+ *     ({status:'OK'|'ERROR'}). Si el error es 'tokenError' → limpia la sesión
+ *     (clearStoredData) y rechaza con ERROR_EXPIRED_TOKEN (no deja el spinner colgado).
+ *   - handleError() normaliza fallas de transporte (HttpErrorResponse) a mensajes
+ *     de usuario (sin conexión / 5xx / 401) y NO expone el texto crudo del error.
+ */
 @Injectable({
     providedIn: "root",
 })

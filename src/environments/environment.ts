@@ -1,3 +1,14 @@
+// =====================================================================
+// CONFIGURACIÓN DE ENTORNO — DESARROLLO (DEV)
+// ---------------------------------------------------------------------
+// Este archivo se compila DENTRO del bundle. Se usa en `npm start` y en el
+// build móvil `ng build --configuration development`.
+//
+// QUÉ CAMBIAR PARA PRODUCCIÓN (no se edita aquí, sino en environment.prod.ts):
+//   - production: true
+//   - BASE_API_URL / LOGICA_API_URL → dominio HTTPS real (sin http:// ni localhost).
+// No contiene secretos ni credenciales: solo URLs públicas y constantes de UI.
+// =====================================================================
 export const environment = {
   production: false,
 
