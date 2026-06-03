@@ -10,6 +10,46 @@
 
 ---
 
+## 📋 Información para la revisión técnica (DTIC / Ciberseguridad)
+
+App del **estudiante** (Ionic + Angular 20 + Capacitor 7), web y iOS. **100 % pública, sin login.** Consume el gateway (Controlador, 3023) y sube/descarga multimedia directo a la Lógica (2000). No guarda credenciales ni datos sensibles en el dispositivo (solo un token efímero si aplica).
+
+| Ítem solicitado | Sección |
+|---|---|
+| Descripción general | Encabezado + "¿Dónde encaja esto?" |
+| Estructura de carpetas | "🗂 Estructura" |
+| Tecnologías y versiones | "Tecnologías y versiones" (abajo) |
+| Instalación y ejecución | "🚀 Setup web" / "📱 Setup iOS" |
+| Variables de entorno | "Configuración de entorno" (abajo) |
+| Credenciales de prueba | No aplica (app pública, sin login) |
+| Conexión a la base de datos | No aplica (no toca BD — consume el Controlador) |
+| Endpoints / servicios | "Configuración de entorno" (URLs de API) |
+
+### Tecnologías y versiones
+
+| Componente | Versión |
+|---|---|
+| Angular | 20 |
+| Ionic | 8 |
+| Capacitor | 7 (iOS) |
+| 3D | `@google/model-viewer` 4 + `three` 0.169 |
+| Node/CLI para build | Node ≥ 18, Angular CLI 20 |
+| Build de producción | `npx ng build` (genera `www/`) |
+
+### Configuración de entorno
+
+No usa variables de entorno del sistema; la configuración vive en **`src/environments/environment.ts`** (dev) y **`environment.prod.ts`** (build de producción):
+
+| Clave | Descripción | Ejemplo |
+|---|---|---|
+| `BASE_API_URL` | URL del Controlador (gateway) | `http://localhost:3023/controlador_base/` |
+| `LOGICA_API_URL` | URL de la Lógica (multimedia directa) | `http://localhost:2000/base_logica/` |
+| `production` | Flag de build | `true` en `environment.prod.ts` |
+
+> Para probar en **iPhone físico** se reemplaza `localhost` por la IP de la máquina en la red local (el teléfono no resuelve `localhost`). En producción, apuntar ambas URLs al dominio institucional (HTTPS).
+
+---
+
 ## 🧭 ¿Dónde encaja esto?
 
 ```
