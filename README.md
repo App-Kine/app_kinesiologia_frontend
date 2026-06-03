@@ -47,6 +47,7 @@
 - **@google/model-viewer** + **three.js** para el torso 3D con hotspots
 - **Web Audio API** (AnalyserNode + canvas) para el espectrograma en vivo
 - **NativeStorage** para token persistente en mobile (legacy de Cordova, fallback a localStorage en web)
+- **jsPDF** + **@capacitor/filesystem** + **@capacitor/share** para generar/compartir el informe PDF en la app nativa (en web se usa `window.print`)
 - **rxjs 7**
 
 ⚠️ **Node 20 requerido**, NO Node 22. Capacitor 7 está fijado para que funcione con Node 20 (la versión que usa el equipo).
@@ -88,7 +89,7 @@ app_kinesiologia_frontend/
 │   ├── theme/variables.scss                  # paleta Ionic
 │   ├── index.html, main.ts, styles.scss
 │   └── assets/
-├── capacitor.config.ts                       # appId, appName, webDir
+├── capacitor.config.ts                       # appId, appName, webDir, androidScheme:'http' + cleartext
 ├── setup-ios.command                         # script de setup iOS (ver abajo)
 ├── setup-ios.sh                              # idem (alternativo)
 ├── angular.json, tsconfig.*, package.json
@@ -154,6 +155,98 @@ Y volvés a apretar ▶ Play en Xcode.
 
 ---
 
+## 🤖 Setup Android (Android Studio) / build de la APK
+
+### Requisitos
+- **Android Studio** + Android SDK instalados (Android Studio trae su propio JDK).
+- Un teléfono Android con **Depuración USB** activada (*Ajustes → Opciones de desarrollador → Depuración USB*), o un emulador.
+
+### Build + correr
+
+```bash
+# 1. Dependencias (incluye @capacitor/android, three, jspdf y los plugins nativos)
+npm install --legacy-peer-deps
+
+# 2. Crear el proyecto nativo android/ (está gitignored — se regenera).
+#    Solo la primera vez, o tras borrar la carpeta.
+npx cap add android
+
+# 3. Compilar la web.
+#    ⚠️ OJO: `npm run build` usa la config PRODUCTION (environment.prod.ts, que
+#    apunta al dominio HTTPS real). Para una APK de PRUEBA contra tu backend
+#    local/LAN tenés que usar la config development (usa environment.ts):
+npx ng build --configuration development
+
+# 4. Copiar la web + plugins al proyecto Android
+npx cap sync android
+
+# 5a. Correr desde Android Studio (recomendado)
+npx cap open android
+#    → esperá el Gradle sync → elegí tu dispositivo/emulador → Run ▶
+#      (compila, instala y abre la app)
+
+# 5b. O generar el APK por línea de comandos
+cd android
+./gradlew assembleDebug          # Windows: .\gradlew.bat assembleDebug
+#    → APK debug FIRMADO en:
+#      android/app/build/outputs/apk/debug/app-debug.apk
+```
+
+> Si `gradlew` no encuentra Java, apuntá `JAVA_HOME` al JDK que trae Android
+> Studio (ej. `C:\Program Files\Android\Android Studio\jbr` en Windows).
+
+### Instalar el APK en el teléfono
+
+```bash
+# Con USB + adb (adb vive en <SDK>/platform-tools):
+adb install -r android/app/build/outputs/apk/debug/app-debug.apk
+```
+
+Si tu teléfono **bloquea la instalación por USB** (típico en Xiaomi/MIUI:
+`INSTALL_FAILED_USER_RESTRICTED`), tenés 2 caminos:
+- Activá **"Instalar vía USB"** en Opciones de desarrollador (MIUI suele pedir cuenta Mi + internet), o
+- **Sideload**: copiá el APK al teléfono y abrilo desde el gestor de archivos:
+  ```bash
+  adb push android/app/build/outputs/apk/debug/app-debug.apk /sdcard/Download/
+  ```
+  En el teléfono: *Archivos → Download → app-debug.apk → Instalar* (permití "instalar de esta fuente").
+  > ⚠️ Usá siempre el APK de **`outputs/apk/debug/`** (firmado). El de
+  > `intermediates/` no sirve para sideload ("el paquete no es válido").
+
+### Loop de desarrollo Android
+
+Cuando cambies código TS/HTML/SCSS:
+```bash
+npx ng build --configuration development && npx cap sync android
+```
+Y volvés a apretar Run ▶ en Android Studio (o regenerás el APK con `gradlew assembleDebug`).
+
+### Para correr en teléfono FÍSICO (backend en tu PC)
+
+`localhost` no funciona en el teléfono (apunta al propio teléfono). Hay que:
+
+1. IP de tu PC en la WiFi: `ipconfig` (Windows) / `ipconfig getifaddr en0` (Mac) → ej. `192.168.1.110`.
+2. Editá `src/environments/environment.ts`:
+   ```ts
+   BASE_API_URL: 'http://192.168.1.110:3023/controlador_base/',
+   LOGICA_API_URL: 'http://192.168.1.110:2000/base_logica/',
+   ```
+   > ⚠️ Config **local de máquina** — no la commitees a `develop` (dejala en `localhost` en el repo).
+3. `npx ng build --configuration development && npx cap sync android` y reinstalá.
+4. PC y teléfono en la **MISMA red WiFi**.
+5. Abrí el **firewall de Windows** para los puertos del backend (entrante TCP 2000 y 3023):
+   ```powershell
+   New-NetFirewallRule -DisplayName "AURIS logica 2000"     -Direction Inbound -Action Allow -Protocol TCP -LocalPort 2000
+   New-NetFirewallRule -DisplayName "AURIS controlador 3023" -Direction Inbound -Action Allow -Protocol TCP -LocalPort 3023
+   ```
+
+> **¿Por qué la app puede llamar al backend por HTTP plano?** `capacitor.config.ts`
+> fija `androidScheme: 'http'` (la app corre en `http://localhost`), evitando el
+> bloqueo de *mixed-content* del WebView al pegarle a un backend HTTP. Y el
+> controlador permite el origen `http://localhost` en su allowlist de CORS.
+
+---
+
 ## 🛠 Convenciones del código
 
 ### Rutas
@@ -203,10 +296,14 @@ El pipe `safeHtml` (`src/app/project/pipes/safe-html.pipe.ts`) primero **sanitiz
 `estudiante-resultado.page.ts` tiene un método `descargarInforme()` que:
 1. Hace POST a `/evaluacion/informeCompleto` (público).
 2. Recibe cabecera + preguntas con alternativas, qué eligió, tiempo, explicación.
-3. Construye HTML imprimible inline.
-4. `window.open()` + `window.print()` → el usuario guarda como PDF desde el diálogo del navegador.
+3. **Detecta la plataforma** (`Capacitor.isNativePlatform()`):
+   - **Web**: construye HTML imprimible inline y usa `window.open()` + `window.print()` → el usuario guarda como PDF desde el diálogo del navegador.
+   - **Nativo (Android/iOS)**: genera un PDF real con **jsPDF** (texto seleccionable) y lo guarda/comparte con **@capacitor/filesystem** + **@capacitor/share** (share sheet del SO → Guardar en Archivos, WhatsApp, correo…).
 
-**Cero dependencias externas** — sin jsPDF ni nada.
+> ⚠️ El branch por plataforma es necesario: en el WebView de Capacitor,
+> `window.open('', '_blank')` no abre una ventana imprimible — lo deriva al
+> navegador externo y, con URL vacía, termina en `http://localhost`. Por eso en
+> nativo se genera el PDF directamente en vez de depender de `window.print()`.
 
 ---
 
@@ -214,7 +311,8 @@ El pipe `safeHtml` (`src/app/project/pipes/safe-html.pipe.ts`) primero **sanitiz
 
 ```bash
 npm run build
-# (exit 0 + sin "error TS" = OK). Para iOS: npm run build && npx cap sync ios
+# (exit 0 + sin "error TS" = OK).
+# Para mobile: npx ng build --configuration development && npx cap sync ios|android
 ```
 
 ---
@@ -224,6 +322,14 @@ npm run build
 **`The Capacitor CLI requires NodeJS >=22`** → estás corriendo `npx cap add ios` con Node viejo, pero también significa que tu `package.json` se actualizó a Capacitor 8. Restaurá `package.json` a `^7.0.0` para todas las deps `@capacitor/*` (ya lo dejamos así en este repo).
 
 **`npm install` falla con `ERESOLVE could not resolve`** → siempre instalá con `--legacy-peer-deps`. Es por el conflicto rxjs/Cordova-legacy.
+
+**`Could not resolve "three/..."` al compilar** → `three` es peerDependency de `@google/model-viewer`. Ya está en `package.json`; corré `npm install --legacy-peer-deps`.
+
+**(Android) La app abre pero NO carga datos / `Http failure response: 0`** → suele ser *mixed-content* (la app en `https://localhost` llamando a un backend HTTP) o CORS. Ya está resuelto: `capacitor.config.ts` usa `androidScheme:'http'` y el controlador permite el origen `http://localhost`. Revisá también firewall + misma WiFi (ver "Setup Android → teléfono físico").
+
+**(Android) `INSTALL_FAILED_USER_RESTRICTED: Installation via USB is disabled`** → MIUI/Xiaomi bloquea instalar por USB. Activá "Instalar vía USB" en Opciones de desarrollador, o sideloadeá el APK (ver "Instalar el APK en el teléfono").
+
+**(Android) "El paquete no es válido / no se pudo analizar"** al instalar a mano → estás usando el APK de `intermediates/`. Usá el de `outputs/apk/debug/app-debug.apk` (firmado), p. ej. tras `gradlew assembleDebug`.
 
 **`Http failure response: 0 Unknown Error`** al subir/cargar multimedia → CORS preflight. Verificá que la lógica esté respondiendo `204` al `OPTIONS` antes del POST (ya está implementado en `index.js` de la lógica).
 
@@ -238,8 +344,8 @@ npm run build
 ## 🤝 Convenciones de equipo
 
 - **No commitear `package-lock.json`** (está en `.gitignore`).
-- **No commitear la carpeta `ios/`** ni `www/` (gitignored). Cada dev se regenera con `setup-ios.command`.
-- Si cambiás algo en `capacitor.config.ts` (appId, appName), hay que volver a correr `npx cap sync ios` para que se propague al proyecto nativo.
+- **No commitear las carpetas `ios/`, `android/`** ni `www/` (gitignored). Cada dev las regenera con `setup-ios.command` / `npx cap add android` + build.
+- Si cambiás algo en `capacitor.config.ts` (appId, appName, androidScheme), hay que volver a correr `npx cap sync ios|android` para que se propague al proyecto nativo.
 - No agregar componentes que no se usen en el flujo de estudiante (este repo es solo para él).
 
 ---
