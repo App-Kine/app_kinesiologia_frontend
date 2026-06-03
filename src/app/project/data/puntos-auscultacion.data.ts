@@ -1,6 +1,15 @@
 /**
  * Puntos de auscultación — datos de los hotspots 3D.
  *
+ * ESQUEMA: RECSOP — 13 puntos estandarizados de auscultación PULMONAR
+ * (CORSA / ERS) con su equivalencia ICBHI 2017. Fuente: presentación del
+ * docente "RECSOP — 13 puntos de auscultación" (2026-06-02).
+ *
+ *   Posteriores (espalda): 6 → apical, medio, basal × (der/izq)   ICBHI Pr/Pl   nº 1–6
+ *   Laterales (axilar medio): 2 → der/izq                         ICBHI Lr/Ll   nº 7–8
+ *   Anteriores (pecho): 4 → apical, basal × (der/izq)             ICBHI Ar/Al   nº 9–12
+ *   Tráquea (referencia, línea media): 1                          ICBHI Tc      nº 13
+ *
  * MODELO 3D ASOCIADO: assets/auscultacion/torso.glb
  *   "Torso sculpt w arms" de Sketchfab — licencia CC BY.
  *
@@ -8,45 +17,44 @@
  *   Centro WORLD:        (2.5, 1.25, -0.6)
  *
  *   ORIENTACIÓN REAL (verificada con las coords del editor):
- *     - X horizontal: 0 (un costado) .. 5 (el otro). Eje de simetría en X = 2.5.
+ *     - X horizontal: lado DERECHO del paciente en X < 2.5; IZQUIERDO en X > 2.5.
+ *       (Confirmado por los focos cardíacos: aórtico = derecho a X≈2.35.)
  *     - Y vertical:   0 (cintura) .. 2.5 (hombros)
- *     - Z profundidad: 0 (PECHO / anterior, lado +Z) .. -1.25 (ESPALDA / posterior, lado -Z)
+ *     - Z profundidad: 0 (PECHO / anterior, +Z) .. -1.25 (ESPALDA / posterior, -Z)
  *
- *   Cómo se distingue la cara por la NORMAL del hotspot:
- *     - normal.z > 0  → la superficie mira hacia +Z → cara ANTERIOR (pecho)
- *     - normal.z < 0  → la superficie mira hacia -Z → cara POSTERIOR (espalda)
- *   `cara` se deriva automáticamente con esa regla (no se escribe a mano).
+ *   La `cara` (pecho/espalda) se DERIVA de la normal:
+ *     normal.z > 0 → 'anterior' (pecho);  normal.z < 0 → 'posterior' (espalda).
  *
- * COMO COLOCAR PUNTOS NUEVOS (forma fácil):
- *   1. Abrir https://modelviewer.dev/editor/
- *   2. Arrastrar src/assets/auscultacion/torso.glb
- *   3. Activar "Hotspot Mode" y hacer click donde quieras el punto.
- *   4. Copiar `data-position` y `data-normal` (quitando el sufijo "m").
- *   5. Pegarlos como un objeto en PUNTOS_UN_LADO de abajo.
+ *   El `lado` y el código ICBHI se asignan por la GEOMETRÍA real (X del punto),
+ *   no a mano: así un punto en X>2.5 es siempre izquierdo (Pl/Al/Ll) y uno en
+ *   X<2.5 es derecho (Pr/Ar/Lr), sin riesgo de etiquetar mal la lateralidad.
  *
- * ESPEJADO AUTOMÁTICO (un solo lado → ambos lados):
- *   Solo hace falta definir UN costado en PUNTOS_UN_LADO. El helper
- *   `espejar()` genera el gemelo del lado opuesto reflejando X respecto al
- *   eje de simetría (X' = 5 - X) e invirtiendo la componente X de la normal.
+ * ESPEJADO AUTOMÁTICO (un anclaje medido → ambos lados):
+ *   Cada punto bilateral se define UNA vez (su anclaje medido) y `espejar()`
+ *   genera el gemelo del lado opuesto: refleja X (X' = 2·centroX − X), invierte
+ *   normal.x, intercambia der↔izq, el código ICBHI (r↔l) y el número par/impar.
  *
- *   ⚠️ Los focos CARDÍACOS no son bilateralmente simétricos (el corazón está
- *   a la izquierda). El espejado tiene sentido clínico para campos PULMONARES;
- *   para puntos cardíacos, revisar manualmente cuáles conviene espejar.
- *
- *   ⚠️ Contenido clínico provisional ("pendiente de validación docente"):
- *   falta el mapeo número→foco clínico.
+ * CÓMO AJUSTAR/AGREGAR POSICIONES (editor):
+ *   1. https://modelviewer.dev/editor/  → arrastrar torso.glb
+ *   2. "Hotspot Mode" → click en la piel → copiar data-position / data-normal.
  */
+
+export type GrupoAuscultacion = 'posterior' | 'anterior' | 'lateral' | 'traquea';
 
 export interface PuntoAuscultacion {
   id: string;
+  /** Número RECSOP del punto (1–13). El 13 es la tráquea (se rotula "T"). */
+  numero: number;
   nombre: string;
+  /** Código ICBHI 2017: Pr/Pl, Ar/Al, Lr/Ll, Tc. */
+  icbhi: string;
+  /** Grupo RECSOP (determina color/leyenda, igual que la presentación). */
+  grupo: GrupoAuscultacion;
+  /** Categoría general. Hoy todos los puntos del mapa son pulmonares. */
   categoria: 'cardiaco' | 'pulmonar' | 'abdominal' | 'vascular';
-  /**
-   * Cara del cuerpo. Se DERIVA de la normal (no se escribe a mano):
-   * normal.z > 0 → 'anterior' (pecho); normal.z < 0 → 'posterior' (espalda).
-   */
+  /** Cara del cuerpo, derivada de la normal (no se escribe a mano). */
   cara: 'anterior' | 'posterior';
-  /** Costado del cuerpo. El gemelo espejado vive en el costado opuesto. */
+  /** Costado del paciente, derivado de la geometría (X respecto al centro). */
   lado: 'derecho' | 'izquierdo';
   ubicacion: string;
   descripcion: string;
@@ -59,11 +67,14 @@ export interface PuntoAuscultacion {
 /** Eje de simetría del modelo en X (centro del bounding box WORLD). */
 const CENTRO_X = 2.5;
 
-/** Datos de cada hotspot medido en el editor (un solo costado). */
+/** Anclaje medido de un punto bilateral (un solo costado). */
 interface HotspotBase {
   id: string;
+  numero: number;
   nombre: string;
-  categoria: PuntoAuscultacion['categoria'];
+  icbhi: string;
+  grupo: GrupoAuscultacion;
+  lado: 'derecho' | 'izquierdo';
   ubicacion: string;
   descripcion: string;
   position: string;
@@ -71,163 +82,163 @@ interface HotspotBase {
 }
 
 /**
- * UN SOLO COSTADO (el medido en el editor). El otro se genera por espejo.
- * `cara` se deriva de la normal, así que no puede quedar mal etiquetada.
+ * ANCLAJES BILATERALES (6). Cada uno se define una vez con su lado/ICBHI/número
+ * REALES según su posición sobre el modelo; `espejar()` produce el gemelo.
  *
- * Grupo ANTERIOR (pecho): los 4 puntos con normal.z > 0 (Z ≈ 0).
- * Grupo POSTERIOR (espalda): los 6 puntos con normal.z < 0 (Z ≈ -1.0),
- *   que en el editor venían numerados 1..6.
+ * Reutilizan las posiciones ya medidas en el editor para los puntos que existían
+ * (ápice/medio/basal posteriores, ápice/basal anteriores). El axilar medio se
+ * recalculó a media altura sobre la línea axilar media.
  */
-// IDENTIFICACIÓN (inferida de la posición sobre el modelo, 2026-05-29):
-// los 4 puntos del PECHO y los 6 de la ESPALDA forman columnas verticales
-// ápice→base → son CAMPOS DE AUSCULTACIÓN PULMONAR (bilaterales, por eso el
-// espejado es clínicamente válido). NO son focos cardíacos (esos van dispersos
-// por el precordio y se agregarán aparte). ⚠ Revisar nombres/niveles con el docente.
-const PUNTOS_UN_LADO: HotspotBase[] = [
-  // ---- CAMPOS PULMONARES ANTERIORES (pecho) — normal.z > 0, de ápice a base ----
+const PUNTOS_ANCLA: HotspotBase[] = [
+  // ---- POSTERIORES (espalda) — medidos en X≈2.77 (> 2.5) ⇒ lado IZQUIERDO ----
   {
-    id: 'ant-1-der',
-    nombre: 'Vértice pulmonar anterior (derecho)',
-    categoria: 'pulmonar',
+    id: 'post-apical-izq',
+    numero: 2,
+    nombre: 'Posterior apical izquierdo',
+    icbhi: 'Pl',
+    grupo: 'posterior',
+    lado: 'izquierdo',
+    ubicacion: 'Región supraescapular, por encima de la espina de la escápula.',
+    descripcion:
+      'Ápice posterior del pulmón. Comparar simetría con el lado contralateral; crepitantes finos al final de la inspiración sugieren fibrosis.',
+    // Acercados un poco al centro (hacia la columna) por pedido (2026-06-02).
+    position: '2.7909498281141367 2.212389567927284 -1.083018071424431',
+    normal: '0.0898753628664103 0.5210043252844936 -0.8488091141030949',
+  },
+  {
+    id: 'post-medio-izq',
+    numero: 4,
+    nombre: 'Posterior medio izquierdo',
+    icbhi: 'Pl',
+    grupo: 'posterior',
+    lado: 'izquierdo',
+    ubicacion: 'Región interescapular (~T5-T6).',
+    descripcion:
+      'Zona de transición entre lóbulos superior e inferior. La egofonía aquí orienta a derrame pleural.',
+    position: '2.7888727102972375 1.5234460614657115 -1.1216202630678542',
+    normal: '0.26677207208247106 -0.4217412346503084 -0.8665835173556318',
+  },
+  {
+    id: 'post-basal-izq',
+    numero: 6,
+    nombre: 'Posterior basal izquierdo',
+    icbhi: 'Pl',
+    grupo: 'posterior',
+    lado: 'izquierdo',
+    ubicacion: 'Región infraescapular baja, base del pulmón.',
+    descripcion:
+      'Base del pulmón. Sitio de elección para crepitantes congestivos (insuficiencia cardíaca, típicamente bilaterales) y derrame pleural.',
+    position: '2.797375871257683 1.0543073663572347 -0.965596046575867',
+    normal: '-0.011654562670001995 -0.3323373833633462 -0.9430885614766915',
+  },
+
+  // ---- LATERAL (axilar medio) — en el HTML del docente van en la CARA DORSAL
+  //      (espalda): la dorsal tiene 8 puntos (6 posteriores + 2 axilares) y la
+  //      ventral 5 (4 anteriores + tráquea). Por eso se ubican en la pared
+  //      posterolateral, con la normal hacia atrás-lateral para que se vean
+  //      desde la vista de espalda. X≈2.0 (<2.5) ⇒ lado DERECHO. ----
+  {
+    id: 'axilar-der',
+    numero: 7,
+    nombre: 'Axilar medio derecho',
+    icbhi: 'Lr',
+    grupo: 'lateral',
+    lado: 'derecho',
+    ubicacion: 'Línea axilar media, ~5.º espacio intercostal.',
+    descripcion:
+      'Pared lateral del tórax. Ausculta los segmentos laterales de los lóbulos (lóbulo medio derecho / língula izquierda). Útil cuando los hallazgos no se aprecian bien por delante o por detrás.',
+    position: '1.95 1.4 -0.62',
+    normal: '-0.8 0.0 -0.6',
+  },
+
+  // ---- ANTERIORES (pecho) — medidos en X≈2.3 (< 2.5) ⇒ lado DERECHO ----
+  {
+    id: 'ant-apical-der',
+    numero: 9,
+    nombre: 'Anterior apical derecho',
+    icbhi: 'Ar',
+    grupo: 'anterior',
+    lado: 'derecho',
     ubicacion: 'Fosa supraclavicular / región infraclavicular alta.',
     descripcion:
-      'Ápice del pulmón. Murmullo vesicular suave. Crepitantes finos persistentes en los vértices orientan a fibrosis o, en adultos jóvenes, a tuberculosis. Comparar siempre con el lado contralateral.',
+      'Ápice anterior del pulmón. Murmullo vesicular suave. Crepitantes finos persistentes en los vértices orientan a fibrosis o, en jóvenes, a tuberculosis.',
     position: '2.3162497904336563 2.165915227291522 -0.4336559395417483',
     normal: '-0.08155478603238682 0.8677641116676695 0.49023898598217586',
   },
   {
-    id: 'ant-2-der',
-    nombre: 'Campo anterior superior (derecho)',
-    categoria: 'pulmonar',
-    ubicacion: '2.º espacio intercostal, línea medioclavicular.',
-    descripcion:
-      'Segmentos anteriores del lóbulo superior. Murmullo vesicular normal; su disminución unilateral sugiere derrame o atelectasia.',
-    position: '2.2837474244439906 1.9673307152664141 -0.21598360435885336',
-    normal: '-0.07144425395030499 0.6739868690180207 0.73528050359626',
-  },
-  {
-    id: 'ant-3-der',
-    nombre: 'Campo anterior medio (derecho)',
-    categoria: 'pulmonar',
-    ubicacion: '3.º-4.º espacio intercostal, línea medioclavicular.',
-    descripcion:
-      'Lóbulo medio (pulmón derecho) o língula (pulmón izquierdo). Buen sitio para crepitantes de condensación neumónica.',
-    position: '2.2901347084191475 1.719207055595298 -0.06391426996184929',
-    normal: '-0.09038504308679554 0.3599264701604575 0.9285922033185673',
-  },
-  {
-    id: 'ant-4-der',
-    nombre: 'Base pulmonar anterior (derecha)',
-    categoria: 'pulmonar',
+    id: 'ant-basal-der',
+    numero: 11,
+    nombre: 'Anterior basal derecho',
+    icbhi: 'Ar',
+    grupo: 'anterior',
+    lado: 'derecho',
     ubicacion: '5.º-6.º espacio intercostal, línea medioclavicular.',
     descripcion:
       'Segmentos anteriores de los lóbulos inferiores. Sibilancias espiratorias sugieren broncoespasmo (asma/EPOC); crepitantes basales, congestión.',
-    position: '2.2942971789492916 1.4719880802392193 -0.0652732136176483',
+    // Bajado al 5.º-6.º EIC (base pulmonar anterior) — antes quedaba a media altura.
+    position: '2.2942971789492916 1.18 -0.18',
     normal: '-0.3510241330454077 0.08128904589940167 0.9328312543201396',
-  },
-
-  // ---- CAMPOS PULMONARES POSTERIORES (espalda) — normal.z < 0, de ápice a base ----
-  {
-    id: 'post-6-der',
-    nombre: 'Vértice pulmonar posterior (derecho)',
-    categoria: 'pulmonar',
-    ubicacion: 'Región supraescapular, por encima de la espina de la escápula.',
-    descripcion:
-      'Ápice posterior del pulmón. Comparar simetría con el lado contralateral; crepitantes finos al final de la inspiración sugieren fibrosis.',
-    position: '2.7709498281141367 2.212389567927284 -1.083018071424431',
-    normal: '0.0898753628664103 0.5210043252844936 -0.8488091141030949',
-  },
-  {
-    id: 'post-5-der',
-    nombre: 'Interescapular superior (derecho)',
-    categoria: 'pulmonar',
-    ubicacion: 'Entre la columna y el borde interno de la escápula, parte alta (~T3-T4).',
-    descripcion:
-      'Segmentos posteriores del lóbulo superior. Soplo tubárico (broncofonía aumentada) sugiere condensación o atelectasia.',
-    position: '2.7676479281244664 1.8679379525687028 -1.1918399358592942',
-    normal: '0.09772098596361509 -0.03973455141121597 -0.9944203207529745',
-  },
-  {
-    id: 'post-4-der',
-    nombre: 'Interescapular medio (derecho)',
-    categoria: 'pulmonar',
-    ubicacion: 'Región interescapular (~T5-T6).',
-    descripcion:
-      'Zona de transición entre lóbulos superior e inferior. La egofonía aquí orienta a derrame pleural.',
-    position: '2.7688727102972375 1.5234460614657115 -1.1216202630678542',
-    normal: '0.26677207208247106 -0.4217412346503084 -0.8665835173556318',
-  },
-  {
-    id: 'post-2-der',
-    nombre: 'Campo posterolateral (derecho)',
-    categoria: 'pulmonar',
-    ubicacion: 'Hacia la línea axilar posterior.',
-    descripcion:
-      'Cara lateral del pulmón. Útil para evaluar los segmentos laterales del lóbulo inferior. (Punto más lateral que el resto de la columna posterior — verificar ubicación.)',
-    position: '3.0901274171762063 1.3518615838853323 -0.9715186256015581',
-    normal: '0.6260997766512568 -0.5360356728812903 -0.5662727497204407',
-  },
-  {
-    id: 'post-3-der',
-    nombre: 'Infraescapular (derecho)',
-    categoria: 'pulmonar',
-    ubicacion: 'Por debajo del ángulo inferior de la escápula (~T8).',
-    descripcion:
-      'Porción superior de la base pulmonar posterior. Crepitantes aquí pueden indicar inicio de congestión o neumonía basal.',
-    position: '2.7718996376262592 1.3006248678059957 -1.0407945203130906',
-    normal: '0.05323837337441607 -0.21697729714879901 -0.9747238214604422',
-  },
-  {
-    id: 'post-1-der',
-    nombre: 'Base pulmonar posterior (derecha)',
-    categoria: 'pulmonar',
-    ubicacion: 'Región infraescapular baja, base del pulmón.',
-    descripcion:
-      'Base del pulmón. Sitio de elección para crepitantes congestivos (insuficiencia cardíaca, típicamente bilaterales) y derrame pleural. Evaluar excursión diafragmática por percusión adyacente.',
-    position: '2.777375871257683 1.0543073663572347 -0.965596046575867',
-    normal: '-0.011654562670001995 -0.3323373833633462 -0.9430885614766915',
-  },
-
-  // ---- CAMPO LATERAL (región infraaxilar) — pared lateral del tórax, bajo la
-  //      axila. Bilateral (se espeja al otro lado). ⚠ Posición ESTIMADA. ----
-  {
-    id: 'infraaxilar-1-der',
-    nombre: 'Campo infraaxilar (derecho)',
-    categoria: 'pulmonar',
-    ubicacion: 'Línea axilar media, por debajo de la axila (~6.º espacio intercostal).',
-    descripcion:
-      'Pared lateral del tórax, bajo la axila. Ausculta los segmentos laterales de los lóbulos inferiores (lóbulo medio derecho / língula izquierda). Útil cuando los hallazgos no se aprecian bien por delante o por detrás.',
-    position: '2.05 1.4 -0.35',
-    normal: '-0.9 0.05 0.43',
   },
 ];
 
-/** Deriva la cara (pecho/espalda) a partir del signo de la normal en Z. */
-function caraDeNormal(normal: string): PuntoAuscultacion['cara'] {
-  const nz = Number(normal.split(/\s+/)[2]);
-  return nz >= 0 ? 'anterior' : 'posterior';
+/**
+ * TRÁQUEA (punto 13, línea media, NO se espeja). Referencia del sonido traqueal
+ * central. Posición CALCULADA sobre la horquilla esternal (escotadura yugular),
+ * en la línea media anterior alta — afinar en el editor si se desea más precisión.
+ */
+const PUNTO_TRAQUEA: PuntoAuscultacion = {
+  id: 'traquea',
+  numero: 13,
+  nombre: 'Tráquea — referencia',
+  icbhi: 'Tc',
+  grupo: 'traquea',
+  categoria: 'pulmonar',
+  cara: 'anterior',
+  lado: 'derecho', // línea media; el valor no afecta (no se espeja)
+  ubicacion: 'Línea media anterior, sobre la horquilla esternal (escotadura yugular).',
+  descripcion:
+    'Punto de referencia traqueal. Registra el sonido de la vía aérea central, patrón con el que se comparan los ruidos pulmonares periféricos. En ICBHI corresponde a la zona Tc.',
+  // Subida al cuello (sobre 9 y 10), como en el diagrama del docente.
+  position: '2.5 2.36 -0.1',
+  normal: '0 0.42 0.91',
+};
+
+/**
+ * Cara (vista) según el GRUPO, igual que el HTML del docente:
+ *   - Cara DORSAL (espalda): posteriores + laterales axilares  → 8 puntos
+ *   - Cara VENTRAL (pecho):  anteriores + tráquea               → 5 puntos
+ * (En el HTML, los axilares 7 y 8 están dibujados en la silueta dorsal.)
+ */
+function caraDeGrupo(grupo: GrupoAuscultacion): PuntoAuscultacion['cara'] {
+  return grupo === 'posterior' || grupo === 'lateral' ? 'posterior' : 'anterior';
 }
 
-/** Expande un hotspot base a un PuntoAuscultacion completo del lado derecho. */
+/** Expande un anclaje a un PuntoAuscultacion completo. */
 function aPunto(b: HotspotBase): PuntoAuscultacion {
   return {
     ...b,
-    cara: caraDeNormal(b.normal),
-    lado: 'derecho',
+    categoria: 'pulmonar',
+    cara: caraDeGrupo(b.grupo),
   };
 }
 
+/** Intercambia el sufijo de lado en un id ('-der' ↔ '-izq'). */
+function swapSufijoLado(id: string, nuevoLado: PuntoAuscultacion['lado']): string {
+  const suf = nuevoLado === 'derecho' ? '-der' : '-izq';
+  return id.replace(/-(der|izq)$/, suf);
+}
+
+/** Código ICBHI del lado opuesto (Pr↔Pl, Ar↔Al, Lr↔Ll). */
+function icbhiOpuesto(icbhi: string): string {
+  if (icbhi.endsWith('r')) return icbhi.slice(0, -1) + 'l';
+  if (icbhi.endsWith('l')) return icbhi.slice(0, -1) + 'r';
+  return icbhi;
+}
+
 /**
- * Refleja un punto al costado opuesto del cuerpo respecto al eje de simetría
- * sagital del modelo (X = centroX):
- *   - X → 2·centroX - X
- *   - normal.X → -normal.X (la cara sigue mirando el mismo frente/espalda)
- *   - Y, Z y normal.Y/Z se mantienen → la `cara` no cambia.
- *
- * `centroX` por defecto es el centro del bounding box (CENTRO_X). El
- * componente lo recalcula en runtime con el centro REAL que reporta
- * model-viewer, para que el espejo quede simétrico aunque el modelo no esté
- * perfectamente centrado en X.
+ * Refleja un punto bilateral al costado opuesto respecto al eje sagital
+ * (X = centroX). Intercambia lado, ICBHI (r↔l), número (impar↔par contiguo) y
+ * el texto del nombre. La `cara` no cambia (se conserva normal.z).
  */
 export function espejar(
   p: PuntoAuscultacion,
@@ -237,105 +248,99 @@ export function espejar(
   const [nx, ny, nz] = p.normal.split(/\s+/).map(Number);
   const ladoOpuesto: PuntoAuscultacion['lado'] =
     p.lado === 'derecho' ? 'izquierdo' : 'derecho';
-  const sufijoOpuesto = ladoOpuesto === 'izquierdo' ? '-izq' : '-der';
+  const nombre =
+    p.lado === 'derecho'
+      ? p.nombre.replace('derecho', 'izquierdo').replace('derecha', 'izquierda')
+      : p.nombre.replace('izquierdo', 'derecho').replace('izquierda', 'derecha');
+  // Pares RECSOP: (1,2)(3,4)(5,6)(7,8)(9,10)(11,12). Impar=der, par=izq.
+  const numeroOpuesto = p.numero % 2 === 1 ? p.numero + 1 : p.numero - 1;
   return {
     ...p,
-    id: p.id.replace(/-(der|izq)$/, sufijoOpuesto),
-    nombre: p.nombre.replace('derecho', 'izquierdo').replace('derecha', 'izquierda'),
+    id: swapSufijoLado(p.id, ladoOpuesto),
+    nombre,
+    icbhi: icbhiOpuesto(p.icbhi),
+    numero: numeroOpuesto,
     lado: ladoOpuesto,
     position: `${2 * centroX - px} ${py} ${pz}`,
     normal: `${-nx} ${ny} ${nz}`,
   };
 }
 
-/** Genera el set completo: pulmonares (medidos + espejo) + focos cardíacos. */
-export function construirPuntos(centroX: number = CENTRO_X): PuntoAuscultacion[] {
-  return [
-    ...PUNTOS_BASE,
-    ...PUNTOS_BASE.map((p) => espejar(p, centroX)),
-    ...PUNTOS_CARDIACOS,
-  ];
+/** Los 6 anclajes medidos, ya expandidos a PuntoAuscultacion. */
+export const PUNTOS_BASE: PuntoAuscultacion[] = PUNTOS_ANCLA.map(aPunto);
+
+/** Coloca un punto sobre el eje de simetría real (reemplaza su X por centroX). */
+function centrarEnX(p: PuntoAuscultacion, centroX: number): PuntoAuscultacion {
+  const [, py, pz] = p.position.split(/\s+/).map(Number);
+  return { ...p, position: `${centroX} ${py} ${pz}` };
 }
 
-/** El costado medido en el editor (lado derecho), ya expandido. */
-export const PUNTOS_BASE: PuntoAuscultacion[] = PUNTOS_UN_LADO.map(aPunto);
+/**
+ * Construye el set completo (13): los 6 anclajes + sus 6 espejos + la tráquea,
+ * ordenados por número RECSOP (1..13).
+ *
+ * La TRÁQUEA es un punto de línea media: su X se fija al centro REAL del modelo
+ * (`centroX`), el MISMO eje sobre el que son simétricos los pares izq/der. Así
+ * queda centrada aunque el bounding box no esté exactamente en X = 2.5 (el
+ * modelo trae brazos y puede descentrarse).
+ */
+export function construirPuntos(centroX: number = CENTRO_X): PuntoAuscultacion[] {
+  const bilaterales = [
+    ...PUNTOS_BASE,
+    ...PUNTOS_BASE.map((p) => espejar(p, centroX)),
+  ];
+  const traquea = centrarEnX(PUNTO_TRAQUEA, centroX);
+  return [...bilaterales, traquea].sort((a, b) => a.numero - b.numero);
+}
 
 /**
- * Focos CARDÍACOS (cara anterior). NO se espejan: el corazón está a la
- * izquierda, así que cada foco tiene una posición anatómica propia.
+ * Focos CARDÍACOS — PRESERVADOS pero FUERA del mapa actual.
  *
- * ⚠️ Posiciones ESTIMADAS sobre el modelo — pueden requerir ajuste fino en el
- * editor de model-viewer (mismo flujo que los demás puntos). El contenido
- * clínico (nombres, ubicación, descripción) sí es correcto.
- *
- * Convención de este modelo: lado DERECHO del paciente en X < 2.5; IZQUIERDO
- * en X > 2.5; pecho en Z ≈ 0 (normal hacia +Z).
+ * El protocolo RECSOP del docente es solo PULMONAR (13 puntos), así que el mapa
+ * 3D muestra únicamente esos 13. Estos focos cardíacos se conservan aquí por si
+ * en el futuro se quiere un modo "cardíaco" aparte; NO se incluyen en
+ * `construirPuntos()`. Posiciones estimadas (revisar en el editor si se reactivan).
  */
 export const PUNTOS_CARDIACOS: PuntoAuscultacion[] = [
   {
-    id: 'foco-aortico',
-    nombre: 'Foco aórtico',
-    categoria: 'cardiaco',
-    cara: 'anterior',
-    lado: 'derecho',
+    id: 'foco-aortico', numero: 0, nombre: 'Foco aórtico', icbhi: '', grupo: 'anterior',
+    categoria: 'cardiaco', cara: 'anterior', lado: 'derecho',
     ubicacion: '2.º espacio intercostal derecho, línea paraesternal.',
-    descripcion:
-      'Cierre de la válvula aórtica (componente A2 del 2.º ruido). En la base, R2 suele ser más intenso que R1. Soplos sistólicos eyectivos sugieren estenosis aórtica; diastólicos, insuficiencia aórtica.',
-    position: '2.35 1.95 -0.18',
-    normal: '-0.15 0.1 0.98',
+    descripcion: 'Cierre de la válvula aórtica (A2). Soplos sistólicos eyectivos sugieren estenosis aórtica; diastólicos, insuficiencia aórtica.',
+    position: '2.35 1.95 -0.18', normal: '-0.15 0.1 0.98',
   },
   {
-    id: 'foco-pulmonar',
-    nombre: 'Foco pulmonar',
-    categoria: 'cardiaco',
-    cara: 'anterior',
-    lado: 'izquierdo',
+    id: 'foco-pulmonar', numero: 0, nombre: 'Foco pulmonar', icbhi: '', grupo: 'anterior',
+    categoria: 'cardiaco', cara: 'anterior', lado: 'izquierdo',
     ubicacion: '2.º espacio intercostal izquierdo, línea paraesternal.',
-    descripcion:
-      'Cierre de la válvula pulmonar (componente P2). El desdoblamiento fisiológico de R2 se acentúa en inspiración. Soplos sistólicos sugieren estenosis pulmonar.',
-    position: '2.68 1.95 -0.18',
-    normal: '0.15 0.1 0.98',
+    descripcion: 'Cierre de la válvula pulmonar (P2). El desdoblamiento fisiológico de R2 se acentúa en inspiración.',
+    position: '2.68 1.95 -0.18', normal: '0.15 0.1 0.98',
   },
   {
-    id: 'foco-erb',
-    nombre: 'Punto de Erb (aórtico accesorio)',
-    categoria: 'cardiaco',
-    cara: 'anterior',
-    lado: 'izquierdo',
+    id: 'foco-erb', numero: 0, nombre: 'Punto de Erb (aórtico accesorio)', icbhi: '', grupo: 'anterior',
+    categoria: 'cardiaco', cara: 'anterior', lado: 'izquierdo',
     ubicacion: '3.º espacio intercostal izquierdo, línea paraesternal.',
-    descripcion:
-      'Punto de referencia entre la base y el ápex. Es el mejor sitio para auscultar los soplos de insuficiencia aórtica y, en general, todos los ruidos cardíacos.',
-    position: '2.6 1.78 -0.14',
-    normal: '0.1 0.1 0.99',
+    descripcion: 'Referencia entre base y ápex; mejor sitio para la insuficiencia aórtica y, en general, todos los ruidos.',
+    position: '2.6 1.78 -0.14', normal: '0.1 0.1 0.99',
   },
   {
-    id: 'foco-tricuspideo',
-    nombre: 'Foco tricuspídeo',
-    categoria: 'cardiaco',
-    cara: 'anterior',
-    lado: 'izquierdo',
+    id: 'foco-tricuspideo', numero: 0, nombre: 'Foco tricuspídeo', icbhi: '', grupo: 'anterior',
+    categoria: 'cardiaco', cara: 'anterior', lado: 'izquierdo',
     ubicacion: '4.º-5.º espacio intercostal izquierdo, borde paraesternal.',
-    descripcion:
-      'Cierre de la válvula tricúspide. Los soplos pansistólicos sugieren insuficiencia tricuspídea, que aumenta en inspiración (signo de Rivero-Carvallo).',
-    position: '2.58 1.58 -0.1',
-    normal: '0.08 0.05 0.99',
+    descripcion: 'Cierre de la válvula tricúspide. Soplos pansistólicos que aumentan en inspiración (signo de Rivero-Carvallo).',
+    position: '2.58 1.58 -0.1', normal: '0.08 0.05 0.99',
   },
   {
-    id: 'foco-mitral',
-    nombre: 'Foco mitral (apexiano)',
-    categoria: 'cardiaco',
-    cara: 'anterior',
-    lado: 'izquierdo',
+    id: 'foco-mitral', numero: 0, nombre: 'Foco mitral (apexiano)', icbhi: '', grupo: 'anterior',
+    categoria: 'cardiaco', cara: 'anterior', lado: 'izquierdo',
     ubicacion: '5.º espacio intercostal izquierdo, línea medioclavicular (ápex).',
-    descripcion:
-      'Cierre de la válvula mitral y calidad del R1. Foco de elección para soplos de insuficiencia o estenosis mitral. El decúbito lateral izquierdo lo intensifica.',
-    position: '2.82 1.48 -0.07',
-    normal: '0.2 0.05 0.98',
+    descripcion: 'Cierre de la válvula mitral y calidad del R1. Foco de elección para insuficiencia/estenosis mitral; el decúbito lateral izquierdo lo intensifica.',
+    position: '2.82 1.48 -0.07', normal: '0.2 0.05 0.98',
   },
 ];
 
 /**
- * Set por defecto: costado medido + espejo respecto al centro nominal (2.5).
- * El componente lo reemplaza al cargar el modelo usando el centro real.
+ * Set por defecto del mapa: los 13 puntos RECSOP (centro nominal 2.5). El
+ * componente lo reemplaza al cargar el modelo usando el centro X real.
  */
 export const PUNTOS_AUSCULTACION: PuntoAuscultacion[] = construirPuntos();

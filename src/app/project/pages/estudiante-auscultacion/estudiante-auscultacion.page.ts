@@ -4,7 +4,7 @@ import {
 import { CommonModule } from '@angular/common';
 import {
   IonContent, IonHeader, IonToolbar, IonTitle, IonButtons, IonBackButton,
-  IonChip, IonLabel, IonIcon, IonModal, IonButton,
+  IonIcon, IonModal, IonButton,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
@@ -13,7 +13,7 @@ import {
 } from 'ionicons/icons';
 
 import {
-  PUNTOS_AUSCULTACION, PuntoAuscultacion, construirPuntos,
+  PUNTOS_AUSCULTACION, PuntoAuscultacion, GrupoAuscultacion, construirPuntos,
 } from '../../data/puntos-auscultacion.data';
 
 /**
@@ -38,7 +38,7 @@ import {
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   imports: [
     CommonModule, IonContent, IonHeader, IonToolbar, IonTitle, IonButtons,
-    IonBackButton, IonChip, IonLabel, IonIcon, IonModal, IonButton,
+    IonBackButton, IonIcon, IonModal, IonButton,
   ],
 })
 export class EstudianteAuscultacionPage implements OnInit {
@@ -46,10 +46,12 @@ export class EstudianteAuscultacionPage implements OnInit {
 
   puntos = PUNTOS_AUSCULTACION;
 
-  filtroActivo: 'todos' | PuntoAuscultacion['categoria'] = 'todos';
-
-  /** Cara mostrada actualmente: 'anterior' (pecho) o 'posterior' (espalda). */
-  caraActiva: 'anterior' | 'posterior' = 'anterior';
+  /**
+   * Cara mostrada actualmente: 'anterior' (ventral/pecho) o 'posterior'
+   * (dorsal/espalda). Arranca en DORSAL para seguir el orden del protocolo
+   * RECSOP del docente ("inicio en cara dorsal").
+   */
+  caraActiva: 'anterior' | 'posterior' = 'posterior';
 
   modelUrl = 'assets/auscultacion/torso.glb';
 
@@ -83,15 +85,9 @@ export class EstudianteAuscultacionPage implements OnInit {
    * (anterior o posterior), así no se cluttea la pantalla.
    */
   get puntosVisibles(): PuntoAuscultacion[] {
-    let pts = this.puntos.filter((p) => p.cara === this.caraActiva);
-    if (this.filtroActivo !== 'todos') {
-      pts = pts.filter((p) => p.categoria === this.filtroActivo);
-    }
-    return pts;
-  }
-
-  cambiarFiltro(filtro: 'todos' | PuntoAuscultacion['categoria']): void {
-    this.filtroActivo = filtro;
+    return this.puntos
+      .filter((p) => p.cara === this.caraActiva)
+      .sort((a, b) => a.numero - b.numero);
   }
 
   abrirPunto(p: PuntoAuscultacion): void {
@@ -219,30 +215,22 @@ export class EstudianteAuscultacionPage implements OnInit {
   // Helpers de UI
   // ============================================================
 
-  labelCategoria(c: PuntoAuscultacion['categoria']): string {
-    switch (c) {
-      case 'cardiaco':   return 'Cardíaco';
-      case 'pulmonar':   return 'Pulmonar';
-      case 'abdominal':  return 'Abdominal';
-      case 'vascular':   return 'Vascular';
+  /** Etiqueta corta del punto: su número RECSOP (el 13 se rotula "T"). */
+  etiqueta(p: PuntoAuscultacion): string {
+    return p.numero === 13 ? 'T' : String(p.numero);
+  }
+
+  /** Nombre legible del grupo RECSOP (para la leyenda/ficha). */
+  labelGrupo(g: GrupoAuscultacion): string {
+    switch (g) {
+      case 'posterior': return 'Posterior';
+      case 'anterior':  return 'Anterior';
+      case 'lateral':   return 'Lateral (axilar)';
+      case 'traquea':   return 'Tráquea';
     }
   }
 
-  colorCategoria(c: PuntoAuscultacion['categoria']): string {
-    switch (c) {
-      case 'cardiaco':   return 'danger';
-      case 'pulmonar':   return 'primary';
-      case 'abdominal':  return 'warning';
-      case 'vascular':   return 'secondary';
-    }
-  }
-
-  iconoCategoria(c: PuntoAuscultacion['categoria']): string {
-    switch (c) {
-      case 'cardiaco':   return 'heart-outline';
-      case 'pulmonar':   return 'fitness-outline';
-      case 'abdominal':  return 'body-outline';
-      case 'vascular':   return 'location-outline';
-    }
+  iconoGrupo(g: GrupoAuscultacion): string {
+    return g === 'traquea' ? 'body-outline' : 'fitness-outline';
   }
 }
