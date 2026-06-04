@@ -19,16 +19,16 @@ export const environment = {
   //      http://localhost:3023/controlador_base/
   //  - iPhone / Android FÍSICO: reemplazar 'localhost' por la IP del Mac
   //      en la WiFi (el teléfono no resuelve 'localhost'). Obtenela con:
-  //      ipconfig getifaddr en0   →  ej. 192.168.1.84
+  //      ipconfig getifaddr en0   →  ej. 192.168.1.7
   //  Mac y teléfono en la MISMA red WiFi. Ver README → "Probar en un celular
   //  FÍSICO". ⚠️ Antes del commit/entrega final volver a 'localhost'.
   // ===================================================================
-  BASE_API_URL: 'http://192.168.1.84:3023/controlador_base/',
+  BASE_API_URL: 'http://localhost:3023/controlador_base/',
 
   // La multimedia (audios/imágenes) se sube/sirve DIRECTO desde la lógica
   // (no pasa por el controlador, porque es multipart/form-data + streaming).
   // ⚠️ Cambiar la IP/host aquí TAMBIÉN cuando se prueba en celular físico.
-  LOGICA_API_URL: 'http://192.168.1.84:2000/base_logica/',
+  LOGICA_API_URL: 'http://localhost:2000/base_logica/',
 
 
   DATA_KEY_TOKEN: 'token',
