@@ -11,14 +11,14 @@
 
 <ion-content [fullscreen]="true" class="ion-padding">
   @if (error && !ev) {
-    <div class="centro">
-      <ion-icon name="close-circle" color="danger" class="big-icon"></ion-icon>
+    <div class="centro" role="alert">
+      <ion-icon name="close-circle" color="danger" class="big-icon" aria-hidden="true"></ion-icon>
       <p><ion-text color="danger">{{ error }}</ion-text></p>
       <ion-button (click)="volverACursos()">Volver a cursos</ion-button>
     </div>
   } @else if (finalizando) {
-    <div class="centro">
-      <ion-spinner name="crescent"></ion-spinner>
+    <div class="centro" role="status" aria-live="polite">
+      <ion-spinner name="crescent" aria-busy="true" aria-label="Cargando"></ion-spinner>
       <p><ion-text color="medium">Calculando resultados…</ion-text></p>
     </div>
   } @else if (pregunta; as p) {
@@ -63,9 +63,15 @@
           <span class="alt-texto">{{ alt.texto }}</span>
           @if (fase === 'feedback' && ultimo) {
             @if (ultimo.correctaAlternativaId === alt.alternativa_id) {
-              <ion-icon name="checkmark-circle" color="success"></ion-icon>
+              <span class="alt-marca alt-marca-ok">
+                <ion-icon name="checkmark-circle" color="success" aria-hidden="true"></ion-icon>
+                <span class="alt-marca-txt">Respuesta correcta</span>
+              </span>
             } @else if (seleccion === alt.alternativa_id && !ultimo.correcta) {
-              <ion-icon name="close-circle" color="danger"></ion-icon>
+              <span class="alt-marca alt-marca-fail">
+                <ion-icon name="close-circle" color="danger" aria-hidden="true"></ion-icon>
+                <span class="alt-marca-txt">Respuesta incorrecta</span>
+              </span>
             }
           }
         </button>
@@ -73,24 +79,25 @@
     </div>
 
     @if (error) {
-      <ion-text color="danger"><p class="error">{{ error }}</p></ion-text>
+      <ion-text color="danger"><p class="error" role="alert">{{ error }}</p></ion-text>
     }
 
     <!-- Feedback (RF-32/34/35/36/38) -->
     @if (fase === 'feedback' && ultimo) {
-      <div class="feedback {{ ultimo.correcta ? 'ok' : (ultimo.finalizadaPregunta ? 'fail' : 'retry') }}">
+      <div class="feedback {{ ultimo.correcta ? 'ok' : (ultimo.finalizadaPregunta ? 'fail' : 'retry') }}"
+        role="status" aria-live="polite">
         @if (ultimo.correcta) {
-          <p class="fb-title"><ion-icon name="checkmark-circle"></ion-icon> ¡Correcto!</p>
+          <p class="fb-title"><ion-icon name="checkmark-circle" aria-hidden="true"></ion-icon> ¡Correcto!</p>
         } @else if (ultimo.puedeReintentar) {
-          <p class="fb-title"><ion-icon name="close-circle"></ion-icon> Incorrecto. Te queda un intento.</p>
+          <p class="fb-title"><ion-icon name="close-circle" aria-hidden="true"></ion-icon> Incorrecto. Te queda un intento.</p>
         } @else {
-          <p class="fb-title"><ion-icon name="close-circle"></ion-icon> Incorrecto. La respuesta correcta está marcada.</p>
+          <p class="fb-title"><ion-icon name="close-circle" aria-hidden="true"></ion-icon> Incorrecto. La respuesta correcta está marcada.</p>
         }
         <!-- Explicación clínica solo al finalizar la pregunta (RF-36/38).
              Render como HTML para respetar el formato del rich text editor. -->
         @if (ultimo.finalizadaPregunta && ultimo.explicacion) {
           <div class="fb-exp">
-            <ion-icon name="bulb-outline"></ion-icon>
+            <ion-icon name="bulb-outline" aria-hidden="true"></ion-icon>
             <div [innerHTML]="ultimo.explicacion | safeHtml"></div>
           </div>
         }
@@ -102,7 +109,7 @@
       @if (fase === 'responder') {
         <ion-button expand="block" color="primary" (click)="confirmar()"
           [disabled]="seleccion == null || enviando">
-          @if (enviando) { <ion-spinner name="dots"></ion-spinner> }
+          @if (enviando) { <ion-spinner name="dots" aria-busy="true" aria-label="Cargando"></ion-spinner> }
           @else { Confirmar respuesta }
         </ion-button>
       } @else if (ultimo && !ultimo.finalizadaPregunta && ultimo.puedeReintentar) {

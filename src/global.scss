@@ -126,6 +126,28 @@ ion-toolbar {
   --border-width: 0;
 }
 
+/* Skip-link (WCAG 2.4.1 "Saltar bloques"): oculto fuera de pantalla y solo
+   visible cuando recibe el foco por teclado. Lleva al contenido principal. */
+.skip-link {
+  position: absolute;
+  left: 8px;
+  top: -48px;
+  z-index: 10000;
+  padding: 10px 16px;
+  border-radius: 0 0 8px 8px;
+  background: var(--ion-color-primary);
+  color: var(--ion-color-primary-contrast, #fff);
+  font-weight: 600;
+  text-decoration: none;
+  transition: top 0.16s ease;
+}
+.skip-link:focus,
+.skip-link:focus-visible {
+  top: 0;
+  outline: none;
+  box-shadow: var(--auris-focus-ring);
+}
+
 /* Foco visible por teclado (accesibilidad WCAG 2.4.7) en elementos propios.
    No afecta el clic con mouse/touch, solo navegación por teclado. */
 a:focus-visible,

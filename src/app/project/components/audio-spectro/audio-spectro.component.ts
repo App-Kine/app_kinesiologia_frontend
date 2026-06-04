@@ -4,17 +4,17 @@ import {
 import { CommonModule } from '@angular/common';
 
 /**
- * Reproductor de audio + ESPECTROGRAMA en vivo.
+ * Reproductor de audio + VISUALIZADOR de barras (estilo ecualizador).
  *
- * Muestra un <audio controls> y, debajo, un espectrograma que se dibuja en
- * tiempo real mientras el audio suena (frecuencia en el eje vertical: graves
- * abajo, agudos arriba; el tiempo avanza hacia la derecha). Usa la Web Audio
- * API (AnalyserNode) — sin librerías externas.
+ * Muestra un <audio controls> y, debajo, barras verticales azules con glow,
+ * centradas, que reaccionan en tiempo real al sonido (más energía en una banda
+ * de frecuencia → barra más alta). Usa la Web Audio API (AnalyserNode), sin
+ * librerías externas.
  *
  * El audio puede venir de otro origen (la lógica), por eso usamos
  * crossorigin="anonymous"; el backend ya envía cabeceras CORS. Si el análisis
- * no estuviera disponible, el audio igual se reproduce (solo no se ve el
- * espectrograma).
+ * no estuviera disponible (CORS u otro), el audio igual se reproduce (solo se
+ * queda la visualización en reposo).
  *
  * Uso:  <app-audio-spectro [src]="urlDelAudio"></app-audio-spectro>
  */
@@ -35,10 +35,7 @@ import { CommonModule } from '@angular/common';
         (pause)="onPause()"
         (ended)="onPause()"
       ></audio>
-      <canvas #canvas class="spectro-canvas" width="320" height="120"></canvas>
-      <p class="spectro-hint">
-        Espectrograma — frecuencia (vertical) a lo largo del tiempo
-      </p>
+      <canvas #canvas class="spectro-canvas"></canvas>
     </div>
   `,
   styles: [`
@@ -46,12 +43,15 @@ import { CommonModule } from '@angular/common';
     .spectro-audio { width: 100%; }
     .spectro-canvas {
       width: 100%;
-      height: 120px;
+      height: 130px;
       display: block;
-      border-radius: 10px;
-      background: #0b1020;
+      border-radius: 12px;
+      /* Transparente: el visualizador muestra el MISMO fondo de la caja que lo
+         contiene (.audio-box), en vez de un rectángulo negro. Las barras se
+         dibujan con clearRect cada frame, así que el fondo siempre es el del
+         contenedor. */
+      background: transparent;
     }
-    .spectro-hint { margin: 0; font-size: 11px; opacity: .6; text-align: center; }
   `],
 })
 export class AudioSpectroComponent implements AfterViewInit, OnDestroy {
@@ -68,12 +68,18 @@ export class AudioSpectroComponent implements AfterViewInit, OnDestroy {
   private activo = false;
   private grafoListo = false;
 
+  // Estilo del visualizador.
+  private readonly BARS = 56;          // nº de barras
+  private readonly COLOR = '#2ec6ff';  // azul cyan brillante (como la referencia)
+
   ngAfterViewInit(): void {
-    this.limpiarCanvas();
+    this.ajustarTamano();
+    this.dibujarReposo();
   }
 
   onPlay(): void {
     this.initGrafo();
+    this.ajustarTamano();
     if (this.ctx && this.ctx.state === 'suspended') {
       this.ctx.resume();
     }
@@ -95,60 +101,81 @@ export class AudioSpectroComponent implements AfterViewInit, OnDestroy {
       this.ctx = new Ctx();
       this.sourceNode = this.ctx.createMediaElementSource(this.audioRef.nativeElement);
       this.analyser = this.ctx.createAnalyser();
-      this.analyser.fftSize = 512;
-      this.analyser.smoothingTimeConstant = 0.6;
+      this.analyser.fftSize = 1024;
+      this.analyser.smoothingTimeConstant = 0.75; // suaviza el movimiento
       this.sourceNode.connect(this.analyser);
       this.analyser.connect(this.ctx.destination);
       this.data = new Uint8Array(new ArrayBuffer(this.analyser.frequencyBinCount));
       this.grafoListo = true;
     } catch (e) {
-      // Si falla (CORS u otro), el audio igual suena; solo no hay espectrograma.
+      // Si falla (CORS u otro), el audio igual suena; solo no hay visualización.
       // eslint-disable-next-line no-console
       console.warn('[audio-spectro] análisis no disponible', e);
     }
   }
 
+  /** Ajusta la resolución del canvas a su tamaño en pantalla (barras nítidas). */
+  private ajustarTamano(): void {
+    const canvas = this.canvasRef.nativeElement;
+    const w = Math.round(canvas.clientWidth || 320);
+    const h = Math.round(canvas.clientHeight || 130);
+    if (w > 0 && canvas.width !== w) canvas.width = w;
+    if (h > 0 && canvas.height !== h) canvas.height = h;
+  }
+
   private dibujar = (): void => {
     if (!this.activo || !this.analyser || !this.data) return;
     this.raf = requestAnimationFrame(this.dibujar);
+    this.ajustarTamano();
+    this.analyser.getByteFrequencyData(this.data);
+    this.pintarBarras(this.data);
+  };
 
+  /** Dibuja las barras centradas a partir de los datos de frecuencia. */
+  private pintarBarras(data: Uint8Array): void {
     const canvas = this.canvasRef.nativeElement;
     const c = canvas.getContext('2d');
     if (!c) return;
 
-    this.analyser.getByteFrequencyData(this.data);
     const w = canvas.width;
     const h = canvas.height;
+    const mid = h / 2;
 
-    // Desplazar el contenido 1px a la izquierda (efecto scroll del tiempo).
-    const img = c.getImageData(1, 0, w - 1, h);
-    c.putImageData(img, 0, 0);
+    // Fondo negro (clearRect deja transparente → se ve el background #000 del CSS).
+    c.clearRect(0, 0, w, h);
 
-    // Dibujar la columna nueva en el borde derecho.
-    const bins = this.data.length;
-    for (let y = 0; y < h; y++) {
-      const i = Math.floor((1 - y / h) * (bins - 1)); // graves abajo, agudos arriba
-      c.fillStyle = this.color(this.data[i]);
-      c.fillRect(w - 1, y, 1, 1);
+    const slot = w / this.BARS;
+    const barW = Math.max(2, slot * 0.5);   // grosor de cada barra (con separación)
+    const minHalf = barW / 2;               // mínimo: que se vea un "punto" redondo
+    // Usamos la parte baja-media del espectro (lo audible útil del sonido).
+    const usable = Math.max(1, Math.floor(data.length * 0.65));
+
+    c.lineCap = 'round';
+    c.lineWidth = barW;
+    c.strokeStyle = this.COLOR;
+    c.shadowColor = this.COLOR;
+    c.shadowBlur = 9;                        // glow
+
+    for (let b = 0; b < this.BARS; b++) {
+      const start = Math.floor((b / this.BARS) * usable);
+      const end = Math.floor(((b + 1) / this.BARS) * usable);
+      let max = 0;
+      for (let i = start; i <= end && i < data.length; i++) {
+        if (data[i] > max) max = data[i];
+      }
+      const v = max / 255;                  // 0..1
+      const half = Math.max(minHalf, v * (mid - 4));
+      const x = b * slot + slot / 2;
+      c.beginPath();
+      c.moveTo(x, mid - half);
+      c.lineTo(x, mid + half);
+      c.stroke();
     }
-  };
-
-  /** Heatmap simple: 0 oscuro → alto brillante (azul → cyan → amarillo → rojo). */
-  private color(v: number): string {
-    const t = v / 255;
-    const r = Math.round(255 * Math.min(1, Math.max(0, t * 1.6 - 0.35)));
-    const g = Math.round(255 * Math.min(1, Math.max(0, t * 1.8 - 0.15)));
-    const b = Math.round(255 * Math.min(1, Math.max(0, 1.2 - t * 1.6)));
-    return `rgb(${r},${g},${b})`;
   }
 
-  private limpiarCanvas(): void {
-    const canvas = this.canvasRef.nativeElement;
-    const c = canvas.getContext('2d');
-    if (c) {
-      c.fillStyle = '#0b1020';
-      c.fillRect(0, 0, canvas.width, canvas.height);
-    }
+  /** Estado en reposo (sin reproducir): una fila de puntos/barras mínimas. */
+  private dibujarReposo(): void {
+    this.pintarBarras(new Uint8Array(this.BARS * 8)); // todo en 0 → barras mínimas
   }
 
   ngOnDestroy(): void {

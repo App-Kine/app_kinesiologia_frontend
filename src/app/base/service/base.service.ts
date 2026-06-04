@@ -1,11 +1,32 @@
 import { Injectable } from "@angular/core";
-import { HttpClient, HttpHeaders, HttpResponse } from "@angular/common/http";
+import { HttpClient, HttpHeaders, HttpResponse, HttpErrorResponse } from "@angular/common/http";
 import { NativeStorage } from "@ionic-native/native-storage/ngx";
 
 import { Platform } from "@ionic/angular";
 import { AnalyticsService } from "../../project/services/analytics.service";
 import { environment } from "../../../environments/environment";
 
+/**
+ * BaseService — capa HTTP común de la app del estudiante.
+ *
+ * CÓMO SE LLAMA AL BACKEND:
+ *   - Único método público de red: post(url, args). Envía a `url` (normalmente
+ *     environment.BASE_API_URL = Controlador/gateway) el cuerpo
+ *     `arg=<JSON url-encoded>` con Content-Type application/x-www-form-urlencoded.
+ *
+ * DÓNDE SE GUARDA EL TOKEN (sesión efímera):
+ *   - getAngularHeaders() lee el token de storage (clave environment.DATA_KEY_TOKEN)
+ *     y, si existe, lo agrega como cabecera Authorization.
+ *   - Storage: en móvil (hybrid) usa NativeStorage; en web usa localStorage.
+ *     No se guardan credenciales, solo el token devuelto por el backend.
+ *
+ * MANEJO DE ERRORES / SESIÓN EXPIRADA:
+ *   - proccessResponse() interpreta la respuesta lógica del backend
+ *     ({status:'OK'|'ERROR'}). Si el error es 'tokenError' → limpia la sesión
+ *     (clearStoredData) y rechaza con ERROR_EXPIRED_TOKEN (no deja el spinner colgado).
+ *   - handleError() normaliza fallas de transporte (HttpErrorResponse) a mensajes
+ *     de usuario (sin conexión / 5xx / 401) y NO expone el texto crudo del error.
+ */
 @Injectable({
     providedIn: "root",
 })
@@ -27,7 +48,7 @@ export class BaseService {
         try {
             token = await this.getStoreData(environment.DATA_KEY_TOKEN);
         } catch (error) {
-            console.log("NO TOKEN YET");
+            if (!environment.production) console.log("NO TOKEN YET");
         }
         this.httpClientHeaders = new HttpHeaders();
         this.httpClientHeaders = this.httpClientHeaders.append(
@@ -46,7 +67,13 @@ export class BaseService {
             switch (data.status) {
                 case "ERROR":
                    if (data.error.message.includes("tokenError")) {
-                      console.log('ERROR', data.error)
+                      // Token expirado: limpiamos sesión y SIEMPRE rechazamos la
+                      // promesa con el mensaje de sesión expirada para no dejar
+                      // el spinner colgado (antes solo hacía break -> promesa sin settle).
+                      if (!environment.production) console.log('ERROR', data.error)
+                      this.clearStoredData().catch(() => {});
+                      const expiredError: any = new Error(environment.ERROR_EXPIRED_TOKEN);
+                      onError(this.handleError(expiredError));
                       break
                     } else {
                       onError(this.handleError(data.error));
@@ -68,6 +95,24 @@ export class BaseService {
     }
     private handleError(error: any) {
         //console.error(error);
+        // Errores de transporte HTTP (HttpErrorResponse): normalizamos por status
+        // para no mostrar al usuario el texto crudo tipo
+        // "Http failure response ... 0 Unknown Error".
+        if (error instanceof HttpErrorResponse) {
+            this.analyticsService.ErrorHandler(error);
+            let msg: string;
+            if (error.status === 0) {
+                msg = "Sin conexión. Verifica tu internet e inténtalo de nuevo.";
+            } else if (error.status >= 500) {
+                msg = "Error del servidor. Intenta más tarde.";
+            } else if (error.status === 401) {
+                msg = environment.ERROR_EXPIRED_TOKEN;
+            } else {
+                msg = error.message;
+            }
+            // Devolvemos un Error con mensaje normalizado para las páginas.
+            return new Error(msg);
+        }
         // Errores que no se reportan a las estadísticas
         // if (error.message.includes("tokenError")) {
         //   return false
@@ -106,6 +151,13 @@ export class BaseService {
             let response = await this.proccessResponse(data);
             return response;
         } catch (error) {
+            // Las fallas de transporte (sin conexión, 5xx, 401) rechazan toPromise()
+            // con un HttpErrorResponse crudo que no pasó por proccessResponse.
+            // Lo normalizamos aquí para que las páginas no muestren el texto crudo
+            // "Http failure response ... 0 Unknown Error".
+            if (error instanceof HttpErrorResponse) {
+                throw this.handleError(error);
+            }
             throw error;
         }
     }
@@ -113,9 +165,19 @@ export class BaseService {
     public isMobilePlatform(): boolean {
         return this.platform.is("hybrid");
     }
-    public setStoreData(key: string, data: any) {
+    public async setStoreData(key: string, data: any) {
         if (this.isMobilePlatform()) {
-            this.storage.setItem(key, data);
+            // await + catch: si falla el guardado nativo no rompemos el flujo
+            // (antes era una promesa sin await -> unhandled rejection).
+            try {
+                await this.storage.setItem(key, data);
+            } catch (error: any) {
+                if (!environment.production) {
+                    console.error(
+                        new Error("No se pudo guardar dato nativo. key: " + key)
+                    );
+                }
+            }
         } else {
             localStorage.setItem(key, JSON.stringify(data));
         }
@@ -127,12 +189,14 @@ export class BaseService {
             try {
                 data = await this.storage.getItem(key);
             } catch (error:any) {
-                if (error.code == 2) {
-                    console.error(new Error("Data Not Found. key: " + key));
-                } else {
-                    console.error(
-                        new Error("Data Not Found. error: " + error.message)
-                    );
+                if (!environment.production) {
+                    if (error.code == 2) {
+                        console.error(new Error("Data Not Found. key: " + key));
+                    } else {
+                        console.error(
+                            new Error("Data Not Found. error: " + error.message)
+                        );
+                    }
                 }
             }
         } else {
@@ -145,14 +209,20 @@ export class BaseService {
         try {
           await this.storage.remove(key);
         } catch (error: any) {
-          if (error.code == 2) {
-            console.error(new Error("Data Not Found. key: " + key));
-          } else {
-            console.error(
-              new Error("Data Not Found. error: " + error.message)
-            );
+          if (!environment.production) {
+            if (error.code == 2) {
+              console.error(new Error("Data Not Found. key: " + key));
+            } else {
+              console.error(
+                new Error("Data Not Found. error: " + error.message)
+              );
+            }
           }
         }
+      } else {
+        // Web: borrar la key de localStorage. Sin esta rama, en navegador el
+        // cierre de sesión no eliminaba el token (quedaba persistido).
+        localStorage.removeItem(key);
       }
     }
     public async clearStoredData() {

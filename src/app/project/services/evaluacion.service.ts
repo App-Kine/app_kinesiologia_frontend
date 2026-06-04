@@ -212,9 +212,10 @@ export class EvaluacionService extends BaseService {
    * enumerable en este endpoint sin login).
    */
   enviarInforme(
-    evaluacionUuid: string
+    evaluacionUuid: string,
+    pdfBase64?: string
   ): Promise<{ enviado: boolean; correo: string; modo: string }> {
-    return this.post(this.url + 'evaluacion/enviarInforme', { evaluacionUuid });
+    return this.post(this.url + 'evaluacion/enviarInforme', { evaluacionUuid, pdfBase64 });
   }
 
   /**

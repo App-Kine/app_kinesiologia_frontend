@@ -40,13 +40,16 @@
         [(ngModel)]="correo"
         placeholder="tucorreo@ejemplo.com"
         autocomplete="email"
+        aria-required="true"
+        [attr.aria-invalid]="error ? 'true' : null"
+        [attr.aria-describedby]="error ? 'inicio-error' : 'inicio-hint'"
       ></ion-input>
     </ion-item>
-    <ion-note class="hint">Recibirás el informe de resultados en este correo (RF-41).</ion-note>
+    <ion-note id="inicio-hint" class="hint">Recibirás el informe de resultados en este correo (RF-41).</ion-note>
   }
 
   @if (error) {
-    <ion-text color="danger"><p class="error">{{ error }}</p></ion-text>
+    <ion-text color="danger"><p id="inicio-error" class="error" role="alert">{{ error }}</p></ion-text>
   }
 
   <ion-button
@@ -57,9 +60,9 @@
     [disabled]="iniciando"
   >
     @if (iniciando) {
-      <ion-spinner name="dots"></ion-spinner>
+      <ion-spinner name="dots" aria-busy="true" aria-label="Cargando"></ion-spinner>
     } @else {
-      <ion-icon name="play-outline" slot="start"></ion-icon>
+      <ion-icon name="play-outline" slot="start" aria-hidden="true"></ion-icon>
       Comenzar evaluación
     }
   </ion-button>

@@ -198,9 +198,12 @@ const PUNTO_TRAQUEA: PuntoAuscultacion = {
   ubicacion: 'Línea media anterior, sobre la horquilla esternal (escotadura yugular).',
   descripcion:
     'Punto de referencia traqueal. Registra el sonido de la vía aérea central, patrón con el que se comparan los ruidos pulmonares periféricos. En ICBHI corresponde a la zona Tc.',
-  // Subida al cuello (sobre 9 y 10), como en el diagrama del docente.
-  position: '2.5 2.36 -0.1',
-  normal: '0 0.42 0.91',
+  // PEGADA A LA PIEL: Z = superficie REAL del esternón en la línea media a esta
+  // altura (raycast contra la malla, 2026-06-03). Antes estaba en Y=2.36 / Z=-0.1,
+  // que quedaba ~0.4 por delante del cuerpo (la superficie real ahí es Z≈-0.5),
+  // por eso se veía despegada. Y=2.20 = horquilla esternal, justo sobre 9/10.
+  position: '2.5 2.2 -0.457',
+  normal: '0 0.57 0.82',
 };
 
 /**
