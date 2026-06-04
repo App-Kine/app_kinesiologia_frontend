@@ -307,23 +307,51 @@ npm run sync                 # build dev + cap sync (ambas plataformas)
 
 `capacitor.config.ts` está en `androidScheme: 'http'` + `cleartext: true` + `android.allowMixedContent: true`. Esto permite que la app (servida desde `http://localhost`) hable con el backend de DEV por **HTTP plano** sin que Android lo bloquee como *mixed content*. En iOS el `setup-ios.command` parchea `NSAllowsArbitraryLoads` en `Info.plist` por el mismo motivo. **En producción se vuelve a HTTPS** (backend con TLS) y se quita el cleartext.
 
-### Para correr en un celular físico
+### 📱 Para probar en un celular FÍSICO (iPhone / Android)
 
-`localhost` **no resuelve desde el teléfono** (apunta al propio dispositivo). El Mac y el celular deben estar en la **misma red WiFi**, y hay que reemplazar `localhost` por la **IP del Mac**:
+> **El archivo que se edita es `src/environments/environment.ts`.** `localhost`
+> **no resuelve desde el teléfono** (apunta al propio dispositivo), así que hay
+> que apuntar a la **IP del Mac** en la WiFi. En el **simulador iOS** y en el
+> **navegador** sí funciona `localhost` (no hace falta cambiar nada).
 
-1. IP del Mac: `ipconfig getifaddr en0` → ej. `192.168.1.42`
-2. Editá `src/environments/environment.ts`:
-   ```ts
-   BASE_API_URL:  'http://192.168.1.42:3023/controlador_base/',
-   LOGICA_API_URL:'http://192.168.1.42:2000/base_logica/',
-   ```
-3. Recompilá y volvé a desplegar:
-   ```bash
-   npm run android      # Android
-   # o
-   npm run ios          # iOS
-   ```
-4. Asegurate de que el Controlador (3023) y la Lógica (2000) acepten conexiones desde la red (no solo `127.0.0.1`) y que el firewall del Mac no bloquee esos puertos.
+**Requisitos:** Mac y teléfono en la **MISMA red WiFi**, y los backends
+(Controlador `:3023` + Lógica `:2000`) **corriendo**.
+
+**1. Obtené la IP del Mac:**
+```bash
+ipconfig getifaddr en0      # ej. 192.168.1.84
+```
+
+**2. Editá `src/environments/environment.ts`** — reemplazá `localhost` por esa IP en las DOS líneas:
+```ts
+//  ANTES (DEV web / simulador):
+BASE_API_URL:  'http://localhost:3023/controlador_base/',
+LOGICA_API_URL:'http://localhost:2000/base_logica/',
+
+//  DESPUÉS (celular físico) — usá TU IP:
+BASE_API_URL:  'http://192.168.1.84:3023/controlador_base/',
+LOGICA_API_URL:'http://192.168.1.84:2000/base_logica/',
+```
+
+**3. Recompilá y desplegá al teléfono:**
+
+- **Android:**
+  ```bash
+  npm run android
+  ```
+- **iOS (iPhone físico):** evitá `npm run ios` si CocoaPods da error; usá:
+  ```bash
+  npx ng build --configuration development
+  npx cap copy ios          # copia el nuevo bundle (con la IP) al proyecto iOS
+  npx cap open ios          # abre Xcode → seleccioná tu iPhone → ▶ Run
+  ```
+
+**4.** Verificá que el firewall del Mac no bloquee los puertos 2000/3023 (los
+servidores ya escuchan en `0.0.0.0`, aceptan conexiones de la red).
+
+> ⚠️ **Antes del commit / entrega final: volvé a dejar `localhost`** en
+> `environment.ts` (la IP es específica de tu máquina y red). Para producción se
+> usa `environment.prod.ts` con el dominio HTTPS real.
 
 ---
 
