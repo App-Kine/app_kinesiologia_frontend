@@ -79,6 +79,8 @@ export interface RespuestaResultado {
 /** Resumen final (RF-39/40). */
 export interface ResultadoFinal {
   evaluacion_id: number;
+  /** Identificador público no adivinable: se usa para pedir el informe. */
+  evaluacion_uuid: string;
   modalidad: 'ANONIMA' | 'IDENTIFICADA';
   total_preguntas: number;
   aciertos_primer: number;
@@ -204,19 +206,25 @@ export class EvaluacionService extends BaseService {
     return this.post(this.url + 'evaluacion/enviar', args);
   }
 
-  /** Envía el informe de resultados al correo registrado (RF-41/42). */
+  /**
+   * Envía el informe de resultados al correo registrado (RF-41/42).
+   * Se identifica por el UUID público (no por el id secuencial, que sería
+   * enumerable en este endpoint sin login).
+   */
   enviarInforme(
-    evaluacionId: number
+    evaluacionUuid: string,
+    pdfBase64?: string
   ): Promise<{ enviado: boolean; correo: string; modo: string }> {
-    return this.post(this.url + 'evaluacion/enviarInforme', { evaluacionId });
+    return this.post(this.url + 'evaluacion/enviarInforme', { evaluacionUuid, pdfBase64 });
   }
 
   /**
    * Devuelve el informe completo (cabecera + todas las preguntas con
    * alternativas, selección, tiempo, etc.) para descarga PDF.
    * Pedido cliente 2026-05-26. Disponible para anónimas e identificadas.
+   * Se identifica por el UUID público (ver nota de seguridad en enviarInforme).
    */
-  informeCompleto(evaluacionId: number): Promise<InformeCompleto> {
-    return this.post(this.url + 'evaluacion/informeCompleto', { evaluacionId });
+  informeCompleto(evaluacionUuid: string): Promise<InformeCompleto> {
+    return this.post(this.url + 'evaluacion/informeCompleto', { evaluacionUuid });
   }
 }

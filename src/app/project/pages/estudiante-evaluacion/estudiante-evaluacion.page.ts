@@ -242,7 +242,7 @@ export class EstudianteEvaluacionPage implements OnInit {
         this.ev.correo
       );
 
-      this.router.navigateByUrl(`/estudiante/resultado/${resultado.evaluacion_id}`, {
+      this.router.navigateByUrl(`/estudiante/resultado/${resultado.evaluacion_uuid}`, {
         state: { resultado, testNombre: this.ev.test_nombre },
         replaceUrl: true,
       });

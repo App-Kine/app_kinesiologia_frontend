@@ -76,63 +76,45 @@
 }
 
 /* ============================================================
-   Filtros (chips arriba)
+   Colores de grupo RECSOP (mismos que la presentación del docente)
    ============================================================ */
-.filtros-bar {
-  display: flex;
-  gap: 8px;
-  padding: 8px 16px 8px;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
+:host {
+  --grp-posterior: #a99bff;
+  --grp-anterior:  #34d6a6;
+  --grp-lateral:   #f3b34a;
+  --grp-traquea:   #cfe2e3;
 }
 
-.filtros-bar::-webkit-scrollbar { display: none; }
+/* Leyenda de grupos */
+.leyenda-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  padding: 8px 16px;
+  justify-content: center;
+}
 
-.filtro-chip {
-  flex: 0 0 auto;
+.leyenda-item {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 8px 14px;
-  border-radius: 999px;
-  border: 1px solid var(--aus-border);
-  background: var(--aus-surface);
-  color: var(--aus-text);
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  font-family: inherit;
-  transition: background .15s ease, border-color .15s ease, color .15s ease;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--aus-text-soft);
 }
 
-.filtro-chip:hover { background: var(--aus-surface-2); }
-
-.filtro-chip.active {
-  background: var(--ion-color-primary);
-  border-color: var(--ion-color-primary);
-  color: var(--ion-color-primary-contrast);
+.leyenda-item i {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  flex: none;
+  box-shadow: 0 0 7px 1px currentColor;
 }
 
-.filtro-chip.cardiaco.active {
-  background: var(--ion-color-danger);
-  border-color: var(--ion-color-danger);
-}
-
-.filtro-chip.pulmonar.active {
-  background: var(--ion-color-primary);
-  border-color: var(--ion-color-primary);
-}
-
-.contador {
-  display: inline-block;
-  padding: 2px 6px;
-  border-radius: 999px;
-  font-size: 11px;
-  background: rgba(127, 127, 127, 0.18);
-}
-
-.filtro-chip.active .contador { background: rgba(255, 255, 255, 0.28); }
+.leyenda-item.grupo-posterior i { background: var(--grp-posterior); color: var(--grp-posterior); }
+.leyenda-item.grupo-anterior  i { background: var(--grp-anterior);  color: var(--grp-anterior); }
+.leyenda-item.grupo-lateral   i { background: var(--grp-lateral);   color: var(--grp-lateral); }
+.leyenda-item.grupo-traquea   i { background: var(--grp-traquea);   color: var(--grp-traquea); }
 
 /* ============================================================
    Visor 3D
@@ -251,6 +233,21 @@
   opacity: 1;
 }
 
+/* Área táctil ≥44x44px (WCAG 2.5.5 / 2.1 AA target size): el círculo visual
+   sigue siendo pequeño, pero un pseudo-elemento transparente y centrado
+   extiende la zona tocable hasta 44x44px sin alterar el diseño. */
+.hotspot::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 44px;
+  height: 44px;
+  transform: translate(-50%, -50%);
+  /* Por debajo del número visible, pero captura el toque en todo el área. */
+  z-index: -1;
+}
+
 /* Cuando el hotspot está detrás de la geometría del modelo, model-viewer le
    agrega data-visible="false" (gracias a data-visibility-attribute="visible").
    Lo ocultamos para que el punto parezca pegado a la piel. */
@@ -300,16 +297,23 @@
   transition: transform .12s ease;
 }
 
-.hotspot-cardiaco  { --hotspot-color: #e53935; }
-.hotspot-pulmonar  { --hotspot-color: #1e88e5; }
-.hotspot-abdominal { --hotspot-color: #fb8c00; }
-.hotspot-vascular  { --hotspot-color: #8e24aa; }
+.hotspot-posterior { --hotspot-color: var(--grp-posterior); }
+.hotspot-anterior  { --hotspot-color: var(--grp-anterior); }
+.hotspot-lateral   { --hotspot-color: var(--grp-lateral); }
+.hotspot-traquea   { --hotspot-color: var(--grp-traquea); }
+
+/* La tráquea es gris claro → el número va oscuro para que contraste. */
+.hotspot-traquea .hotspot-num { color: #0b1413; }
 
 /* ============================================================
    Lista de puntos abajo del visor
    ============================================================ */
 .lista-puntos {
-  padding: 8px 16px 32px;
+  /* Padding inferior generoso y fijo (48px) + área segura: garantiza que el
+     último punto se vea completo aunque env(safe-area-inset-bottom) no resuelva
+     en el WebView. El 48px solo ya despeja el home indicator del iPhone. */
+  padding: 8px 16px;
+  padding-bottom: calc(48px + env(safe-area-inset-bottom, 0px));
 }
 
 .lista-puntos h3 {
@@ -364,24 +368,37 @@
   font-size: 13px;
 }
 
-.cat-cardiaco  .num-pill { background: #e53935; }
-.cat-pulmonar  .num-pill { background: #1e88e5; }
-.cat-abdominal .num-pill { background: #fb8c00; }
-.cat-vascular  .num-pill { background: #8e24aa; }
+.cat-posterior .num-pill { background: var(--grp-posterior); }
+.cat-anterior  .num-pill { background: var(--grp-anterior); }
+.cat-lateral   .num-pill { background: var(--grp-lateral); }
+.cat-traquea   .num-pill { background: var(--grp-traquea); color: #0b1413; }
 
 .punto-icon {
   flex: 0 0 auto;
   font-size: 22px;
 }
 
-.cat-cardiaco  .punto-icon { color: #e53935; }
-.cat-pulmonar  .punto-icon { color: #1e88e5; }
-.cat-abdominal .punto-icon { color: #fb8c00; }
-.cat-vascular  .punto-icon { color: #8e24aa; }
+.cat-posterior .punto-icon { color: var(--grp-posterior); }
+.cat-anterior  .punto-icon { color: var(--grp-anterior); }
+.cat-lateral   .punto-icon { color: var(--grp-lateral); }
+.cat-traquea   .punto-icon { color: #8aa1a3; }
 
 .punto-info {
   flex: 1 1 auto;
   min-width: 0;
+}
+
+/* Código ICBHI a la derecha de cada tarjeta */
+.icbhi-tag {
+  flex: 0 0 auto;
+  align-self: center;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--aus-surface-2);
+  color: var(--aus-text-soft);
 }
 
 .punto-info strong {
@@ -423,6 +440,39 @@
   align-items: center;
   justify-content: space-between;
   padding: 4px 0;
+}
+
+/* Badges de la ficha: grupo (coloreado) + código ICBHI */
+.sheet-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.grupo-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 5px 12px;
+  border-radius: 999px;
+  color: #0b1413;
+}
+
+.grupo-badge.grupo-posterior { background: var(--grp-posterior); }
+.grupo-badge.grupo-anterior  { background: var(--grp-anterior); }
+.grupo-badge.grupo-lateral   { background: var(--grp-lateral); }
+.grupo-badge.grupo-traquea   { background: var(--grp-traquea); }
+
+.icbhi-badge {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--aus-border);
+  color: var(--aus-text-soft);
 }
 
 .sheet-body {

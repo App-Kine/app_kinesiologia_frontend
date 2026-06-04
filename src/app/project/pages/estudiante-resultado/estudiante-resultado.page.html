@@ -45,9 +45,9 @@
     <!-- RF-41/42: envío del informe al correo registrado -->
     @if (resultado.modalidad === 'IDENTIFICADA') {
       @if (informeEnviado) {
-        <p class="nota">
+        <p class="nota" role="status" aria-live="polite">
           <ion-text color="success">
-            <ion-icon name="checkmark-done-outline"></ion-icon>
+            <ion-icon name="checkmark-done-outline" aria-hidden="true"></ion-icon>
             Informe enviado a {{ correoEnviado }}. Revisa tu bandeja de entrada (y spam).
           </ion-text>
         </p>
@@ -61,14 +61,14 @@
           (click)="enviarInforme()"
         >
           @if (enviandoInforme) {
-            <ion-spinner name="dots"></ion-spinner>
+            <ion-spinner name="dots" aria-busy="true" aria-label="Cargando"></ion-spinner>
           } @else {
-            <ion-icon name="mail-outline" slot="start"></ion-icon>
+            <ion-icon name="mail-outline" slot="start" aria-hidden="true"></ion-icon>
             Enviar informe a mi correo
           }
         </ion-button>
         @if (errorInforme) {
-          <p class="nota"><ion-text color="danger">{{ errorInforme }}</ion-text></p>
+          <p class="nota" role="alert"><ion-text color="danger">{{ errorInforme }}</ion-text></p>
         }
       }
     }
@@ -83,14 +83,14 @@
       (click)="descargarInforme()"
     >
       @if (generandoPdf) {
-        <ion-spinner name="dots"></ion-spinner>
+        <ion-spinner name="dots" aria-busy="true" aria-label="Cargando"></ion-spinner>
       } @else {
-        <ion-icon name="download-outline" slot="start"></ion-icon>
+        <ion-icon name="download-outline" slot="start" aria-hidden="true"></ion-icon>
         Descargar informe (PDF)
       }
     </ion-button>
     @if (errorPdf) {
-      <p class="nota"><ion-text color="danger">{{ errorPdf }}</ion-text></p>
+      <p class="nota" role="alert"><ion-text color="danger">{{ errorPdf }}</ion-text></p>
     }
 
     <ion-button expand="block" color="primary" class="ion-margin-top" (click)="volver()">

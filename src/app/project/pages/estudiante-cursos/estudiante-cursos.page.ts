@@ -3,7 +3,8 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import {
   IonContent, IonHeader, IonToolbar, IonTitle, IonButtons, IonButton,
-  IonBackButton, IonIcon, IonList, IonItem, IonLabel, IonNote, IonText, IonSpinner,
+  IonBackButton, IonIcon, IonList, IonItem, IonLabel, IonText, IonSpinner,
+  IonRefresher, IonRefresherContent,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { schoolOutline, chevronForwardOutline, refreshOutline } from 'ionicons/icons';
@@ -17,13 +18,20 @@ import { EvaluacionService, CursoPublico } from '../../services/evaluacion.servi
   standalone: true,
   imports: [
     CommonModule, IonContent, IonHeader, IonToolbar, IonTitle, IonButtons,
-    IonButton, IonBackButton, IonIcon, IonList, IonItem, IonLabel, IonNote, IonText, IonSpinner,
+    IonButton, IonBackButton, IonIcon, IonList, IonItem, IonLabel, IonText, IonSpinner,
+    IonRefresher, IonRefresherContent,
   ],
 })
 export class EstudianteCursosPage {
   cursos: CursoPublico[] = [];
   cargando = true;
   error: string | null = null;
+
+  private inFlight = false;
+  // Refresco al volver la app a primer plano (cubre web y WebView de Capacitor).
+  private onVisible = (): void => {
+    if (document.visibilityState === 'visible') { void this.cargar(true); }
+  };
 
   constructor(private evalSvc: EvaluacionService, private router: Router) {
     addIcons({ schoolOutline, chevronForwardOutline, refreshOutline });
@@ -34,18 +42,35 @@ export class EstudianteCursosPage {
    * Asegura que el estudiante vea los cursos actualizados si el docente
    * habilitó/deshabilitó alguno mientras navegaba.
    */
-  ionViewWillEnter(): void { void this.cargar(); }
+  ionViewWillEnter(): void {
+    void this.cargar();
+    document.addEventListener('visibilitychange', this.onVisible);
+  }
 
-  async cargar(): Promise<void> {
-    this.cargando = true;
-    this.error = null;
+  ionViewWillLeave(): void {
+    document.removeEventListener('visibilitychange', this.onVisible);
+  }
+
+  /** @param silencioso true = refresco en segundo plano (sin spinner ni borrar la lista). */
+  async cargar(silencioso = false): Promise<void> {
+    if (this.inFlight) return;
+    this.inFlight = true;
+    if (!silencioso) { this.cargando = true; this.error = null; }
     try {
       this.cursos = await this.evalSvc.listarCursos();
+      this.error = null;
     } catch (e: any) {
-      this.error = e?.message || 'No se pudieron cargar los cursos';
+      if (!silencioso) { this.error = e?.message || 'No se pudieron cargar los cursos'; }
     } finally {
+      this.inFlight = false;
       this.cargando = false;
     }
+  }
+
+  /** Pull-to-refresh. */
+  async doRefresh(ev: any): Promise<void> {
+    await this.cargar(true);
+    ev.target.complete();
   }
 
   abrir(c: CursoPublico): void {

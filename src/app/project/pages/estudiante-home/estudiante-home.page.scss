@@ -1,78 +1,73 @@
 /*
- * Variables propias del componente, light/dark mode aware.
- * Mismo patrón que estudiante-auscultacion: definimos defaults light,
- * y los sobrescribimos con @media (prefers-color-scheme: dark).
+ * Home del estudiante.
+ * Ahora consume el SISTEMA DE DISEÑO compartido (theme/variables.scss):
+ * superficies, bordes, texto, elevación y gradiente de marca vienen de los
+ * tokens --auris-*, que ya resuelven claro/oscuro automáticamente. Así esta
+ * pantalla queda coherente con el resto y futuras vistas heredan el mismo look.
  */
 :host {
   display: block;
-
-  --home-bg:        var(--ion-background-color, #ffffff);
-  --home-bg-tint:   color-mix(in srgb, var(--ion-color-primary) 5%, #ffffff);
-  --home-surface:   #ffffff;
-  --home-surface-2: #f0f0f3;
-  --home-border:    #e5e5e7;
-  --home-text:      #1a1a1a;
-  --home-text-soft: #5a5a5e;
-  --home-text-muted:#80868b;
-  --home-shadow:    rgba(0, 0, 0, 0.06);
-  --home-shadow-hover: rgba(0, 0, 0, 0.10);
-
   color-scheme: light dark;
 }
 
-@media (prefers-color-scheme: dark) {
-  :host {
-    --home-bg:        #0f1115;
-    --home-bg-tint:   color-mix(in srgb, var(--ion-color-primary) 8%, #0f1115);
-    --home-surface:   #1c1f25;
-    --home-surface-2: #262a31;
-    --home-border:    #2e323a;
-    --home-text:      #f1f1f2;
-    --home-text-soft: #c5c7cc;
-    --home-text-muted:#8b8e95;
-    --home-shadow:    rgba(0, 0, 0, 0.4);
-    --home-shadow-hover: rgba(0, 0, 0, 0.55);
-  }
-}
-
 .home-content {
-  --background: linear-gradient(180deg, var(--home-bg-tint) 0%, var(--home-bg) 100%);
-  color: var(--home-text);
+  /* Fondo con tinte sutil de marca que se desvanece hacia el fondo base */
+  --background: linear-gradient(180deg, var(--auris-bg-tint) 0%, var(--ion-background-color, #fff) 100%);
+  color: var(--auris-text);
 }
 
 .home-wrapper {
   max-width: 720px;
   margin: 0 auto;
-  padding: 32px 20px 40px;
+  padding: var(--auris-space-8) var(--auris-space-5) var(--auris-space-10);
 }
 
+/* ============================================================
+   Bienvenida
+   ============================================================ */
 .welcome {
   text-align: center;
-  margin-bottom: 36px;
+  margin-bottom: var(--auris-space-8);
 }
 
-.welcome-icon {
-  font-size: 56px;
-  color: var(--ion-color-primary);
-  margin-bottom: 8px;
+/* Insignia con gradiente navy → teal (firma de marca) */
+.welcome-badge {
+  width: 76px;
+  height: 76px;
+  margin: 0 auto var(--auris-space-3);
+  border-radius: var(--auris-radius-xl);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--auris-gradient);
+  box-shadow: var(--auris-elev-2);
+}
+
+.welcome-badge ion-icon {
+  font-size: 38px;
+  color: #ffffff;
 }
 
 .welcome h1 {
-  font-size: 28px;
-  font-weight: 700;
-  margin: 4px 0;
-  color: var(--home-text);
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: -0.4px;
+  margin: var(--auris-space-1) 0;
+  color: var(--auris-text);
 }
 
-.welcome p {
+.welcome-sub {
   margin: 0;
   font-size: 16px;
-  color: var(--home-text-soft);
+  color: var(--auris-text-soft);
 }
 
+/* ============================================================
+   Tarjetas de acción
+   ============================================================ */
 .cards-grid {
   display: grid;
-  gap: 16px;
+  gap: var(--auris-space-4);
   grid-template-columns: 1fr;
 }
 
@@ -85,62 +80,58 @@
 .big-card {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: var(--auris-space-4);
   width: 100%;
   text-align: left;
-  padding: 22px 18px;
-  background: var(--home-surface);
-  border: 1px solid var(--home-border);
-  border-radius: 16px;
-  box-shadow: 0 2px 12px var(--home-shadow);
+  padding: var(--auris-space-5) var(--auris-space-4);
+  background: var(--auris-surface);
+  border: 1px solid var(--auris-border);
+  border-radius: var(--auris-radius-lg);
+  box-shadow: var(--auris-elev-1);
   cursor: pointer;
   font-family: inherit;
-  color: var(--home-text);
-  transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
+  color: var(--auris-text);
+  transition:
+    transform 0.16s var(--auris-ease),
+    box-shadow 0.16s var(--auris-ease),
+    border-color 0.16s var(--auris-ease);
 }
 
 .big-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px var(--home-shadow-hover);
+  transform: translateY(-3px);
+  box-shadow: var(--auris-elev-3);
 }
 
 .big-card:active {
-  transform: translateY(0);
+  transform: translateY(-1px);
 }
 
+/* Tarjeta destacada (auscultación 3D): tinte de gradiente suave de marca */
 .big-card.auscultacion {
-  border-color: color-mix(in srgb, var(--ion-color-secondary) 30%, transparent);
+  background:
+    var(--auris-gradient-soft),
+    var(--auris-surface);
+  border-color: color-mix(in srgb, var(--ion-color-secondary) 35%, transparent);
 }
 
 .big-card.auscultacion:hover {
   border-color: var(--ion-color-secondary);
 }
 
-.big-card.tests {
-  border-color: color-mix(in srgb, var(--ion-color-primary) 30%, transparent);
-}
-
 .big-card.tests:hover {
-  border-color: var(--ion-color-primary);
+  border-color: color-mix(in srgb, var(--ion-color-primary) 55%, transparent);
 }
 
+/* Cápsula del icono */
 .card-icon-wrap {
   flex: 0 0 56px;
   width: 56px;
   height: 56px;
-  border-radius: 14px;
+  border-radius: var(--auris-radius);
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--home-surface-2);
-}
-
-.auscultacion .card-icon-wrap {
-  background: color-mix(in srgb, var(--ion-color-secondary) 18%, transparent);
-}
-
-.tests .card-icon-wrap {
-  background: color-mix(in srgb, var(--ion-color-primary) 18%, transparent);
+  background: var(--auris-surface-2);
 }
 
 .card-icon-wrap ion-icon {
@@ -148,8 +139,16 @@
   color: var(--ion-color-primary);
 }
 
+.auscultacion .card-icon-wrap {
+  background: var(--auris-gradient);
+}
+
 .auscultacion .card-icon-wrap ion-icon {
-  color: var(--ion-color-secondary);
+  color: #ffffff;
+}
+
+.tests .card-icon-wrap {
+  background: color-mix(in srgb, var(--ion-color-primary) 14%, transparent);
 }
 
 .card-body {
@@ -158,21 +157,26 @@
 }
 
 .card-body h2 {
-  margin: 0 0 4px;
+  margin: 0 0 var(--auris-space-1);
   font-size: 18px;
-  font-weight: 600;
-  color: var(--home-text);
+  font-weight: 700;
+  color: var(--auris-text);
 }
 
 .card-body p {
   margin: 0;
   font-size: 14px;
-  line-height: 1.4;
-  color: var(--home-text-muted);
+  line-height: 1.45;
+  color: var(--auris-text-muted);
 }
 
 .card-arrow {
   flex: 0 0 auto;
   font-size: 22px;
-  color: var(--home-text-muted);
+  color: var(--auris-text-muted);
+  transition: transform 0.16s var(--auris-ease);
+}
+
+.big-card:hover .card-arrow {
+  transform: translateX(3px);
 }

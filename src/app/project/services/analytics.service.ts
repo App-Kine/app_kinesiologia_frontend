@@ -1,5 +1,6 @@
 import { Injectable, ErrorHandler } from '@angular/core';
 import { Platform } from '@ionic/angular';
+import { environment } from '../../../environments/environment';
 // import { FirebaseAnalytics } from '@ionic-native/firebase-analytics/ngx';
 
 @Injectable({
@@ -50,10 +51,14 @@ export class AnalyticsService extends ErrorHandler {
 
   async ErrorHandler(error: Error) {
     super.handleError(error);
-    try {
-      console.log(error);
-    } catch (e) {
-      console.error(e);
+    // En producción NUNCA logueamos el objeto error/HttpErrorResponse completo
+    // (puede llevar URL del endpoint, headers, token). Silencio total en prod.
+    if (!environment.production) {
+      try {
+        console.log(error?.message || error);
+      } catch (e) {
+        // Silencio: el logging no debe romper el manejo de errores.
+      }
     }
   }
 }

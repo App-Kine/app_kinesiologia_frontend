@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import {
-  IonContent, IonHeader, IonToolbar, IonTitle, IonIcon, IonText,
+  IonContent, IonHeader, IonToolbar, IonTitle, IonIcon,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
@@ -28,7 +28,7 @@ import {
   styleUrls: ['./estudiante-home.page.scss'],
   standalone: true,
   imports: [
-    CommonModule, IonContent, IonHeader, IonToolbar, IonTitle, IonIcon, IonText,
+    CommonModule, IonContent, IonHeader, IonToolbar, IonTitle, IonIcon,
   ],
 })
 export class EstudianteHomePage {

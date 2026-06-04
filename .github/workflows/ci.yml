@@ -1,0 +1,22 @@
+name: CI
+
+# Gate de calidad de la app del estudiante: build de producción-dev en cada
+# push y PR para detectar errores de tipos/plantilla antes de mergear.
+on:
+  push:
+    branches: [main, Final-details]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Instalar dependencias
+        run: npm ci
+      - name: Build (development)
+        run: npx ng build --configuration development
