@@ -1,0 +1,43 @@
+<ion-content [fullscreen]="true" class="landing">
+  <div class="landing-wrap">
+
+    <header class="landing-hero">
+      <div class="logo">
+        <ion-icon name="pulse-outline" aria-hidden="true"></ion-icon>
+      </div>
+      <h1>Auris</h1>
+      <p class="sub">Plataforma de entrenamiento de auscultación · Universidad de Valparaíso</p>
+    </header>
+
+    <p class="pregunta">¿Cómo quieres ingresar?</p>
+
+    <div class="opciones">
+      <!-- Estudiante: entra directo, sin login -->
+      <button type="button" class="opcion opcion-estudiante" (click)="entrarEstudiante()"
+              aria-label="Ingresar como estudiante">
+        <span class="op-ic"><ion-icon name="school-outline" aria-hidden="true"></ion-icon></span>
+        <span class="op-txt">
+          <span class="op-tit">Soy estudiante</span>
+          <span class="op-desc">Practica auscultación y rinde tus evaluaciones. Sin inicio de sesión.</span>
+        </span>
+        <ion-icon class="op-go" name="arrow-forward" aria-hidden="true"></ion-icon>
+      </button>
+
+      <!-- Profesor: va al login del panel -->
+      <button type="button" class="opcion opcion-profesor" (click)="entrarProfesor()"
+              aria-label="Ingresar como profesor">
+        <span class="op-ic"><ion-icon name="easel-outline" aria-hidden="true"></ion-icon></span>
+        <span class="op-txt">
+          <span class="op-tit">Soy profesor</span>
+          <span class="op-desc">Gestiona cursos, tests y analítica. Requiere iniciar sesión.</span>
+        </span>
+        <ion-icon class="op-go" name="arrow-forward" aria-hidden="true"></ion-icon>
+      </button>
+    </div>
+
+    <footer class="landing-foot">
+      <span>Auris · Kinesiología UV</span>
+    </footer>
+
+  </div>
+</ion-content>

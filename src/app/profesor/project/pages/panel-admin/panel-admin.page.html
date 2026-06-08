@@ -1,0 +1,299 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="secondary">
+    <ion-title>Panel de Administración</ion-title>
+    <ion-buttons slot="end">
+      @if (tieneRolProfesor) {
+        <ion-button
+          fill="clear"
+          color="light"
+          (click)="cambiarPanel()"
+          title="Cambiar al panel docente"
+          aria-label="Cambiar al panel docente"
+        >
+          <ion-icon slot="icon-only" name="swap-horizontal-outline" aria-hidden="true"></ion-icon>
+        </ion-button>
+      }
+      <ion-button
+        fill="clear"
+        color="light"
+        (click)="irACambiarPassword()"
+        title="Cambiar contraseña"
+        aria-label="Cambiar contraseña"
+      >
+        <ion-icon slot="icon-only" name="key-outline" aria-hidden="true"></ion-icon>
+      </ion-button>
+      <ion-button
+        fill="clear"
+        color="light"
+        (click)="cerrarSesion()"
+        title="Cerrar sesión"
+        aria-label="Cerrar sesión"
+      >
+        <ion-icon slot="icon-only" name="log-out-outline" aria-hidden="true"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  <div class="admin-hero">
+    <ion-icon name="shield-checkmark-outline" class="hero-icon"></ion-icon>
+    <div>
+      <h1>Hola, {{ usuario?.nombre || 'Administrador' }}</h1>
+      <ion-text color="medium">
+        <p class="hero-subtitle">
+          Estás en el panel de administración del sistema.
+          <ion-badge color="primary">SUPERADMIN</ion-badge>
+        </p>
+      </ion-text>
+    </div>
+  </div>
+
+  <!-- ========================== GESTIÓN DE PROFESORES (RF-76..RF-87) ========================== -->
+  <ion-card class="card-profesores">
+    <ion-card-header>
+      <ion-icon name="people-outline" class="card-icon"></ion-icon>
+      <ion-card-title>Gestión de profesores</ion-card-title>
+      <ion-card-subtitle>
+        Invita nuevos profesores por correo y revisa el estado de cada invitación.
+      </ion-card-subtitle>
+    </ion-card-header>
+
+    <ion-card-content>
+      <!-- FORM: invitar nuevo profesor -->
+      <div class="invitar-form">
+        <ion-item lines="full" class="invitar-input">
+          <ion-icon name="mail-outline" slot="start"></ion-icon>
+          <ion-label position="stacked">Correo del profesor</ion-label>
+          <ion-input
+            type="email"
+            inputmode="email"
+            placeholder="nombre.apellido@uchile.cl"
+            [(ngModel)]="invitarCorreo"
+            [disabled]="invitando"
+            [attr.aria-invalid]="invitarError ? 'true' : null"
+            [attr.aria-describedby]="invitarError ? 'invitar-error' : null"
+            (keyup.enter)="invitar()"
+          ></ion-input>
+        </ion-item>
+
+        <ion-button
+          (click)="invitar()"
+          [disabled]="invitando || !invitarCorreo"
+          color="primary"
+        >
+          @if (invitando) {
+            <ion-spinner name="dots" aria-label="Enviando invitación" aria-busy="true"></ion-spinner>
+          } @else {
+            <ion-icon slot="start" name="send-outline" aria-hidden="true"></ion-icon>
+            Enviar invitación
+          }
+        </ion-button>
+      </div>
+
+      @if (invitarError) {
+        <ion-text color="danger" class="invitar-error">
+          <span id="invitar-error" role="alert">{{ invitarError }}</span>
+        </ion-text>
+      }
+
+      @if (invitacionRecienCreada) {
+        @if (invitacionRecienCreada.correo_enviado) {
+          <!-- Modo real: el correo se envió por SMTP -->
+          <div class="invitar-ok" role="status" aria-live="polite">
+            <ion-text color="success">
+              <ion-icon name="checkmark-circle"></ion-icon>
+              Invitación enviada por correo a
+              <strong>{{ invitacionRecienCreada.correo_destino }}</strong>.
+            </ion-text>
+            <p class="dev-link-meta">
+              Expira: {{ formatoFecha(invitacionRecienCreada.expira_en) }}
+            </p>
+          </div>
+        } @else if (invitacionRecienCreada.link) {
+          <!-- Respaldo: enlace directo (solo expuesto si no hay envío por SMTP) -->
+          <div class="dev-link-box">
+            <p>
+              <strong>Enlace de invitación.</strong> Si el profesor no recibe el
+              correo, puedes compartirle este enlace directamente:
+            </p>
+            <code class="dev-link">{{ invitacionRecienCreada.link }}</code>
+            <ion-button
+              size="small"
+              fill="outline"
+              (click)="copiarLink()"
+              color="primary"
+            >
+              <ion-icon slot="start" name="copy-outline"></ion-icon>
+              Copiar
+            </ion-button>
+            <p class="dev-link-meta">
+              Expira: {{ formatoFecha(invitacionRecienCreada.expira_en) }}
+            </p>
+          </div>
+        } @else {
+          <!-- Modo real pero el envío falló: la invitación quedó creada -->
+          <div class="invitar-warn" role="alert">
+            <ion-text color="warning">
+              <ion-icon name="time-outline"></ion-icon>
+              La invitación se creó, pero el correo no pudo enviarse a
+              <strong>{{ invitacionRecienCreada.correo_destino }}</strong>.
+              Revisa la configuración de correo (SMTP) e inténtalo de nuevo.
+            </ion-text>
+          </div>
+        }
+      }
+
+      <!-- LISTADO: invitaciones existentes (RF-83) -->
+      <div class="invitaciones-header">
+        <h3>Invitaciones enviadas</h3>
+        <ion-button
+          size="small"
+          fill="clear"
+          (click)="recargarInvitaciones()"
+          [disabled]="cargandoLista"
+          aria-label="Recargar invitaciones"
+        >
+          <ion-icon slot="icon-only" name="refresh-outline" aria-hidden="true"></ion-icon>
+        </ion-button>
+      </div>
+
+      @if (cargandoLista) {
+        <ion-spinner aria-label="Cargando invitaciones" aria-busy="true"></ion-spinner>
+      } @else if (errorLista) {
+        <ion-text color="danger"><span role="alert">{{ errorLista }}</span></ion-text>
+      } @else if (invitaciones.length === 0) {
+        <ion-note>Aún no se han enviado invitaciones.</ion-note>
+      } @else {
+        <div class="tabla-wrapper">
+          <table class="invitaciones-tabla">
+            <thead>
+              <tr>
+                <th>Correo</th>
+                <th>Estado</th>
+                <th>Enviada</th>
+                <th>Expira</th>
+                <th>Completada</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (inv of invitaciones; track inv.invitacion_id) {
+                <tr>
+                  <td>{{ inv.correo_destino }}</td>
+                  <td>
+                    <ion-chip [color]="badgeColor(inv.estado)" class="estado-chip">
+                      <ion-icon [name]="badgeIcon(inv.estado)"></ion-icon>
+                      <ion-label>{{ inv.estado }}</ion-label>
+                    </ion-chip>
+                  </td>
+                  <td>{{ formatoFecha(inv.creada_en) }}</td>
+                  <td>{{ formatoFecha(inv.expira_en) }}</td>
+                  <td>{{ formatoFecha(inv.completada_en) }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </ion-card-content>
+  </ion-card>
+
+  <!-- ========================== USUARIOS ========================== -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>
+        <ion-icon name="people-outline" aria-hidden="true"></ion-icon>
+        Usuarios
+      </ion-card-title>
+      <ion-card-subtitle>Gestiona el acceso de los usuarios del sistema</ion-card-subtitle>
+    </ion-card-header>
+    <ion-card-content>
+      <div class="invitaciones-header">
+        <h3>Usuarios registrados</h3>
+        <ion-button
+          size="small"
+          fill="clear"
+          (click)="cargarUsuarios()"
+          [disabled]="cargandoUsuarios"
+          aria-label="Recargar usuarios"
+        >
+          <ion-icon slot="icon-only" name="refresh-outline" aria-hidden="true"></ion-icon>
+        </ion-button>
+      </div>
+
+      @if (cargandoUsuarios) {
+        <ion-spinner aria-label="Cargando usuarios" aria-busy="true"></ion-spinner>
+      } @else if (errorUsuarios) {
+        <ion-text color="danger"><span role="alert">{{ errorUsuarios }}</span></ion-text>
+      } @else if (usuarios.length === 0) {
+        <ion-note>No hay usuarios registrados.</ion-note>
+      } @else {
+        <div class="tabla-wrapper">
+          <table class="invitaciones-tabla">
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Correo</th>
+                <th>Roles</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (u of usuarios; track u.usuario_id) {
+                <tr [class.fila-inactiva]="!u.activo">
+                  <td>
+                    {{ u.nombre }}
+                    @if (esYo(u)) { <ion-note class="tu-tag">(tú)</ion-note> }
+                  </td>
+                  <td>{{ u.correo }}</td>
+                  <td>
+                    @for (rol of u.roles; track rol) {
+                      <ion-chip class="rol-chip"
+                                [color]="rol === 'SUPERADMIN' ? 'danger' : 'primary'">
+                        <ion-label>{{ rol }}</ion-label>
+                      </ion-chip>
+                    }
+                  </td>
+                  <td>
+                    <ion-chip [color]="u.activo ? 'success' : 'medium'" class="estado-chip">
+                      <ion-icon [name]="u.activo ? 'checkmark-circle' : 'close-circle'"></ion-icon>
+                      <ion-label>{{ u.activo ? 'Activo' : 'Inactivo' }}</ion-label>
+                    </ion-chip>
+                  </td>
+                  <td>
+                    @if (u.activo) {
+                      <ion-button
+                        size="small"
+                        fill="clear"
+                        color="danger"
+                        [disabled]="esYo(u)"
+                        (click)="confirmarEliminarUsuario(u)"
+                        [title]="esYo(u) ? 'No puedes eliminar tu propia cuenta' : 'Eliminar usuario'"
+                        aria-label="Eliminar usuario"
+                      >
+                        <ion-icon slot="icon-only" name="trash-outline" aria-hidden="true"></ion-icon>
+                      </ion-button>
+                    } @else {
+                      <ion-button
+                        size="small"
+                        fill="clear"
+                        color="success"
+                        (click)="reactivarUsuario(u)"
+                        title="Reactivar usuario"
+                        aria-label="Reactivar usuario"
+                      >
+                        <ion-icon slot="icon-only" name="arrow-undo-outline" aria-hidden="true"></ion-icon>
+                      </ion-button>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </ion-card-content>
+  </ion-card>
+
+</ion-content>

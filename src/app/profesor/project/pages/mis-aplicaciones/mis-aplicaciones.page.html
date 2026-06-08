@@ -1,0 +1,94 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="secondary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/panel-docente"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Aplicaciones de test</ion-title>
+    <ion-buttons slot="end">
+      <ion-button fill="clear" color="light" (click)="recargar()" [disabled]="cargando"
+                  aria-label="Recargar aplicaciones" title="Recargar">
+        <ion-icon slot="icon-only" name="refresh-outline" aria-hidden="true"></ion-icon>
+      </ion-button>
+      <ion-button fill="clear" color="light" (click)="irACrear()"
+                  aria-label="Nueva aplicación de test" title="Nueva aplicación">
+        <ion-icon slot="icon-only" name="add-outline" aria-hidden="true"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  <ion-note class="hint">
+    <ion-icon name="clipboard-outline"></ion-icon>
+    Cada aplicación expone un test a los estudiantes de un curso. Puedes activarlas
+    o desactivarlas con el toggle.
+  </ion-note>
+
+  @if (cargando) {
+    <div class="centro"><ion-spinner></ion-spinner><p>Cargando aplicaciones...</p></div>
+  } @else if (error) {
+    <ion-text color="danger"><p>{{ error }}</p></ion-text>
+  } @else if (aplicaciones.length === 0) {
+    <div class="vacio">
+      <ion-note>Aún no has creado aplicaciones de test.</ion-note>
+      <ion-button (click)="irACrear()">
+        <ion-icon slot="start" name="add-outline"></ion-icon>
+        Crear la primera
+      </ion-button>
+    </div>
+  } @else {
+    <div class="tabla-wrapper">
+      <table class="tabla">
+        <thead>
+          <tr>
+            <th>Test</th>
+            <th>Curso</th>
+            <th>Estado</th>
+            <th>Creada</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (a of aplicaciones; track a.aplicacion_id) {
+            <tr>
+              <td>{{ a.test_nombre }}</td>
+              <td>{{ a.curso_codigo }} · {{ a.curso_nombre }}</td>
+              <td>
+                <ion-toggle
+                  [checked]="a.activo"
+                  (ionChange)="toggleActivo(a, $event)"
+                >
+                  @if (a.activo) {
+                    <ion-chip color="success"><ion-icon name="play-circle"></ion-icon><ion-label>activa</ion-label></ion-chip>
+                  } @else {
+                    <ion-chip color="medium"><ion-icon name="pause-circle"></ion-icon><ion-label>inactiva</ion-label></ion-chip>
+                  }
+                </ion-toggle>
+              </td>
+              <td>{{ formatoFecha(a.created_at) }}</td>
+              <td>
+                <ion-button fill="clear" size="small" color="secondary"
+                  (click)="verResultados(a)" title="Ver resultados">
+                  <ion-icon slot="start" name="stats-chart-outline"></ion-icon>
+                  Resultados
+                </ion-button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    @if (hasMore) {
+      <div class="cargar-mas">
+        <ion-button fill="outline" expand="block" (click)="cargarMas()" [disabled]="cargandoMas">
+          @if (cargandoMas) {
+            <ion-spinner slot="start" name="dots"></ion-spinner> Cargando…
+          } @else {
+            Cargar más
+          }
+        </ion-button>
+      </div>
+    }
+  }
+</ion-content>

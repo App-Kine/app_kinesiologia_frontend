@@ -1,0 +1,86 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="secondary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/panel-docente"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Analítica</ion-title>
+    <ion-buttons slot="end">
+      <ion-button fill="clear" color="light" (click)="recargar()" [disabled]="cargando"
+                  aria-label="Recargar analítica" title="Recargar">
+        <ion-icon slot="icon-only" name="refresh-outline" aria-hidden="true"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+
+  <div class="hero">
+    <div class="hero-icon"><ion-icon name="stats-chart-outline"></ion-icon></div>
+    <div class="hero-text">
+      <h1>Resultados de tus tests</h1>
+      <ion-note>
+        Elige una aplicación para ver el desempeño por pregunta y por estudiante.
+      </ion-note>
+    </div>
+  </div>
+
+  <div class="body-wrapper">
+    @if (cargando) {
+      <div class="centro" role="status" aria-live="polite">
+        <ion-spinner aria-label="Cargando analítica" aria-busy="true"></ion-spinner>
+        <p>Cargando analítica...</p>
+      </div>
+    } @else if (error) {
+      <div class="centro">
+        <ion-text color="danger"><p role="alert">{{ error }}</p></ion-text>
+        <ion-button fill="outline" (click)="recargar()">Reintentar</ion-button>
+      </div>
+    } @else if (items.length === 0) {
+      <div class="empty">
+        <div class="empty-icon"><ion-icon name="sparkles-outline"></ion-icon></div>
+        <h2>Aún no hay datos</h2>
+        <p>Cuando tus estudiantes respondan los tests aplicados, verás aquí los resultados.</p>
+      </div>
+    } @else {
+      <div class="cards">
+        @for (a of items; track a.aplicacion_id) {
+          <div class="apl-card" role="button" tabindex="0"
+               [attr.aria-label]="'Ver detalle de ' + a.test_nombre + ' — ' + a.curso_nombre"
+               (click)="abrir(a)"
+               (keydown.enter)="abrir(a)"
+               (keydown.space)="$event.preventDefault(); abrir(a)">
+            <div class="card-head">
+              <ion-chip color="secondary" class="cod-chip"><ion-label>{{ a.curso_codigo }}</ion-label></ion-chip>
+              <ion-chip [color]="colorPct(a.porcentaje_promedio)" class="pct-chip">
+                <ion-label>{{ pct(a.porcentaje_promedio) }}</ion-label>
+              </ion-chip>
+            </div>
+
+            <h3 class="card-test">{{ a.test_nombre }}</h3>
+            <p class="card-curso">{{ a.curso_nombre }}</p>
+
+            <div class="card-stats">
+              <span class="stat">
+                <ion-icon name="people-outline"></ion-icon>
+                {{ a.total_evaluaciones }} resp.
+              </span>
+              <span class="stat">
+                <ion-icon name="eye-outline"></ion-icon>
+                {{ a.evaluaciones_identificadas }} ident.
+              </span>
+              <span class="stat">
+                <ion-icon name="eye-off-outline"></ion-icon>
+                {{ a.evaluaciones_anonimas }} anón.
+              </span>
+            </div>
+
+            <div class="card-foot">
+              <span class="abrir">Ver detalle <ion-icon name="arrow-forward-outline"></ion-icon></span>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</ion-content>

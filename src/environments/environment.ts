@@ -19,7 +19,7 @@ export const environment = {
   //      http://localhost:3023/controlador_base/
   //  - iPhone / Android FÍSICO: reemplazar 'localhost' por la IP del Mac
   //      en la WiFi (el teléfono no resuelve 'localhost'). Obtenela con:
-  //      ipconfig getifaddr en0   →  ej. 192.168.1.7
+  //      ipconfig getifaddr en0   →  ej. 192.168.1.84
   //  Mac y teléfono en la MISMA red WiFi. Ver README → "Probar en un celular
   //  FÍSICO". ⚠️ Antes del commit/entrega final volver a 'localhost'.
   // ===================================================================

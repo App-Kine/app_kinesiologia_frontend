@@ -3,13 +3,13 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import {
   IonContent, IonHeader, IonToolbar, IonTitle, IonButton, IonIcon,
-  IonText, IonSpinner, IonProgressBar, IonChip, IonLabel,
+  IonText, IonSpinner, IonProgressBar, IonChip, IonLabel, IonButtons,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
   volumeHighOutline, checkmarkCircle, closeCircle, bulbOutline,
   arrowForwardOutline, refreshOutline, ribbonOutline, videocamOutline,
-  timeOutline,
+  timeOutline, arrowBackOutline,
 } from 'ionicons/icons';
 
 import {
@@ -41,7 +41,7 @@ interface BufferRespuesta {
   standalone: true,
   imports: [
     CommonModule, IonContent, IonHeader, IonToolbar, IonTitle, IonButton,
-    IonIcon, IonText, IonSpinner, IonProgressBar, IonChip, IonLabel,
+    IonIcon, IonText, IonSpinner, IonProgressBar, IonChip, IonLabel, IonButtons,
     SafeHtmlPipe, AudioSpectroComponent,
   ],
 })
@@ -83,7 +83,7 @@ export class EstudianteEvaluacionPage implements OnInit {
     addIcons({
       volumeHighOutline, checkmarkCircle, closeCircle, bulbOutline,
       arrowForwardOutline, refreshOutline, ribbonOutline, videocamOutline,
-      timeOutline,
+      timeOutline, arrowBackOutline,
     });
   }
 

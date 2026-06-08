@@ -1,14 +1,21 @@
-# Auris · App Móvil del Estudiante
+# Auris · App unificada (estudiante + panel docente)
 
-**App Ionic + Angular 20 + Capacitor 7** para Android/iOS (y también ejecutable en navegador). Es la app del **estudiante** de la plataforma de auscultación Auris. Tiene tres capacidades principales:
+**App Ionic + Angular 20 + Capacitor 7** que se despliega **en web y como app móvil** (Android/iOS). Es la app **única** de la plataforma de auscultación Auris: al abrir muestra una **landing** que separa los dos mundos con un botón cada uno.
 
-- **Exploración 3D de auscultación**: un modelo del torso (`torso.glb`, renderizado con `<model-viewer>` + three.js) con *hotspots* numerados; al tocar uno se ve el nombre, la ubicación y la descripción clínica del punto.
-- **Evaluaciones (tests)**: el estudiante elige curso → test → responde preguntas (con audio/imagen/video y **espectrograma** en vivo bajo el audio) → ve su resultado.
-- **Informe PDF + envío por correo**: al terminar genera un **PDF** del informe (con `jsPDF`) que puede descargar/compartir; si rindió identificándose con un email, además puede **recibir ese mismo PDF por correo**.
+- **"Soy estudiante"** → flujo del alumno, **100 % público (sin login)**:
+  - **Exploración 3D de auscultación**: modelo del torso (`torso.glb`, `<model-viewer>` + three.js) con *hotspots* numerados.
+  - **Evaluaciones (tests)**: curso → test → preguntas (audio/imagen/video con **espectrograma** en vivo) → resultado.
+  - **Informe PDF + envío por correo** (con `jsPDF`); opcionalmente lo recibe por email si se identifica.
+- **"Soy profesor"** → **login (JWT)** → **panel docente/admin**: gestión de cursos, preguntas, tests, aplicaciones y analítica; los administradores invitan nuevos docentes.
 
-**100 % pública** — el flujo del estudiante **NO requiere login**. Puede rendir como anónimo o identificarse con su email solo para recibir el informe por correo.
+> **Estructura interna:** `src/app/landing/` (portada) · `src/app/project/` (estudiante) · `src/app/profesor/` (panel incrustado) · `src/app/app.routes.ts` (rutas planas: `estudiante/*` + rutas del panel). Cada sección conserva su propio estilo.
 
-> **Setup completo del entorno (BD + 3 servicios):** ver [`../app_kinesiologia_logica/database/SETUP.md`](../app_kinesiologia_logica/database/SETUP.md)
+> **📦 Repositorios del proyecto Auris** — el código definitivo está en la rama **`unification`** de cada repo:
+> - **App (estudiante + panel)** — este repo: https://github.com/App-Kine/app_kinesiologia_frontend
+> - **Lógica** (negocio + datos + BD + correo): https://github.com/App-Kine/app_kinesiologia_logica
+> - **Controlador** (gateway / API): https://github.com/App-Kine/app_kinesiologia_controlador
+
+> **Setup completo del entorno (BD + servicios):** ver la guía en la Lógica → [`database/SETUP.md`](https://github.com/App-Kine/app_kinesiologia_logica/blob/unification/database/SETUP.md)
 
 > ⚠️ **Esta app NO se conecta a ninguna base de datos.** Consume el **Controlador** (gateway, puerto `3023`) y la **Lógica** (multimedia, puerto `2000`). Toda la BD (SQL Server + MongoDB) la maneja la Lógica. Ver [Conexión a la base de datos](#-conexión-a-la-base-de-datos) y [Levantar el sistema completo](#-levantar-el-sistema-completo-en-local).
 
@@ -76,30 +83,28 @@ No usa variables de entorno del sistema operativo. **Toda la configuración vive
 ## 🧭 ¿Dónde encaja esto?
 
 ```
-┌─────────────────────┐   ┌──────────────────────┐
-│  Panel WEB          │   │  APP MÓVIL           │ ← TÚ ESTÁS ACÁ
-│  (docente/admin)    │   │  (estudiante)        │
-│  app_kinesiologia   │   │  Ionic + Capacitor   │
-│  _panel · :4200     │   │  :4201 / iOS/Android │
-└─────────┬───────────┘   └──────────┬───────────┘
-          │                          │
-          │  JWT                     │  Público
-          └────────────┬─────────────┘
-                       │
-                ┌──────▼──────┐
-                │ Controlador │ :3023
-                └──────┬──────┘
-                       │
-                ┌──────▼──────┐
-                │   Lógica    │ :2000
-                └──────┬──────┘
-                       │
-              ┌────────┴────────┐
-              ▼                 ▼
-          SQL Server         MongoDB
+        ┌──────────────────────────────────────────┐
+        │  APP AURIS  (este repo) ← TÚ ESTÁS ACÁ    │
+        │  Ionic + Angular + Capacitor              │
+        │  landing →  Estudiante (público)          │
+        │          →  Profesor (login JWT → panel)  │
+        │  web :4201  ·  iOS / Android              │
+        └──────────────────────┬───────────────────┘
+                               │  (mismo backend para ambos)
+                        ┌──────▼──────┐
+                        │ Controlador │ :3023
+                        └──────┬──────┘
+                               │
+                        ┌──────▼──────┐
+                        │   Lógica    │ :2000
+                        └──────┬──────┘
+                               │
+                      ┌────────┴────────┐
+                      ▼                 ▼
+                  SQL Server         MongoDB
 ```
 
-**Comparte backend** con el panel web — ambos pegan al mismo controlador (`localhost:3023`).
+El **estudiante** y el **panel docente** son dos secciones de **esta misma app** y comparten el mismo backend (Controlador `:3023` → Lógica `:2000`).
 
 ---
 
@@ -107,13 +112,14 @@ No usa variables de entorno del sistema operativo. **Toda la configuración vive
 
 **El flujo del estudiante es PÚBLICO: NO requiere login ni credenciales.** El revisor puede abrir la app y usarla directamente (rinde como anónimo o se identifica con un email solo para recibir el informe por correo).
 
-Para que la app **muestre datos** (cursos, tests, preguntas con su multimedia), esos datos deben existir primero. Se crean desde el **Panel docente** (`app_kinesiologia_panel`, puerto 4200), que **sí** tiene login. Credenciales de prueba del Panel:
+Para que la app **muestre datos** (cursos, tests, preguntas con su multimedia), esos datos deben existir primero. Se crean desde el **panel docente de esta misma app**: en la landing elegí **"Soy profesor"** → inicia sesión. Credenciales de prueba (del seed de la BD):
 
 | Rol | Usuario | Clave |
 |---|---|---|
-| Admin (Panel) | `admin@auris.local` | `ChangeMe!2026` |
+| Admin + Profesor | `admin@auris.local` | `ChangeMe!2026` |
+| Profesor | `juan.perez@auris.local` | `ChangeMe!2026` |
 
-> Estas credenciales son **solo del Panel**, no de esta app. Esta app no almacena ni valida credenciales.
+> El flujo del **estudiante** no usa estas credenciales (es público). Las credenciales se validan en el backend (no en la app). El seed completo de usuarios está en el repo de la Lógica (`database/AurisDB_INSTALL.sql`).
 
 ---
 
@@ -224,14 +230,14 @@ app_kinesiologia_frontend/
 Esta app es **el último eslabón**: necesita el backend arriba para mostrar datos. Orden de arranque obligatorio:
 
 ```text
-1. Bases de datos:   SQL Server  +  MongoDB        (ver ../app_kinesiologia_logica/database/SETUP.md)
+1. Bases de datos:   SQL Server  +  MongoDB        (ver SETUP.md en el repo de la Lógica)
 2. Lógica:           app_kinesiologia_logica        → puerto 2000
 3. Controlador:      app_kinesiologia_controlador    → puerto 3023
-4. App estudiante:   este repo                        → npm start (puerto 4201)
-   (opcional) Panel: app_kinesiologia_panel           → puerto 4200  (para crear cursos/tests de prueba)
+4. App Auris:        este repo                        → npm start (puerto 4201)
+                     (estudiante y panel docente, todo en la misma app)
 ```
 
-Si la app abre pero no muestra cursos, lo más probable es que falte levantar la Lógica (2000) o el Controlador (3023), o que no haya datos creados desde el Panel.
+Si la app abre pero no muestra cursos, lo más probable es que falte levantar la Lógica (2000) o el Controlador (3023), o que no haya datos creados (créalos entrando como **profesor** en la propia app).
 
 ---
 
@@ -309,42 +315,36 @@ npm run sync                 # build dev + cap sync (ambas plataformas)
 
 ### 📱 Para probar en un celular FÍSICO (iPhone / Android)
 
-> **El archivo que se edita es `src/environments/environment.ts`.** `localhost`
-> **no resuelve desde el teléfono** (apunta al propio dispositivo), así que hay
-> que apuntar a la **IP del Mac** en la WiFi. En el **simulador iOS** y en el
-> **navegador** sí funciona `localhost` (no hace falta cambiar nada).
+> `localhost` **no resuelve desde el teléfono** (apunta al propio dispositivo),
+> así que la app debe apuntar a la **IP del Mac** en la WiFi. **Esto ya está
+> AUTOMATIZADO:** `npm run ios` / `npm run android` detectan la IP y la ponen
+> solos en `environment.ts`; `npm start` la vuelve a dejar en `localhost`.
+> Ya no hay que editar nada a mano.
 
 **Requisitos:** Mac y teléfono en la **MISMA red WiFi**, y los backends
 (Controlador `:3023` + Lógica `:2000`) **corriendo**.
 
-**1. Obtené la IP del Mac:**
+**Desplegar al teléfono (un comando):**
+
+- **iOS (iPhone físico):**
+  ```bash
+  npm run ios            # detecta la IP + build + sync + instala en el dispositivo
+  ```
+  (el script ya exporta `LANG=en_US.UTF-8` para evitar el error de CocoaPods).
+- **Android:** (requiere Android Studio instalado para el SDK/adb)
+  ```bash
+  npm run android        # detecta la IP + build + sync + instala en el teléfono
+  ```
+
+**Helpers de host (por si los necesitás sueltos):**
 ```bash
-ipconfig getifaddr en0      # ej. 192.168.1.84
+npm run host:device      # pone la IP del Mac en environment.ts (celular)
+npm run host:local       # vuelve a localhost (web / simulador)
 ```
 
-**2. Editá `src/environments/environment.ts`** — reemplazá `localhost` por esa IP en las DOS líneas:
-```ts
-//  ANTES (DEV web / simulador):
-BASE_API_URL:  'http://localhost:3023/controlador_base/',
-LOGICA_API_URL:'http://localhost:2000/base_logica/',
-
-//  DESPUÉS (celular físico) — usá TU IP:
-BASE_API_URL:  'http://192.168.1.84:3023/controlador_base/',
-LOGICA_API_URL:'http://192.168.1.84:2000/base_logica/',
-```
-
-**3. Recompilá y desplegá al teléfono:**
-
-- **Android:**
-  ```bash
-  npm run android
-  ```
-- **iOS (iPhone físico):** evitá `npm run ios` si CocoaPods da error; usá:
-  ```bash
-  npx ng build --configuration development
-  npx cap copy ios          # copia el nuevo bundle (con la IP) al proyecto iOS
-  npx cap open ios          # abre Xcode → seleccioná tu iPhone → ▶ Run
-  ```
+> El `environment.ts` versionado queda siempre en `localhost`; los scripts solo
+> lo cambian en tu copia local mientras pruebas. Si cambiás de red WiFi, basta
+> volver a correr `npm run ios` / `npm run android` (re-detecta la IP nueva).
 
 **4.** Verificá que el firewall del Mac no bloquee los puertos 2000/3023 (los
 servidores ya escuchan en `0.0.0.0`, aceptan conexiones de la red).
@@ -464,18 +464,19 @@ Para móvil, recordá re-sincronizar el código nativo tras compilar: `npm run s
 - **No commitear `package-lock.json`** (está en `.gitignore`).
 - **No commitear las carpetas `ios/` ni `android/`** ni `www/` (gitignored). Cada dev las regenera con `npx cap add ios` / `npx cap add android` (o `setup-ios.command`).
 - Si cambiás algo en `capacitor.config.ts` (appId, appName), hay que volver a correr `npm run sync` (o `npx cap sync`) para que se propague al proyecto nativo.
-- No agregar componentes que no se usen en el flujo de estudiante (este repo es solo para él).
+- El **estudiante** (público) vive en `src/app/project/` y el **panel docente** (login) en `src/app/profesor/`. Mantené cada flujo en su carpeta; comparten el tema y el backend.
 
 ---
 
-## 📌 Diferencia con el panel web
+## 📌 Estudiante y panel en una sola app
 
-Si te confundís y querés tocar algo de docente/admin, **estás en el repo equivocado**. Andá a [`../app_kinesiologia_panel`](../app_kinesiologia_panel) — ahí vive todo el panel.
+Antes el estudiante y el panel docente eran **dos apps separadas**. Ahora están **unificados en este único repo**: una **landing** en `/` separa los dos mundos.
 
-| | Este repo (`_frontend`) | Panel web (`_panel`) |
+| | Estudiante | Panel docente/admin |
 |---|---|---|
-| Para quién | Estudiante (público) | Docente + Admin (login JWT) |
-| Plataforma | iOS / Android | Web (Chrome, Safari, etc.) |
-| Tecnología | Ionic + Capacitor | Angular + Ionic (sin Capacitor) |
-| Puerto dev | 4201 | 4200 |
+| Carpeta | `src/app/project/` | `src/app/profesor/` |
+| Para quién | Alumno (público, sin login) | Docente + Admin (login JWT) |
+| Entrada | landing → "Soy estudiante" | landing → "Soy profesor" |
 | Rutas | `/estudiante/*` | `/login`, `/panel-*`, `/mis-*`, `/curso/*`, `/test-*`, `/analitica/*` |
+
+Ambos se sirven desde el mismo proyecto Angular/Ionic y se despliegan juntos en **web y móvil** (Capacitor). Ver "Estructura interna" al inicio de este README.

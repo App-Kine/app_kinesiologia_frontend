@@ -70,7 +70,7 @@ export class AudioSpectroComponent implements AfterViewInit, OnDestroy {
 
   // Estilo del visualizador.
   private readonly BARS = 56;          // nº de barras
-  private readonly COLOR = '#2ec6ff';  // azul cyan brillante (como la referencia)
+  private readonly COLOR = '#14a8a8';  // teal de marca (Kinesiología)
 
   ngAfterViewInit(): void {
     this.ajustarTamano();
@@ -154,7 +154,7 @@ export class AudioSpectroComponent implements AfterViewInit, OnDestroy {
     c.lineWidth = barW;
     c.strokeStyle = this.COLOR;
     c.shadowColor = this.COLOR;
-    c.shadowBlur = 9;                        // glow
+    c.shadowBlur = 2;                        // glow muy sutil (antes 9 = muy brilloso)
 
     for (let b = 0; b < this.BARS; b++) {
       const start = Math.floor((b / this.BARS) * usable);

@@ -1,23 +1,33 @@
 import { Routes } from '@angular/router';
+import { PROFESOR_ROUTES } from './profesor/profesor.routes';
 
 /**
- * Rutas de la APP MÓVIL del ESTUDIANTE (Ionic + Capacitor).
- * El panel docente/admin vive en `app_kinesiologia_panel` (web).
+ * Rutas de la APP UNIFICADA de Auris (web + móvil con Capacitor).
  *
- * Todo el flujo del estudiante es PÚBLICO (sin login) — RF-01.
+ * Una sola app con dos mundos que comparten backend (Controlador + Lógica):
+ *   - Landing  (`/`)                 → portada con dos botones (estudiante / profesor).
+ *   - Estudiante (`/estudiante/...`) → flujo del alumno, PÚBLICO (sin login).
+ *   - Profesor  (login, mis-cursos, analitica, ...) → panel docente/admin (JWT).
  *
- * Mapa de rutas:
- *   /estudiante/home                 → home con 2 opciones (auscultación / tests)
- *   /estudiante/auscultacion         → modelo 3D con hotspots (modo libre)
- *   /estudiante/cursos               → lista de cursos (flujo tests)
- *   /estudiante/curso/:id/tests      → tests del curso
- *   /estudiante/inicio/:aplicacionId → splash + modalidad anónima/identificada
- *   /estudiante/evaluacion/:id       → preguntas
- *   /estudiante/resultado/:id        → resultados + descargar PDF
+ * Las rutas del profesor viven en `profesor/profesor.routes.ts` y se montan
+ * PLANAS (al mismo nivel) para no romper las navegaciones internas del panel
+ * (que usan rutas absolutas como `/login`, `/panel-docente`, `/mis-cursos`).
+ * No hay colisión: el estudiante usa el prefijo `estudiante/` y el panel usa
+ * nombres propios.
  */
 export const routes: Routes = [
   // -----------------------------------------------------------
-  // Home del estudiante (pedido cliente 2026-05-27)
+  // Landing (entrada común)
+  // -----------------------------------------------------------
+  {
+    path: '',
+    pathMatch: 'full',
+    loadComponent: () =>
+      import('./landing/landing.page').then((m) => m.LandingPage),
+  },
+
+  // -----------------------------------------------------------
+  // Flujo del ESTUDIANTE (público, sin login)
   // -----------------------------------------------------------
   {
     path: 'estudiante/home',
@@ -33,10 +43,6 @@ export const routes: Routes = [
         (m) => m.EstudianteAuscultacionPage
       ),
   },
-
-  // -----------------------------------------------------------
-  // Flujo de tests (existente)
-  // -----------------------------------------------------------
   {
     path: 'estudiante/cursos',
     loadComponent: () =>
@@ -59,8 +65,6 @@ export const routes: Routes = [
       ),
   },
   {
-    // Auditoría 2026-05-28: ahora el param es aplicacionId, no evaluacionId.
-    // La evaluación no existe en BD hasta que el estudiante envía el test.
     path: 'estudiante/evaluacion/:aplicacionId',
     loadComponent: () =>
       import('./project/pages/estudiante-evaluacion/estudiante-evaluacion.page').then(
@@ -68,9 +72,6 @@ export const routes: Routes = [
       ),
   },
   {
-    // El segmento de URL es el UUID público de la evaluación (no el id
-    // secuencial). El detalle se carga desde history.state; el param solo
-    // da una URL estable/compartible sin exponer IDs enumerables.
     path: 'estudiante/resultado/:evaluacionUuid',
     loadComponent: () =>
       import('./project/pages/estudiante-resultado/estudiante-resultado.page').then(
@@ -79,15 +80,15 @@ export const routes: Routes = [
   },
 
   // -----------------------------------------------------------
-  // Raíz: home con las 2 opciones
+  // Flujo del PROFESOR (panel docente/admin — login + guards JWT)
+  // -----------------------------------------------------------
+  ...PROFESOR_ROUTES,
+
+  // -----------------------------------------------------------
+  // Cualquier otra URL → landing
   // -----------------------------------------------------------
   {
-    path: '',
-    redirectTo: '/estudiante/home',
-    pathMatch: 'full',
-  },
-  {
     path: '**',
-    redirectTo: '/estudiante/home',
+    redirectTo: '',
   },
 ];

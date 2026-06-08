@@ -2,12 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import {
-  IonContent, IonHeader, IonToolbar, IonTitle, IonButton, IonIcon, IonText, IonSpinner,
+  IonContent, IonHeader, IonToolbar, IonTitle, IonButton, IonIcon, IonText, IonSpinner, IonButtons,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
   ribbonOutline, checkmarkCircle, refreshCircle, closeCircle, homeOutline,
-  mailOutline, checkmarkDoneOutline, downloadOutline,
+  mailOutline, checkmarkDoneOutline, downloadOutline, arrowBackOutline,
 } from 'ionicons/icons';
 import { Capacitor } from '@capacitor/core';
 import { Filesystem, Directory } from '@capacitor/filesystem';
@@ -24,7 +24,7 @@ import {
   styleUrls: ['./estudiante-resultado.page.scss'],
   standalone: true,
   imports: [
-    CommonModule, IonContent, IonHeader, IonToolbar, IonTitle, IonButton, IonIcon, IonText, IonSpinner,
+    CommonModule, IonContent, IonHeader, IonToolbar, IonTitle, IonButton, IonIcon, IonText, IonSpinner, IonButtons,
   ],
 })
 export class EstudianteResultadoPage implements OnInit {
@@ -49,7 +49,7 @@ export class EstudianteResultadoPage implements OnInit {
   constructor(private router: Router, private evalSvc: EvaluacionService) {
     addIcons({
       ribbonOutline, checkmarkCircle, refreshCircle, closeCircle, homeOutline,
-      mailOutline, checkmarkDoneOutline, downloadOutline,
+      mailOutline, checkmarkDoneOutline, downloadOutline, arrowBackOutline,
     });
   }
 

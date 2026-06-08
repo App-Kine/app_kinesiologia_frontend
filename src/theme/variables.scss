@@ -2,19 +2,22 @@
 // https://ionicframework.com/docs/theming/
 
 :root {
-	--ion-color-primary: #003c58;
-	--ion-color-primary-rgb: 0,60,88;
+	/* COLOR DE MARCA ÚNICO — Kinesiología (verde azulado / teal).
+	   primary y secondary son el MISMO teal, así el estudiante (usa primary) y el
+	   panel docente (usa secondary) se ven idénticos en toda la app. */
+	--ion-color-primary: #0e8c8c;
+	--ion-color-primary-rgb: 14,140,140;
 	--ion-color-primary-contrast: #ffffff;
 	--ion-color-primary-contrast-rgb: 255,255,255;
-	--ion-color-primary-shade: #00354d;
-	--ion-color-primary-tint: #1a5069;
+	--ion-color-primary-shade: #0c7b7b;
+	--ion-color-primary-tint: #269898;
 
-	--ion-color-secondary: #06717e;
-	--ion-color-secondary-rgb: 6,113,126;
+	--ion-color-secondary: #0e8c8c;
+	--ion-color-secondary-rgb: 14,140,140;
 	--ion-color-secondary-contrast: #ffffff;
 	--ion-color-secondary-contrast-rgb: 255,255,255;
-	--ion-color-secondary-shade: #05636f;
-	--ion-color-secondary-tint: #1f7f8b;
+	--ion-color-secondary-shade: #0c7b7b;
+	--ion-color-secondary-tint: #269898;
 
 	--ion-color-tertiary: #6030ff;
 	--ion-color-tertiary-rgb: 96,48,255;
@@ -69,10 +72,13 @@
 	--ion-color-dark-shade: #292929;
 	--ion-color-dark-tint: #444444;
 
-	/* ---- Tipografía (usa la fuente nativa del sistema: SF en iOS, Roboto en
-	   Android) para que se vea nítida y consistente sin depender de internet. */
-	--ion-font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI',
-		Roboto, 'Helvetica Neue', Arial, sans-serif;
+	/* ---- Tipografía ÚNICA para TODA la app (estudiante + panel + landing).
+	   Usa la fuente nativa del sistema (SF en iOS/Mac, Roboto en Android, Segoe
+	   en Windows): se ve nítida, no depende de internet y es la MISMA en todas
+	   las ventanas. (Antes se declaraba 'Inter', que NO estaba cargada y podía
+	   caer a fallbacks distintos según el dispositivo.) */
+	--ion-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+		'Helvetica Neue', Arial, sans-serif;
 
 	/* ---- Radios consistentes para botones / tarjetas (look más cohesivo) */
 	--auris-radius: 12px;
@@ -102,6 +108,11 @@
 	--auris-radius-xl: 22px;
 	--auris-radius-pill: 999px;
 
+	/* Fondo de página (modo claro) con tinte teal MUY sutil: cohesivo con la
+	   marca, sin ser blanco puro. Las tarjetas blancas resaltan encima. */
+	--ion-background-color: #eef5f4;
+	--ion-background-color-rgb: 238,245,244;
+
 	/* Superficies, bordes y texto (modo claro) */
 	--auris-surface:    #ffffff;
 	--auris-surface-2:  #f4f6fa;
@@ -114,10 +125,10 @@
 	/* Fondo de página con tinte sutil de marca */
 	--auris-bg-tint: color-mix(in srgb, var(--ion-color-primary) 5%, var(--ion-background-color, #ffffff));
 
-	/* Elevación en dos capas (ambiente + key), look suave y moderno */
-	--auris-elev-1: 0 1px 2px rgba(16, 32, 43, 0.06), 0 1px 3px rgba(16, 32, 43, 0.05);
-	--auris-elev-2: 0 2px 6px rgba(16, 32, 43, 0.07), 0 8px 18px rgba(16, 32, 43, 0.08);
-	--auris-elev-3: 0 10px 30px rgba(16, 32, 43, 0.13), 0 2px 8px rgba(16, 32, 43, 0.08);
+	/* Elevación SUAVE y MATE (menos brillo): sombras sutiles, sin "flotar". */
+	--auris-elev-1: 0 1px 2px rgba(16, 32, 43, 0.05);
+	--auris-elev-2: 0 1px 3px rgba(16, 32, 43, 0.06), 0 4px 10px rgba(16, 32, 43, 0.05);
+	--auris-elev-3: 0 4px 14px rgba(16, 32, 43, 0.08), 0 1px 4px rgba(16, 32, 43, 0.05);
 
 	/* Firma de marca: gradiente navy → teal */
 	--auris-gradient: linear-gradient(135deg, var(--ion-color-primary) 0%, var(--ion-color-secondary) 100%);
@@ -142,15 +153,16 @@
 	body {
 		--ion-text-color: #ffffff;
 		--ion-text-color-rgb: 255, 255, 255;
-		--ion-background-color: #121212;
-		--ion-background-color-rgb: 18, 18, 18;
+		/* Fondo dark-teal de marca (combina con la landing y los toolbars teal). */
+		--ion-background-color: #0a2423;
+		--ion-background-color-rgb: 10, 36, 35;
 
-		--ion-color-light: #222428;
-		--ion-color-light-rgb: 34, 36, 40;
+		--ion-color-light: #173b38;
+		--ion-color-light-rgb: 23, 59, 56;
 		--ion-color-light-contrast: #ffffff;
 		--ion-color-light-contrast-rgb: 255, 255, 255;
-		--ion-color-light-shade: #1e2023;
-		--ion-color-light-tint: #383a3e;
+		--ion-color-light-shade: #143431;
+		--ion-color-light-tint: #20453f;
 
 		--ion-color-dark: #f4f5f8;
 		--ion-color-dark-rgb: 244, 245, 248;
@@ -179,23 +191,23 @@
 		--ion-color-step-900: #e7e7e7;
 		--ion-color-step-950: #f3f3f3;
 
-		--ion-item-background: #1c1c1c;
-		--ion-card-background: #1c1c1c;
+		--ion-item-background: #103230;
+		--ion-card-background: #103230;
 
-		/* Tokens del sistema de diseño Auris — variante oscura */
-		--auris-surface:    #1b1f27;
-		--auris-surface-2:  #232833;
-		--auris-surface-3:  #2c323e;
-		--auris-border:     #2f3742;
+		/* Tokens del sistema de diseño Auris — variante oscura (teñida teal) */
+		--auris-surface:    #103230;
+		--auris-surface-2:  #163b38;
+		--auris-surface-3:  #1d4642;
+		--auris-border:     #24524d;
 		--auris-text:       #f1f3f6;
 		--auris-text-soft:  #c2c8d2;
 		--auris-text-muted: #8b93a1;
 
 		--auris-bg-tint: color-mix(in srgb, var(--ion-color-primary) 12%, var(--ion-background-color, #121212));
 
-		--auris-elev-1: 0 1px 2px rgba(0, 0, 0, 0.40);
-		--auris-elev-2: 0 2px 8px rgba(0, 0, 0, 0.45), 0 8px 20px rgba(0, 0, 0, 0.40);
-		--auris-elev-3: 0 10px 30px rgba(0, 0, 0, 0.55), 0 2px 8px rgba(0, 0, 0, 0.45);
+		--auris-elev-1: 0 1px 2px rgba(0, 0, 0, 0.28);
+		--auris-elev-2: 0 1px 3px rgba(0, 0, 0, 0.30), 0 4px 10px rgba(0, 0, 0, 0.28);
+		--auris-elev-3: 0 4px 14px rgba(0, 0, 0, 0.34), 0 1px 4px rgba(0, 0, 0, 0.30);
 
 		--auris-focus-ring: 0 0 0 3px color-mix(in srgb, var(--ion-color-secondary) 55%, transparent);
 	}

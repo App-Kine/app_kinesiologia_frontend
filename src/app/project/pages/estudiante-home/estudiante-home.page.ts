@@ -2,11 +2,11 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import {
-  IonContent, IonHeader, IonToolbar, IonTitle, IonIcon,
+  IonContent, IonHeader, IonToolbar, IonTitle, IonIcon, IonButtons, IonButton,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
-  bodyOutline, schoolOutline, chevronForwardOutline, medicalOutline,
+  bodyOutline, schoolOutline, chevronForwardOutline, medicalOutline, arrowBackOutline,
 } from 'ionicons/icons';
 
 /**
@@ -28,12 +28,17 @@ import {
   styleUrls: ['./estudiante-home.page.scss'],
   standalone: true,
   imports: [
-    CommonModule, IonContent, IonHeader, IonToolbar, IonTitle, IonIcon,
+    CommonModule, IonContent, IonHeader, IonToolbar, IonTitle, IonIcon, IonButtons, IonButton,
   ],
 })
 export class EstudianteHomePage {
   constructor(private router: Router) {
-    addIcons({ bodyOutline, schoolOutline, chevronForwardOutline, medicalOutline });
+    addIcons({ bodyOutline, schoolOutline, chevronForwardOutline, medicalOutline, arrowBackOutline });
+  }
+
+  /** Vuelve a la landing (elegir estudiante/profesor). */
+  volver(): void {
+    this.router.navigateByUrl('/');
   }
 
   irAAuscultacion(): void {

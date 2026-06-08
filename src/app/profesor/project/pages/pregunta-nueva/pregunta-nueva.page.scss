@@ -1,0 +1,290 @@
+.pregunta-wrapper {
+  max-width: 800px;
+  margin: 0 auto;
+  padding-bottom: 80px; // espacio para el submit-bar
+}
+
+// ----- Header -----
+.header-card {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  padding: 16px 20px;
+  background: linear-gradient(135deg,
+    rgba(var(--ion-color-secondary-rgb), 0.10),
+    rgba(var(--ion-color-tertiary-rgb), 0.06));
+  border-radius: 16px;
+  margin-bottom: 24px;
+
+  .header-icon {
+    flex-shrink: 0;
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    background: var(--ion-color-secondary);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    ion-icon { font-size: 28px; }
+  }
+
+  .header-text {
+    h1 {
+      margin: 0 0 4px;
+      font-size: 1.3rem;
+      font-weight: 700;
+    }
+    p {
+      margin: 0;
+      font-size: 0.9rem;
+      color: var(--ion-color-medium);
+      line-height: 1.4;
+    }
+  }
+}
+
+// ----- Tarjetas de sección -----
+.section-card {
+  background: var(--ion-card-background, #fff);
+  border-radius: 14px;
+  padding: 16px 20px;
+  margin-bottom: 18px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--ion-color-light-shade, #ececec);
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+
+  .step {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--ion-color-secondary);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.9rem;
+  }
+  h2 {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 600;
+  }
+  ion-note {
+    font-size: 0.8rem;
+    margin-left: auto;
+  }
+  .chip-info {
+    margin: 0;
+    height: 26px;
+    font-size: 0.75rem;
+  }
+}
+
+// Forzar estilo "outline" uniforme en todos los ion-input/ion-textarea
+ion-input.in-input-fill-outline,
+ion-textarea.in-textarea-fill-outline {
+  // Ionic ya aplica los estilos; este wrapper sirve si quieres overrides.
+}
+
+// ----- Bloques de multimedia (audio / imagen) -----
+.media-block {
+  border: 1px solid var(--ion-color-light-shade, #ececec);
+  border-radius: 12px;
+  padding: 12px 14px;
+
+  .media-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: var(--ion-color-dark);
+    ion-icon { font-size: 18px; color: var(--ion-color-secondary); }
+  }
+
+  .media-preview {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    audio { width: 100%; }
+    .img-thumb {
+      max-width: 100%;
+      max-height: 220px;
+      border-radius: 10px;
+      object-fit: contain;
+      align-self: flex-start;
+      border: 1px solid var(--ion-color-light-shade, #ececec);
+    }
+    .media-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      ion-note { font-size: 0.8rem; word-break: break-all; }
+    }
+  }
+}
+
+.hint-text {
+  display: block;
+  font-size: 0.85rem;
+  margin: 4px 0 14px;
+  color: var(--ion-color-medium);
+}
+
+// ----- Alternativas -----
+// Cada fila replica el estilo "outline" de los textareas de arriba:
+// sin fondo gris, sin borde, el ion-input es el único elemento visual.
+.alts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.alt-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  // sin background, sin border, sin padding extra: el ion-input outline
+  // ya aporta toda la estructura visual (igual que enunciado/explicación)
+
+  .alt-radio {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    // Alineamos verticalmente con el centro del input (el label "Alternativa N"
+    // ocupa un poco arriba, así que añadimos un pequeño offset)
+    padding-top: 18px;
+
+    ion-radio {
+      --color-checked: var(--ion-color-success);
+      --color: var(--ion-color-medium);
+      transform: scale(1.25);
+    }
+  }
+
+  .alt-input {
+    flex: 1;
+    min-width: 0; // permite shrink en pantallas estrechas
+  }
+
+  .alt-delete {
+    flex-shrink: 0;
+    margin: 0;
+    padding-top: 14px;
+    --padding-start: 8px;
+    --padding-end: 8px;
+  }
+}
+
+.btn-agregar-alt {
+  margin-top: 4px;
+  --border-radius: 10px;
+}
+
+// ----- Avanzado -----
+.avanzado-card {
+  padding: 0;
+
+  .avanzado-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 14px 20px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--ion-color-dark);
+    text-align: left;
+
+    ion-icon { font-size: 18px; color: var(--ion-color-medium); }
+    .avanzado-note {
+      margin-left: auto;
+      font-size: 0.78rem;
+    }
+
+    &:hover { background: rgba(0,0,0,0.02); }
+  }
+
+  .avanzado-body {
+    padding: 0 16px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+}
+
+// ----- Validación viva -----
+.pendientes-box {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  background: rgba(var(--ion-color-warning-rgb), 0.10);
+  border: 1px solid rgba(var(--ion-color-warning-rgb), 0.4);
+  padding: 12px 16px;
+  border-radius: 10px;
+  margin-top: 16px;
+
+  ion-icon {
+    flex-shrink: 0;
+    font-size: 24px;
+    margin-top: 2px;
+  }
+  strong { display: block; margin-bottom: 4px; font-size: 0.92rem; }
+  ul {
+    margin: 0;
+    padding-left: 18px;
+    font-size: 0.88rem;
+    color: var(--ion-color-medium-shade);
+  }
+}
+
+// ----- Mensajes -----
+.msg-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  margin-top: 16px;
+  font-size: 0.92rem;
+
+  ion-icon { font-size: 20px; flex-shrink: 0; }
+
+  &.error {
+    background: rgba(var(--ion-color-danger-rgb), 0.10);
+    color: var(--ion-color-danger-shade);
+  }
+  &.ok {
+    background: rgba(var(--ion-color-success-rgb), 0.10);
+    color: var(--ion-color-success-shade);
+  }
+}
+
+// ----- Submit -----
+.submit-bar {
+  position: sticky;
+  bottom: 0;
+  margin-top: 24px;
+  padding: 12px 0;
+  background: linear-gradient(to top, var(--ion-background-color, #fff) 70%, transparent);
+  z-index: 5;
+}

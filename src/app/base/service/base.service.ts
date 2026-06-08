@@ -44,23 +44,22 @@ export class BaseService {
     }
 
     private async getAngularHeaders() {
-        let token = undefined;
-        try {
-            token = await this.getStoreData(environment.DATA_KEY_TOKEN);
-        } catch (error) {
-            if (!environment.production) console.log("NO TOKEN YET");
-        }
-        this.httpClientHeaders = new HttpHeaders();
-        this.httpClientHeaders = this.httpClientHeaders.append(
+        // FLUJO DEL ESTUDIANTE = 100% PÚBLICO (sin login). NO adjuntamos ninguna
+        // cabecera Authorization a propósito:
+        //   1) Los endpoints del estudiante (evaluacion/*) son públicos en el
+        //      gateway; el token no aporta nada.
+        //   2) En la app UNIFICADA puede quedar un token de una sesión de PROFESOR
+        //      en storage. Si lo mandáramos aquí, la petición dejaría de ser
+        //      "simple" y el navegador dispararía un preflight OPTIONS. El WebView
+        //      de iOS (WKWebView, esquema capacitor:// + http en claro de dev)
+        //      falla ese preflight → los cursos/tests no cargaban en el iPhone.
+        // Sin Authorization la petición es simple y se comporta igual que la app
+        // original del estudiante (que funcionaba en iOS). El panel del profesor
+        // usa su PROPIO BaseService (src/app/profesor/base) que sí envía el token.
+        this.httpClientHeaders = new HttpHeaders().append(
             "Content-Type",
             "application/x-www-form-urlencoded"
         );
-        if (token) {
-            this.httpClientHeaders = this.httpClientHeaders.append(
-                "Authorization",
-                token
-            );
-        }
     }
     private proccessResponse(data: any): any {
         let p = new Promise((onSuccess, onError) => {
