@@ -1,0 +1,205 @@
+/*
+ * App Global CSS
+ * ----------------------------------------------------------------------------
+ * Put style rules here that you want to apply globally. These styles are for
+ * the entire app and not just one component. Additionally, this file can be
+ * used as an entry point to import other CSS/Sass files to be included in the
+ * output CSS.
+ * For more information on global stylesheets, visit the documentation:
+ * https://ionicframework.com/docs/layout/global-stylesheets
+ */
+
+/* Core CSS required for Ionic components to work properly */
+@import "@ionic/angular/css/core.css";
+
+/* Basic CSS for apps built with Ionic */
+@import "@ionic/angular/css/normalize.css";
+@import "@ionic/angular/css/structure.css";
+@import "@ionic/angular/css/typography.css";
+@import "@ionic/angular/css/display.css";
+
+/* Optional CSS utils that can be commented out */
+@import "@ionic/angular/css/padding.css";
+@import "@ionic/angular/css/float-elements.css";
+@import "@ionic/angular/css/text-alignment.css";
+@import "@ionic/angular/css/text-transformation.css";
+@import "@ionic/angular/css/flex-utils.css";
+
+/**
+ * Ionic Dark Mode
+ * -----------------------------------------------------
+ * For more info, please see:
+ * https://ionicframework.com/docs/theming/dark-mode
+ */
+
+/* @import "@ionic/angular/css/palettes/dark.always.css"; */
+/* @import "@ionic/angular/css/palettes/dark.class.css"; */
+@import '@ionic/angular/css/palettes/dark.system.css';
+
+/* ============================================================================
+ * Pulido visual global de Auris (tipografía, botones, tarjetas)
+ * Funciona en claro y oscuro porque usa variables de tema Ionic.
+ * ========================================================================== */
+
+/* Tipografía nítida y consistente */
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--ion-font-family);
+}
+
+/* Títulos de la barra superior: un poco más definidos */
+ion-title {
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+
+/* Botones: esquinas redondeadas, peso medio, sin MAYÚSCULAS forzadas y con
+ * una sombra sutil en los sólidos para que "encajen" mejor con las tarjetas. */
+ion-button {
+  --border-radius: var(--auris-radius-sm, 10px);
+  font-weight: 600;
+  letter-spacing: 0.1px;
+  text-transform: none;
+  --box-shadow: none;
+}
+
+ion-button[fill='solid'],
+ion-button:not([fill]) {
+  /* Sombra sutil y neutra (menos brillo: antes era una sombra teñida y marcada). */
+  --box-shadow: 0 1px 2px rgba(16, 32, 43, 0.10);
+}
+
+ion-button[shape='round'] {
+  --border-radius: 999px;
+}
+
+/* Tarjetas y listas: radio amplio, borde sutil + elevación en dos capas */
+ion-card {
+  border-radius: var(--auris-radius-lg, 16px);
+  box-shadow: var(--auris-elev-2);
+  border: 1px solid var(--auris-border);
+}
+
+ion-item {
+  --border-radius: var(--auris-radius-sm, 10px);
+}
+
+/* Inputs/areas de texto con borde redondeado coherente */
+ion-input,
+ion-textarea,
+ion-select {
+  --border-radius: var(--auris-radius-sm, 10px);
+}
+
+/* ============================================================================
+ * Área segura inferior (home indicator del iPhone) en TODAS las pantallas.
+ * Agrega espacio al final del scroll para que el último elemento de cualquier
+ * página no quede cortado por la barra de inicio. En navegador/Android sin
+ * notch el inset es 0, así que no afecta.
+ * ========================================================================== */
+ion-content::part(scroll) {
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
+}
+
+/* ============================================================================
+ * Toque moderno: micro-interacciones, foco accesible y utilidades de layout.
+ * Todo con tokens del sistema (theme/variables.scss) → claro/oscuro automático.
+ * ========================================================================== */
+
+/* Botones: leve hundimiento al presionar (feedback táctil visual) */
+ion-button::part(native) {
+  transition: transform 0.12s var(--auris-ease, ease);
+}
+ion-button:active::part(native) {
+  transform: translateY(1px);
+}
+
+/* Header plano moderno: quitamos la sombra/línea dura por defecto de Ionic */
+ion-header.header-md::after {
+  background-image: none;
+}
+ion-toolbar {
+  --border-width: 0;
+}
+
+/* Skip-link (WCAG 2.4.1 "Saltar bloques"): oculto fuera de pantalla y solo
+   visible cuando recibe el foco por teclado. Lleva al contenido principal. */
+.skip-link {
+  position: absolute;
+  left: 8px;
+  top: -48px;
+  z-index: 10000;
+  padding: 10px 16px;
+  border-radius: 0 0 8px 8px;
+  background: var(--ion-color-primary);
+  color: var(--ion-color-primary-contrast, #fff);
+  font-weight: 600;
+  text-decoration: none;
+  transition: top 0.16s ease;
+}
+.skip-link:focus,
+.skip-link:focus-visible {
+  top: 0;
+  outline: none;
+  box-shadow: var(--auris-focus-ring);
+}
+
+/* Foco visible por teclado (accesibilidad WCAG 2.4.7) en elementos propios.
+   No afecta el clic con mouse/touch, solo navegación por teclado. */
+a:focus-visible,
+button:focus-visible,
+[tabindex]:focus-visible {
+  outline: none;
+  box-shadow: var(--auris-focus-ring);
+  border-radius: 8px;
+}
+
+/* Skeletons de carga con radio coherente */
+ion-skeleton-text {
+  --border-radius: 6px;
+  border-radius: 6px;
+}
+
+/* --------- Utilidades de layout reutilizables en cualquier página --------- */
+
+/* Contenedor centrado con ancho de lectura cómodo */
+.auris-page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: var(--auris-space-6) var(--auris-space-5) var(--auris-space-10);
+}
+
+/* Tarjeta-superficie genérica (para <div>/<button> que no son ion-card) */
+.auris-card {
+  background: var(--auris-surface);
+  border: 1px solid var(--auris-border);
+  border-radius: var(--auris-radius-lg);
+  box-shadow: var(--auris-elev-1);
+}
+
+/* Helpers de elevación */
+.auris-elev-1 { box-shadow: var(--auris-elev-1); }
+.auris-elev-2 { box-shadow: var(--auris-elev-2); }
+.auris-elev-3 { box-shadow: var(--auris-elev-3); }
+
+/* Título con gradiente de marca (navy → teal) para encabezados hero */
+.auris-gradient-text {
+  background: var(--auris-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* "Eyebrow": rótulo discreto sobre títulos de sección */
+.auris-eyebrow {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--auris-text-muted);
+}

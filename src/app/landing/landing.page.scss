@@ -1,0 +1,114 @@
+/* Landing de Auris — portada neutra con identidad de marca (navy → teal).
+   Usa tokens del tema cuando existen, con fallbacks propios. */
+
+.landing {
+  /* Fondo MATE dark-teal (igual base que el resto de la app: #0a2423). */
+  --background: linear-gradient(160deg, #103a38 0%, #0a2423 72%);
+}
+
+.landing-wrap {
+  min-height: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 26px;
+  padding: 32px 22px calc(env(safe-area-inset-bottom, 0px) + 28px);
+  color: #eaf2fb;
+  text-align: center;
+}
+
+/* ---------- Hero ---------- */
+.landing-hero { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+
+.logo {
+  width: 72px;
+  height: 72px;
+  border-radius: 20px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, #18a8a8, #0c7b7b);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  margin-bottom: 4px;
+}
+.logo ion-icon { font-size: 40px; color: #04121f; }
+
+.landing-hero h1 {
+  margin: 0;
+  font-size: clamp(40px, 9vw, 56px);
+  font-weight: 800;
+  letter-spacing: -1px;
+  line-height: 1;
+}
+.landing-hero .sub {
+  margin: 0;
+  max-width: 460px;
+  font-size: 14.5px;
+  color: #b9c9da;
+  line-height: 1.5;
+}
+
+.pregunta {
+  margin: 4px 0 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #d6e2ee;
+}
+
+/* ---------- Opciones ---------- */
+.opciones {
+  width: 100%;
+  max-width: 440px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.opcion {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  text-align: left;
+  padding: 20px 18px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+  color: #eaf2fb;
+  cursor: pointer;
+  transition: transform 0.14s ease, border-color 0.14s ease, background 0.14s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.opcion:hover { transform: translateY(-2px); background: rgba(255, 255, 255, 0.08); }
+.opcion:active { transform: translateY(0); }
+.opcion:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(38, 178, 178, 0.6); }
+
+.op-ic {
+  flex: 0 0 auto;
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+}
+.op-ic ion-icon { font-size: 28px; }
+/* Mismo color de marca (teal) en ambas opciones; las diferencia el icono. */
+.opcion-estudiante .op-ic,
+.opcion-profesor .op-ic { background: rgba(38, 178, 178, 0.16); }
+.opcion-estudiante .op-ic ion-icon,
+.opcion-profesor .op-ic ion-icon { color: #3bd0d0; }
+
+.op-txt { flex: 1 1 auto; display: flex; flex-direction: column; gap: 3px; }
+.op-tit { font-size: 18px; font-weight: 700; }
+.op-desc { font-size: 13px; color: #aebccb; line-height: 1.4; }
+
+.op-go { flex: 0 0 auto; font-size: 20px; color: #7f93a6; }
+.opcion:hover .op-go { color: #eaf2fb; }
+
+/* ---------- Footer ---------- */
+.landing-foot {
+  font-size: 12.5px;
+  color: #7f93a6;
+  letter-spacing: 0.3px;
+}

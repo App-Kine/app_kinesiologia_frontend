@@ -1,0 +1,136 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-button (click)="volverACursos()" aria-label="Salir de la evaluación">
+        <ion-icon slot="icon-only" name="arrow-back-outline" aria-hidden="true"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>
+      @if (ev) { Pregunta {{ idx + 1 }} de {{ total }} } @else { Evaluación }
+    </ion-title>
+  </ion-toolbar>
+  @if (ev) {
+    <ion-progress-bar [value]="progreso" color="secondary"></ion-progress-bar>
+  }
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  @if (error && !ev) {
+    <div class="centro" role="alert">
+      <ion-icon name="close-circle" color="danger" class="big-icon" aria-hidden="true"></ion-icon>
+      <p><ion-text color="danger">{{ error }}</ion-text></p>
+      <ion-button (click)="volverACursos()">Volver a cursos</ion-button>
+    </div>
+  } @else if (finalizando) {
+    <div class="centro" role="status" aria-live="polite">
+      <ion-spinner name="crescent" aria-busy="true" aria-label="Cargando"></ion-spinner>
+      <p><ion-text color="medium">Calculando resultados…</ion-text></p>
+    </div>
+  } @else if (pregunta; as p) {
+
+    <!-- Intento actual (RF-33) -->
+    <div class="meta-row">
+      <ion-chip [color]="intento === 1 ? 'medium' : 'warning'">
+        <ion-label>Intento {{ intento }} de 2</ion-label>
+      </ion-chip>
+    </div>
+
+    <!-- Enunciado con formato HTML (rich text editor) -->
+    <div class="enunciado" [innerHTML]="p.enunciado | safeHtml"></div>
+
+    <!-- Audio clínico + espectrograma (RF-17/18) -->
+    @if (p.audio_grid_id) {
+      <div class="audio-box">
+        <ion-icon name="volume-high-outline" color="primary"></ion-icon>
+        <app-audio-spectro [src]="audioUrl(p)"></app-audio-spectro>
+      </div>
+    }
+
+    <!-- Imagen opcional (RF-19/20/21: nada si no hay) -->
+    @if (p.imagen_grid_id) {
+      <img class="pregunta-img" [src]="imagenUrl(p)" alt="Imagen de la pregunta" />
+    }
+
+    <!-- Video opcional (pedido cliente 2026-05-26) -->
+    @if (p.video_grid_id) {
+      <video class="pregunta-video" [src]="videoUrl(p)" controls preload="metadata"
+        style="max-width:100%;border-radius:10px;margin:12px 0;"></video>
+    }
+
+    <!-- Alternativas -->
+    <div class="alts">
+      @for (alt of p.alternativas; track alt.alternativa_id) {
+        <button
+          class="alt {{ claseAlternativa(alt.alternativa_id) }}"
+          (click)="seleccionar(alt.alternativa_id)"
+          [disabled]="fase === 'feedback' || alt.alternativa_id === altBloqueada"
+        >
+          <span class="alt-texto">{{ alt.texto }}</span>
+          @if (fase === 'feedback' && ultimo) {
+            @if (ultimo.correctaAlternativaId === alt.alternativa_id) {
+              <span class="alt-marca alt-marca-ok">
+                <ion-icon name="checkmark-circle" color="success" aria-hidden="true"></ion-icon>
+                <span class="alt-marca-txt">Respuesta correcta</span>
+              </span>
+            } @else if (seleccion === alt.alternativa_id && !ultimo.correcta) {
+              <span class="alt-marca alt-marca-fail">
+                <ion-icon name="close-circle" color="danger" aria-hidden="true"></ion-icon>
+                <span class="alt-marca-txt">Respuesta incorrecta</span>
+              </span>
+            }
+          }
+        </button>
+      }
+    </div>
+
+    @if (error) {
+      <ion-text color="danger"><p class="error" role="alert">{{ error }}</p></ion-text>
+    }
+
+    <!-- Feedback (RF-32/34/35/36/38) -->
+    @if (fase === 'feedback' && ultimo) {
+      <div class="feedback {{ ultimo.correcta ? 'ok' : (ultimo.finalizadaPregunta ? 'fail' : 'retry') }}"
+        role="status" aria-live="polite">
+        @if (ultimo.correcta) {
+          <p class="fb-title"><ion-icon name="checkmark-circle" aria-hidden="true"></ion-icon> ¡Correcto!</p>
+        } @else if (ultimo.puedeReintentar) {
+          <p class="fb-title"><ion-icon name="close-circle" aria-hidden="true"></ion-icon> Incorrecto. Te queda un intento.</p>
+        } @else {
+          <p class="fb-title"><ion-icon name="close-circle" aria-hidden="true"></ion-icon> Incorrecto. La respuesta correcta está marcada.</p>
+        }
+        <!-- Explicación clínica solo al finalizar la pregunta (RF-36/38).
+             Render como HTML para respetar el formato del rich text editor. -->
+        @if (ultimo.finalizadaPregunta && ultimo.explicacion) {
+          <div class="fb-exp">
+            <ion-icon name="bulb-outline" aria-hidden="true"></ion-icon>
+            <div [innerHTML]="ultimo.explicacion | safeHtml"></div>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- Botonera -->
+    <div class="acciones">
+      @if (fase === 'responder') {
+        <ion-button expand="block" color="primary" (click)="confirmar()"
+          [disabled]="seleccion == null || enviando">
+          @if (enviando) { <ion-spinner name="dots" aria-busy="true" aria-label="Cargando"></ion-spinner> }
+          @else { Confirmar respuesta }
+        </ion-button>
+      } @else if (ultimo && !ultimo.finalizadaPregunta && ultimo.puedeReintentar) {
+        <ion-button expand="block" color="warning" (click)="reintentar()">
+          <ion-icon name="refresh-outline" slot="start"></ion-icon>
+          Intentar de nuevo
+        </ion-button>
+      } @else {
+        <ion-button expand="block" color="primary" (click)="siguiente()">
+          @if (esUltima) {
+            <ion-icon name="ribbon-outline" slot="start"></ion-icon> Ver resultados
+          } @else {
+            Siguiente <ion-icon name="arrow-forward-outline" slot="end"></ion-icon>
+          }
+        </ion-button>
+      }
+    </div>
+  }
+</ion-content>

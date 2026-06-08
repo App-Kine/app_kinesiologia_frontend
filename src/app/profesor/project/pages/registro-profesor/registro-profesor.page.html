@@ -1,0 +1,141 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="secondary">
+    <ion-buttons slot="start">
+      <ion-button (click)="volver()" aria-label="Volver al inicio de sesión">
+        <ion-icon slot="icon-only" name="arrow-back-outline" aria-hidden="true"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Completa tu registro · Auris</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  <div class="registro-wrapper">
+    <div class="registro-card">
+      @if (verificando) {
+        <div class="estado" role="status" aria-live="polite">
+          <ion-spinner name="crescent" aria-label="Validando invitación" aria-busy="true"></ion-spinner>
+          <p>Validando tu invitación...</p>
+        </div>
+      } @else if (!invitacionValida) {
+        <div class="estado error" role="alert">
+          <ion-icon name="close-circle" color="danger" aria-hidden="true"></ion-icon>
+          <h2>No fue posible continuar</h2>
+          <p>{{ mensajeError }}</p>
+          <ion-button expand="block" fill="outline" (click)="irALogin()">
+            Volver al login
+          </ion-button>
+        </div>
+      } @else if (ok) {
+        <div class="estado ok" role="status" aria-live="polite">
+          <ion-icon name="checkmark-circle" color="success" aria-hidden="true"></ion-icon>
+          <h2>¡Cuenta creada!</h2>
+          <p>Redirigiéndote al login...</p>
+        </div>
+      } @else {
+        <h1 class="titulo">Bienvenido a Auris</h1>
+        <p class="subtitulo">
+          Define tus datos para activar tu cuenta de profesor.
+        </p>
+
+        <form (ngSubmit)="onSubmit()" novalidate>
+          <ion-item lines="full">
+            <ion-icon name="mail-outline" slot="start"></ion-icon>
+            <ion-label position="stacked">Correo</ion-label>
+            <ion-input
+              type="email"
+              [value]="correoPrelleno"
+              readonly
+              name="correo"
+            ></ion-input>
+            <ion-note slot="helper">Este correo está fijo en la invitación.</ion-note>
+          </ion-item>
+
+          <ion-item lines="full">
+            <ion-icon name="person-outline" slot="start"></ion-icon>
+            <ion-label position="stacked">Nombre completo</ion-label>
+            <ion-input
+              type="text"
+              autocomplete="name"
+              placeholder="Ej. Juan Pérez"
+              name="nombre"
+              [(ngModel)]="nombre"
+              required
+              aria-required="true"
+              [disabled]="cargando"
+            ></ion-input>
+          </ion-item>
+
+          <ion-item lines="full">
+            <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
+            <ion-label position="stacked">Contraseña</ion-label>
+            <ion-input
+              type="password"
+              autocomplete="new-password"
+              name="password"
+              [(ngModel)]="password"
+              (ionInput)="evaluarPassword()"
+              required
+              aria-required="true"
+              [attr.aria-invalid]="password && !passwordCumple ? 'true' : null"
+              aria-describedby="reglas-password"
+              [disabled]="cargando"
+            ></ion-input>
+          </ion-item>
+
+          <ion-item lines="full">
+            <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
+            <ion-label position="stacked">Confirma la contraseña</ion-label>
+            <ion-input
+              type="password"
+              autocomplete="new-password"
+              name="password2"
+              [(ngModel)]="password2"
+              (ionInput)="evaluarPassword()"
+              required
+              aria-required="true"
+              [attr.aria-invalid]="password2 && password !== password2 ? 'true' : null"
+              aria-describedby="reglas-password"
+              [disabled]="cargando"
+            ></ion-input>
+          </ion-item>
+
+          <!-- Reglas de complejidad (RNF-13) -->
+          <ul class="reglas" id="reglas-password" aria-live="polite">
+            @for (r of reglas; track r.id) {
+              <li [class.ok]="r.ok"
+                  [attr.aria-label]="(r.ok ? 'Cumplido: ' : 'Pendiente: ') + r.label">
+                <ion-icon
+                  [name]="r.ok ? 'checkmark-circle' : 'close-circle'"
+                  [color]="r.ok ? 'success' : 'medium'"
+                  aria-hidden="true"
+                ></ion-icon>
+                <span aria-hidden="true">{{ r.label }}</span>
+              </li>
+            }
+          </ul>
+
+          @if (mensajeError) {
+            <ion-text color="danger" class="form-error">
+              <span role="alert">{{ mensajeError }}</span>
+            </ion-text>
+          }
+
+          <ion-button
+            expand="block"
+            type="submit"
+            [disabled]="cargando || !passwordCumple"
+            class="ion-margin-top"
+          >
+            @if (cargando) {
+              <ion-spinner name="dots" aria-label="Creando cuenta" aria-busy="true"></ion-spinner>
+            } @else {
+              <ion-icon slot="start" name="save-outline" aria-hidden="true"></ion-icon>
+              Crear cuenta
+            }
+          </ion-button>
+        </form>
+      }
+    </div>
+  </div>
+</ion-content>

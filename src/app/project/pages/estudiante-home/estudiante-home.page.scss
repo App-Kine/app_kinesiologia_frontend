@@ -1,0 +1,182 @@
+/*
+ * Home del estudiante.
+ * Ahora consume el SISTEMA DE DISEÑO compartido (theme/variables.scss):
+ * superficies, bordes, texto, elevación y gradiente de marca vienen de los
+ * tokens --auris-*, que ya resuelven claro/oscuro automáticamente. Así esta
+ * pantalla queda coherente con el resto y futuras vistas heredan el mismo look.
+ */
+:host {
+  display: block;
+  color-scheme: light dark;
+}
+
+.home-content {
+  /* Fondo con tinte sutil de marca que se desvanece hacia el fondo base */
+  --background: linear-gradient(180deg, var(--auris-bg-tint) 0%, var(--ion-background-color, #fff) 100%);
+  color: var(--auris-text);
+}
+
+.home-wrapper {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: var(--auris-space-8) var(--auris-space-5) var(--auris-space-10);
+}
+
+/* ============================================================
+   Bienvenida
+   ============================================================ */
+.welcome {
+  text-align: center;
+  margin-bottom: var(--auris-space-8);
+}
+
+/* Insignia con gradiente navy → teal (firma de marca) */
+.welcome-badge {
+  width: 76px;
+  height: 76px;
+  margin: 0 auto var(--auris-space-3);
+  border-radius: var(--auris-radius-xl);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--auris-gradient);
+  box-shadow: var(--auris-elev-2);
+}
+
+.welcome-badge ion-icon {
+  font-size: 38px;
+  color: #ffffff;
+}
+
+.welcome h1 {
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: -0.4px;
+  margin: var(--auris-space-1) 0;
+  color: var(--auris-text);
+}
+
+.welcome-sub {
+  margin: 0;
+  font-size: 16px;
+  color: var(--auris-text-soft);
+}
+
+/* ============================================================
+   Tarjetas de acción
+   ============================================================ */
+.cards-grid {
+  display: grid;
+  gap: var(--auris-space-4);
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) {
+  .cards-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.big-card {
+  display: flex;
+  align-items: center;
+  gap: var(--auris-space-4);
+  width: 100%;
+  text-align: left;
+  padding: var(--auris-space-5) var(--auris-space-4);
+  background: var(--auris-surface);
+  border: 1px solid var(--auris-border);
+  border-radius: var(--auris-radius-lg);
+  box-shadow: var(--auris-elev-1);
+  cursor: pointer;
+  font-family: inherit;
+  color: var(--auris-text);
+  transition:
+    transform 0.16s var(--auris-ease),
+    box-shadow 0.16s var(--auris-ease),
+    border-color 0.16s var(--auris-ease);
+}
+
+.big-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--auris-elev-3);
+}
+
+.big-card:active {
+  transform: translateY(-1px);
+}
+
+/* Tarjeta destacada (auscultación 3D): tinte de gradiente suave de marca */
+.big-card.auscultacion {
+  background:
+    var(--auris-gradient-soft),
+    var(--auris-surface);
+  border-color: color-mix(in srgb, var(--ion-color-secondary) 35%, transparent);
+}
+
+.big-card.auscultacion:hover {
+  border-color: var(--ion-color-secondary);
+}
+
+.big-card.tests:hover {
+  border-color: color-mix(in srgb, var(--ion-color-primary) 55%, transparent);
+}
+
+/* Cápsula del icono */
+.card-icon-wrap {
+  flex: 0 0 56px;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--auris-radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--auris-surface-2);
+}
+
+.card-icon-wrap ion-icon {
+  font-size: 28px;
+  color: var(--ion-color-primary);
+}
+
+.auscultacion .card-icon-wrap {
+  background: var(--auris-gradient);
+}
+
+.auscultacion .card-icon-wrap ion-icon {
+  color: #ffffff;
+}
+
+.tests .card-icon-wrap {
+  background: color-mix(in srgb, var(--ion-color-primary) 14%, transparent);
+}
+
+.card-body {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.card-body h2 {
+  margin: 0 0 var(--auris-space-1);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--auris-text);
+}
+
+.card-body p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--auris-text-muted);
+}
+
+.card-arrow {
+  flex: 0 0 auto;
+  font-size: 22px;
+  color: var(--auris-text-muted);
+  transition: transform 0.16s var(--auris-ease);
+}
+
+.big-card:hover .card-arrow {
+  transform: translateX(3px);
+}

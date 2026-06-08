@@ -1,0 +1,108 @@
+# =============================================================================
+# Auris · App MÓVIL del estudiante — .gitignore
+# Ionic + Angular 20 + Capacitor (iOS/Android)
+# Ref: http://git-scm.com/docs/gitignore
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Dependencias
+# -----------------------------------------------------------------------------
+/node_modules
+jspm_packages/
+
+# Lock file (convención del equipo: no versionarlo)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# -----------------------------------------------------------------------------
+# Builds y outputs
+# -----------------------------------------------------------------------------
+/dist
+/www
+/out-tsc
+/bazel-out
+/tmp
+
+# -----------------------------------------------------------------------------
+# Angular CLI cachés
+# -----------------------------------------------------------------------------
+/.angular
+/.angular/cache
+.angular-cache/
+
+# -----------------------------------------------------------------------------
+# Ionic / Capacitor / Cordova
+# capacitor.config.ts SÍ se versiona (es config del proyecto).
+# Las carpetas nativas iOS/Android se generan con `npx cap add ios|android` y
+# sus builds/Pods/Gradle locales NO van al repo.
+# -----------------------------------------------------------------------------
+/.ionic
+/.versions
+/platforms
+/plugins
+.capacitor/
+
+# iOS — la carpeta ios/ se genera localmente. Si querés versionar el proyecto
+# nativo, comentá la línea siguiente. Acá la dejamos ignorada para evitar
+# subir builds, Pods, certificados, etc.
+/ios
+
+# Si en algún momento agregás Android:
+/android
+
+# -----------------------------------------------------------------------------
+# Variables de entorno locales
+# (los src/environments/environment.ts SÍ se versionan, son la plantilla)
+# -----------------------------------------------------------------------------
+/src/environments/environment.local.ts
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+
+# -----------------------------------------------------------------------------
+# Tests y cobertura
+# -----------------------------------------------------------------------------
+coverage/
+.nyc_output/
+
+# -----------------------------------------------------------------------------
+# Logs
+# -----------------------------------------------------------------------------
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# -----------------------------------------------------------------------------
+# IDEs / Editores
+# -----------------------------------------------------------------------------
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.history/
+*.swp
+*~
+
+# -----------------------------------------------------------------------------
+# Sistema operativo
+# -----------------------------------------------------------------------------
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# -----------------------------------------------------------------------------
+# Carpetas basura cuando Windows leakea rutas absolutas en otro OS
+# (eg "C:" como carpeta literal en lugar de la unidad)
+# -----------------------------------------------------------------------------
+/C:/

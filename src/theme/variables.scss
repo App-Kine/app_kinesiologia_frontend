@@ -1,0 +1,214 @@
+// For information on how to create your own theme, please refer to:
+// https://ionicframework.com/docs/theming/
+
+:root {
+	/* COLOR DE MARCA ÚNICO — Kinesiología (verde azulado / teal).
+	   primary y secondary son el MISMO teal, así el estudiante (usa primary) y el
+	   panel docente (usa secondary) se ven idénticos en toda la app. */
+	--ion-color-primary: #0e8c8c;
+	--ion-color-primary-rgb: 14,140,140;
+	--ion-color-primary-contrast: #ffffff;
+	--ion-color-primary-contrast-rgb: 255,255,255;
+	--ion-color-primary-shade: #0c7b7b;
+	--ion-color-primary-tint: #269898;
+
+	--ion-color-secondary: #0e8c8c;
+	--ion-color-secondary-rgb: 14,140,140;
+	--ion-color-secondary-contrast: #ffffff;
+	--ion-color-secondary-contrast-rgb: 255,255,255;
+	--ion-color-secondary-shade: #0c7b7b;
+	--ion-color-secondary-tint: #269898;
+
+	--ion-color-tertiary: #6030ff;
+	--ion-color-tertiary-rgb: 96,48,255;
+	--ion-color-tertiary-contrast: #ffffff;
+	--ion-color-tertiary-contrast-rgb: 255,255,255;
+	--ion-color-tertiary-shade: #542ae0;
+	--ion-color-tertiary-tint: #7045ff;
+
+	--ion-color-success: #2dd55b;
+	--ion-color-success-rgb: 45,213,91;
+	--ion-color-success-contrast: #000000;
+	--ion-color-success-contrast-rgb: 0,0,0;
+	--ion-color-success-shade: #28bb50;
+	--ion-color-success-tint: #42d96b;
+
+	--ion-color-warning: #ffc409;
+	--ion-color-warning-rgb: 255,196,9;
+	--ion-color-warning-contrast: #000000;
+	--ion-color-warning-contrast-rgb: 0,0,0;
+	--ion-color-warning-shade: #e0ac08;
+	--ion-color-warning-tint: #ffca22;
+	/* Texto "warning" sobre fondo claro: #e0ac08 da ~2:1 (no cumple WCAG AA).
+	   Token dedicado, oscurecido a ~#8a6d00 (>=4.5:1) para usar SOLO como texto,
+	   sin tocar el color de los botones warning. */
+	--auris-warning-text: #8a6d00;
+
+	--ion-color-danger: #c5000f;
+	--ion-color-danger-rgb: 197,0,15;
+	--ion-color-danger-contrast: #ffffff;
+	--ion-color-danger-contrast-rgb: 255,255,255;
+	--ion-color-danger-shade: #ad000d;
+	--ion-color-danger-tint: #cb1a27;
+
+	--ion-color-light: #f6f8fc;
+	--ion-color-light-rgb: 246,248,252;
+	--ion-color-light-contrast: #000000;
+	--ion-color-light-contrast-rgb: 0,0,0;
+	--ion-color-light-shade: #d8dade;
+	--ion-color-light-tint: #f7f9fc;
+
+	--ion-color-medium: #5f5f5f;
+	--ion-color-medium-rgb: 95,95,95;
+	--ion-color-medium-contrast: #ffffff;
+	--ion-color-medium-contrast-rgb: 255,255,255;
+	--ion-color-medium-shade: #545454;
+	--ion-color-medium-tint: #6f6f6f;
+
+	--ion-color-dark: #2f2f2f;
+	--ion-color-dark-rgb: 47,47,47;
+	--ion-color-dark-contrast: #ffffff;
+	--ion-color-dark-contrast-rgb: 255,255,255;
+	--ion-color-dark-shade: #292929;
+	--ion-color-dark-tint: #444444;
+
+	/* ---- Tipografía ÚNICA para TODA la app (estudiante + panel + landing).
+	   Usa la fuente nativa del sistema (SF en iOS/Mac, Roboto en Android, Segoe
+	   en Windows): se ve nítida, no depende de internet y es la MISMA en todas
+	   las ventanas. (Antes se declaraba 'Inter', que NO estaba cargada y podía
+	   caer a fallbacks distintos según el dispositivo.) */
+	--ion-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+		'Helvetica Neue', Arial, sans-serif;
+
+	/* ---- Radios consistentes para botones / tarjetas (look más cohesivo) */
+	--auris-radius: 12px;
+	--auris-radius-sm: 10px;
+
+	/* ========================================================================
+	 * SISTEMA DE DISEÑO AURIS — tokens semánticos compartidos
+	 * Mismo set en la app del estudiante y en el panel docente. Modo claro por
+	 * defecto; el bloque @media dark de abajo reescribe superficies/sombras.
+	 * Mezcla identidad UV (navy) con un toque moderno (gradiente, elevación
+	 * en dos capas, espaciado y radios sistematizados).
+	 * ===================================================================== */
+
+	/* Escala de espaciado (base 4px) */
+	--auris-space-1: 4px;
+	--auris-space-2: 8px;
+	--auris-space-3: 12px;
+	--auris-space-4: 16px;
+	--auris-space-5: 20px;
+	--auris-space-6: 24px;
+	--auris-space-8: 32px;
+	--auris-space-10: 40px;
+	--auris-space-12: 48px;
+
+	/* Radios extendidos */
+	--auris-radius-lg: 16px;
+	--auris-radius-xl: 22px;
+	--auris-radius-pill: 999px;
+
+	/* Fondo de página (modo claro) con tinte teal MUY sutil: cohesivo con la
+	   marca, sin ser blanco puro. Las tarjetas blancas resaltan encima. */
+	--ion-background-color: #eef5f4;
+	--ion-background-color-rgb: 238,245,244;
+
+	/* Superficies, bordes y texto (modo claro) */
+	--auris-surface:    #ffffff;
+	--auris-surface-2:  #f4f6fa;
+	--auris-surface-3:  #eaeef4;
+	--auris-border:     #e2e6ee;
+	--auris-text:       #16202b;
+	--auris-text-soft:  #4a5560;
+	--auris-text-muted: #6b7280; /* Oscurecido (antes #7c8794 ~3.6:1) -> ~4.8:1 sobre blanco (WCAG AA). */
+
+	/* Fondo de página con tinte sutil de marca */
+	--auris-bg-tint: color-mix(in srgb, var(--ion-color-primary) 5%, var(--ion-background-color, #ffffff));
+
+	/* Elevación SUAVE y MATE (menos brillo): sombras sutiles, sin "flotar". */
+	--auris-elev-1: 0 1px 2px rgba(16, 32, 43, 0.05);
+	--auris-elev-2: 0 1px 3px rgba(16, 32, 43, 0.06), 0 4px 10px rgba(16, 32, 43, 0.05);
+	--auris-elev-3: 0 4px 14px rgba(16, 32, 43, 0.08), 0 1px 4px rgba(16, 32, 43, 0.05);
+
+	/* Firma de marca: gradiente navy → teal */
+	--auris-gradient: linear-gradient(135deg, var(--ion-color-primary) 0%, var(--ion-color-secondary) 100%);
+	--auris-gradient-soft: linear-gradient(135deg,
+		color-mix(in srgb, var(--ion-color-primary) 14%, transparent) 0%,
+		color-mix(in srgb, var(--ion-color-secondary) 14%, transparent) 100%);
+
+	/* Anillo de foco accesible (teclado) */
+	--auris-focus-ring: 0 0 0 3px color-mix(in srgb, var(--ion-color-primary) 35%, transparent);
+
+	/* Curva de animación estándar (salida suave tipo iOS) */
+	--auris-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+/*
+ * Dark mode — patrón oficial Ionic (prefers-color-scheme: dark).
+ * Sin este bloque, los fondos "light" (zebra, cards, chips) quedan
+ * blancos brillantes mientras el texto se vuelve claro = invisibles
+ * cuando el navegador/SO está en modo oscuro.
+ */
+@media (prefers-color-scheme: dark) {
+	body {
+		--ion-text-color: #ffffff;
+		--ion-text-color-rgb: 255, 255, 255;
+		/* Fondo dark-teal de marca (combina con la landing y los toolbars teal). */
+		--ion-background-color: #0a2423;
+		--ion-background-color-rgb: 10, 36, 35;
+
+		--ion-color-light: #173b38;
+		--ion-color-light-rgb: 23, 59, 56;
+		--ion-color-light-contrast: #ffffff;
+		--ion-color-light-contrast-rgb: 255, 255, 255;
+		--ion-color-light-shade: #143431;
+		--ion-color-light-tint: #20453f;
+
+		--ion-color-dark: #f4f5f8;
+		--ion-color-dark-rgb: 244, 245, 248;
+		--ion-color-dark-contrast: #000000;
+		--ion-color-dark-contrast-rgb: 0, 0, 0;
+		--ion-color-dark-shade: #d7d8da;
+		--ion-color-dark-tint: #f5f6f9;
+
+		--ion-color-step-50:  #1e1e1e;
+		--ion-color-step-100: #2a2a2a;
+		--ion-color-step-150: #363636;
+		--ion-color-step-200: #414141;
+		--ion-color-step-250: #4d4d4d;
+		--ion-color-step-300: #595959;
+		--ion-color-step-350: #656565;
+		--ion-color-step-400: #717171;
+		--ion-color-step-450: #7d7d7d;
+		--ion-color-step-500: #898989;
+		--ion-color-step-550: #949494;
+		--ion-color-step-600: #a0a0a0;
+		--ion-color-step-650: #acacac;
+		--ion-color-step-700: #b8b8b8;
+		--ion-color-step-750: #c4c4c4;
+		--ion-color-step-800: #d0d0d0;
+		--ion-color-step-850: #dbdbdb;
+		--ion-color-step-900: #e7e7e7;
+		--ion-color-step-950: #f3f3f3;
+
+		--ion-item-background: #103230;
+		--ion-card-background: #103230;
+
+		/* Tokens del sistema de diseño Auris — variante oscura (teñida teal) */
+		--auris-surface:    #103230;
+		--auris-surface-2:  #163b38;
+		--auris-surface-3:  #1d4642;
+		--auris-border:     #24524d;
+		--auris-text:       #f1f3f6;
+		--auris-text-soft:  #c2c8d2;
+		--auris-text-muted: #8b93a1;
+
+		--auris-bg-tint: color-mix(in srgb, var(--ion-color-primary) 12%, var(--ion-background-color, #121212));
+
+		--auris-elev-1: 0 1px 2px rgba(0, 0, 0, 0.28);
+		--auris-elev-2: 0 1px 3px rgba(0, 0, 0, 0.30), 0 4px 10px rgba(0, 0, 0, 0.28);
+		--auris-elev-3: 0 4px 14px rgba(0, 0, 0, 0.34), 0 1px 4px rgba(0, 0, 0, 0.30);
+
+		--auris-focus-ring: 0 0 0 3px color-mix(in srgb, var(--ion-color-secondary) 55%, transparent);
+	}
+}

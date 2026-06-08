@@ -1,0 +1,111 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="secondary">
+    <ion-title>Panel Docente</ion-title>
+    <ion-buttons slot="end">
+      @if (tieneRolAdmin) {
+        <ion-button
+          fill="clear"
+          color="light"
+          (click)="cambiarPanel()"
+          title="Cambiar al panel de administración"
+          aria-label="Cambiar al panel de administración"
+        >
+          <ion-icon slot="icon-only" name="swap-horizontal-outline" aria-hidden="true"></ion-icon>
+        </ion-button>
+      }
+      <ion-button
+        fill="clear"
+        color="light"
+        (click)="irA('/cambiar-password')"
+        title="Cambiar contraseña"
+        aria-label="Cambiar contraseña"
+      >
+        <ion-icon slot="icon-only" name="key-outline" aria-hidden="true"></ion-icon>
+      </ion-button>
+      <ion-button
+        fill="clear"
+        color="light"
+        (click)="cerrarSesion()"
+        title="Cerrar sesión"
+        aria-label="Cerrar sesión"
+      >
+        <ion-icon slot="icon-only" name="log-out-outline" aria-hidden="true"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  <div class="docente-hero">
+    <ion-icon name="school-outline" class="hero-icon"></ion-icon>
+    <div>
+      <h1>Hola, {{ usuario?.nombre || 'Profesor' }}</h1>
+      <ion-text color="medium">
+        <p class="hero-subtitle">
+          Bienvenido al panel docente.
+          <ion-badge color="secondary">PROFESOR</ion-badge>
+        </p>
+      </ion-text>
+    </div>
+  </div>
+
+  <ion-grid class="docente-grid">
+    <ion-row>
+      <!-- Mis cursos: punto de entrada principal -->
+      <ion-col size="12" size-md="6" size-lg="4">
+        <ion-card button (click)="irA('/mis-cursos')">
+          <ion-card-header>
+            <ion-icon name="school-outline" class="card-icon"></ion-icon>
+            <ion-card-title>Mis cursos</ion-card-title>
+            <ion-card-subtitle>Crear cursos y aplicar tests</ion-card-subtitle>
+          </ion-card-header>
+          <ion-card-content>
+            Arma cursos y dentro agrega los tests que tus estudiantes responderán.
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+
+      <!-- Banco de tests + preguntas -->
+      <ion-col size="12" size-md="6" size-lg="4">
+        <ion-card button (click)="irA('/mis-tests')">
+          <ion-card-header>
+            <ion-icon name="document-text-outline" class="card-icon"></ion-icon>
+            <ion-card-title>Tests y preguntas</ion-card-title>
+            <ion-card-subtitle>Banco de tests del profesor</ion-card-subtitle>
+          </ion-card-header>
+          <ion-card-content>
+            Crea tests y dentro de cada uno agrega, edita o quita preguntas.
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+
+      <!-- Aplicaciones (vista cross-curso) -->
+      <ion-col size="12" size-md="6" size-lg="4">
+        <ion-card button (click)="irA('/mis-aplicaciones')">
+          <ion-card-header>
+            <ion-icon name="clipboard-outline" class="card-icon"></ion-icon>
+            <ion-card-title>Aplicaciones</ion-card-title>
+            <ion-card-subtitle>Tests aplicados a cursos</ion-card-subtitle>
+          </ion-card-header>
+          <ion-card-content>
+            Activa o desactiva aplicaciones (visible u oculto al estudiante).
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+
+      <!-- Analítica -->
+      <ion-col size="12" size-md="6" size-lg="4">
+        <ion-card button (click)="irA('/analitica')">
+          <ion-card-header>
+            <ion-icon name="stats-chart-outline" class="card-icon"></ion-icon>
+            <ion-card-title>Analítica</ion-card-title>
+            <ion-card-subtitle>Resultados por test y pregunta</ion-card-subtitle>
+          </ion-card-header>
+          <ion-card-content>
+            Porcentaje de aciertos, preguntas por tasa de error e intentos.
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>

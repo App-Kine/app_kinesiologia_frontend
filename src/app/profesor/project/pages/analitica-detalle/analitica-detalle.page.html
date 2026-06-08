@@ -1,0 +1,202 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="secondary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/analitica"></ion-back-button>
+    </ion-buttons>
+    <ion-title>{{ data?.resumen?.test_nombre || 'Analítica' }}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button fill="clear" color="light" (click)="recargar()" [disabled]="cargando" aria-label="Recargar analítica">
+        <ion-icon slot="icon-only" name="refresh-outline" aria-hidden="true"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+
+  @if (cargando && !data) {
+    <div class="centro" role="status" aria-live="polite">
+      <ion-spinner aria-label="Cargando analítica" aria-busy="true"></ion-spinner>
+      <p>Cargando analítica...</p>
+    </div>
+  } @else if (error) {
+    <div class="centro" role="alert">
+      <ion-icon name="alert-circle-outline" color="danger" style="font-size:48px" aria-hidden="true"></ion-icon>
+      <h2>{{ error }}</h2>
+      <ion-button fill="outline" routerLink="/analitica">Volver</ion-button>
+    </div>
+  } @else if (data) {
+
+    <!-- Resumen global -->
+    <div class="resumen">
+      <div class="resumen-curso">
+        <ion-chip color="secondary"><ion-label>{{ data.resumen.curso_codigo }}</ion-label></ion-chip>
+        <span>{{ data.resumen.curso_nombre }}</span>
+      </div>
+
+      <div class="metricas">
+        <div class="metrica big" [class]="'borde-' + colorPct(data.resumen.porcentaje_promedio)">
+          <div class="metrica-valor">{{ pct(data.resumen.porcentaje_promedio) }}</div>
+          <div class="metrica-label"><ion-icon name="trending-up-outline"></ion-icon> % aciertos global</div>
+        </div>
+        <div class="metrica">
+          <div class="metrica-valor">{{ data.resumen.total_evaluaciones }}</div>
+          <div class="metrica-label"><ion-icon name="people-outline"></ion-icon> evaluaciones</div>
+        </div>
+        <div class="metrica">
+          <div class="metrica-valor">{{ data.resumen.evaluaciones_identificadas }}</div>
+          <div class="metrica-label"><ion-icon name="eye-outline"></ion-icon> identificadas</div>
+        </div>
+        <div class="metrica">
+          <div class="metrica-valor">{{ data.resumen.evaluaciones_anonimas }}</div>
+          <div class="metrica-label"><ion-icon name="eye-off-outline"></ion-icon> anónimas</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Selector de vista -->
+    <div class="seg-wrapper">
+      <ion-segment [value]="vista" (ionChange)="cambiarVista($event)">
+        <ion-segment-button value="preguntas">
+          <ion-label><ion-icon name="help-circle-outline"></ion-icon> Por pregunta</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="estudiantes">
+          <ion-label><ion-icon name="people-outline"></ion-icon> Por evaluación</ion-label>
+        </ion-segment-button>
+      </ion-segment>
+    </div>
+
+    <div class="body-wrapper">
+
+      @if (vista === 'preguntas') {
+        @if (data.preguntas.length === 0) {
+          <ion-note class="vacio">Aún no hay respuestas para analizar.</ion-note>
+        } @else {
+          <p class="seccion-nota">
+            <ion-icon name="list-outline"></ion-icon>
+            Preguntas ordenadas por tasa de error (las más difíciles primero).
+          </p>
+          @for (p of data.preguntas; track p.pregunta_id) {
+            <div class="preg-card">
+              <div class="preg-top">
+                <ion-chip [color]="colorTasaError(p.tasa_error)" class="err-chip">
+                  <ion-label>{{ pctTasaError(p.tasa_error) }} error</ion-label>
+                </ion-chip>
+                <span class="preg-resp">{{ p.total_respuestas }} respuestas</span>
+              </div>
+              <div class="preg-enunciado" [innerHTML]="p.enunciado | safeHtml"></div>
+              <div class="preg-stats">
+                <span class="ok">✓ {{ p.aciertos_int1 }} al 1er intento</span>
+                <span class="ok">✓ {{ p.aciertos_int2 }} al 2do intento</span>
+                <span class="bad">✗ {{ p.errores }} incorrectas</span>
+                <span class="neutral">{{ p.total_intentos }} intentos totales</span>
+                <!-- Tiempo promedio (agregado anónimos + identificados) -->
+                <span class="neutral" title="Tiempo promedio dedicado a la pregunta">
+                  ⏱ {{ fmtSeg(p.tiempo_promedio_segundos) }} prom.
+                </span>
+              </div>
+            </div>
+          }
+        }
+      } @else {
+        @if (data.evaluaciones.length === 0) {
+          <ion-note class="vacio">Aún no hay evaluaciones finalizadas.</ion-note>
+        } @else {
+          <div class="tabla-wrapper">
+            <table class="tabla">
+              <thead>
+                <tr>
+                  <th>Estudiante</th>
+                  <th>%</th>
+                  <th>Correctas 1°</th>
+                  <th>Correctas 2°</th>
+                  <th>Incorrectas</th>
+                  <th>Tiempo total</th>
+                  <th>Fecha</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (e of data.evaluaciones; track e.evaluacion_id) {
+                  <tr>
+                    <td>
+                      @if (e.modalidad === 'IDENTIFICADA') {
+                        {{ e.correo_estudiante }}
+                      } @else {
+                        <ion-chip color="medium" class="anon-chip">
+                          <ion-icon name="eye-off-outline"></ion-icon>
+                          <ion-label>anónimo</ion-label>
+                        </ion-chip>
+                      }
+                    </td>
+                    <td>
+                      <ion-chip [color]="colorPct(e.porcentaje_global)" class="pct-mini">
+                        <ion-label>{{ pct(e.porcentaje_global) }}</ion-label>
+                      </ion-chip>
+                    </td>
+                    <td>{{ e.aciertos_primer ?? '—' }}</td>
+                    <td>{{ e.aciertos_segundo ?? '—' }}</td>
+                    <td>{{ e.incorrectas ?? '—' }}</td>
+                    <td>{{ fmtSeg(e.tiempo_total_segundos) }}</td>
+                    <td>{{ formatoFecha(e.finalizada_en) }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Detalle de tiempo por pregunta SOLO para identificados (pedido cliente 2026-05-26) -->
+          @if (tiemposPorEstudiante.length > 0) {
+            <h3 class="seccion-titulo">
+              ⏱ Tiempo por pregunta — estudiantes registrados
+            </h3>
+            <ion-note class="hint">
+              Esto solo aplica a evaluaciones identificadas. Para anónimas
+              mostramos el <strong>promedio agregado</strong> en la vista
+              "Por pregunta".
+            </ion-note>
+            @for (est of tiemposPorEstudiante; track est.evaluacion_id) {
+              <div class="estud-tiempo">
+                <div class="estud-tiempo-head">
+                  <strong>{{ est.correo }}</strong>
+                </div>
+                <div class="estud-tiempo-grid">
+                  @for (q of est.pregs; track q.orden) {
+                    <span class="tiempo-cell">
+                      P{{ q.orden }}: <strong>{{ fmtSeg(q.tiempo) }}</strong>
+                    </span>
+                  }
+                </div>
+              </div>
+            }
+          }
+
+          <ion-note class="privacidad">
+            <ion-icon name="eye-off-outline"></ion-icon>
+            Las evaluaciones anónimas no exponen ningún dato del estudiante.
+          </ion-note>
+        }
+      }
+    </div>
+  }
+</ion-content>
+
+<style>
+  .seccion-titulo { margin: 24px 12px 4px; }
+  .hint { display: block; margin: 0 12px 12px; color: var(--ion-color-medium); }
+  .estud-tiempo {
+    background: var(--ion-color-light);
+    color: var(--ion-color-light-contrast, var(--ion-text-color));
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin: 8px 12px;
+  }
+  .estud-tiempo-head {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 6px;
+  }
+  .estud-tiempo-grid {
+    display: flex; flex-wrap: wrap; gap: 6px 14px;
+    font-size: 13px;
+  }
+  .tiempo-cell { color: var(--ion-text-color); }
+</style>

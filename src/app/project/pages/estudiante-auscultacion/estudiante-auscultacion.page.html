@@ -1,0 +1,149 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/estudiante/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Puntos de auscultación</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="auscultacion-content">
+
+  <!-- Selector de cara — MISMO orden que el HTML del docente: dorsal (espalda)
+       a la izquierda, ventral (pecho) a la derecha.
+       Internamente 'posterior' = dorsal (espalda) y 'anterior' = ventral (pecho). -->
+  <div class="caras-bar">
+    <button class="cara-chip"
+            [class.active]="caraActiva === 'posterior'"
+            (click)="mostrarCara('posterior')">
+      Cara dorsal (espalda)
+    </button>
+    <button class="cara-chip"
+            [class.active]="caraActiva === 'anterior'"
+            (click)="mostrarCara('anterior')">
+      Cara ventral (pecho)
+    </button>
+  </div>
+
+  <!-- Leyenda de grupos RECSOP (mismos colores que la presentación del docente) -->
+  <div class="leyenda-bar">
+    <span class="leyenda-item grupo-posterior"><i></i> Posteriores</span>
+    <span class="leyenda-item grupo-anterior"><i></i> Anteriores</span>
+    <span class="leyenda-item grupo-lateral"><i></i> Laterales</span>
+    <span class="leyenda-item grupo-traquea"><i></i> Tráquea</span>
+  </div>
+
+  <!-- Visor 3D del torso -->
+  <div class="viewer-wrap">
+    <model-viewer
+      #mv
+      [attr.src]="modelUrl"
+      alt="Modelo 3D del torso humano para auscultación"
+      camera-controls
+      touch-action="pan-y"
+      shadow-intensity="0.8"
+      exposure="1.0"
+      interaction-prompt="none"
+      camera-target="2.5m 1.25m -0.6m"
+      camera-orbit="180deg 90deg 5m"
+      field-of-view="35deg"
+      (load)="onModelLoaded()"
+      class="model-viewer"
+    >
+      <!-- Hotspots de cada punto.
+           data-visibility-attribute="visible" hace que model-viewer agregue
+           data-visible="false" cuando el hotspot está detrás de la geometría.
+           Usamos eso en el CSS para ocultar los hotspots que no son visibles
+           desde el ángulo actual de cámara → efecto "pegado a la piel". -->
+      @for (p of puntosVisibles; track p.id) {
+        <button
+          [attr.slot]="'hotspot-' + p.id"
+          [attr.data-position]="p.position"
+          [attr.data-normal]="p.normal"
+          data-visibility-attribute="visible"
+          [class]="'hotspot hotspot-' + p.grupo"
+          (click)="abrirPunto(p)"
+          [title]="p.numero + ' · ' + p.nombre"
+        >
+          <span class="hotspot-num">{{ etiqueta(p) }}</span>
+        </button>
+      }
+
+      <div slot="poster" class="loading-overlay">
+        <ion-icon name="body-outline"></ion-icon>
+        <p>Cargando modelo 3D…</p>
+      </div>
+    </model-viewer>
+
+    <div class="ayuda-overlay">
+      <p>
+        <ion-icon name="refresh-outline"></ion-icon>
+        Gira con el dedo · pellizca para zoom · desliza ↓ para ver la lista
+      </p>
+    </div>
+
+    <!-- Botón flotante: vuelve a la vista de la cara activa si el alumno
+         se perdió rotando manualmente. -->
+    <button class="reset-btn" (click)="resetearVista()" title="Volver a la vista">
+      <ion-icon name="refresh-outline"></ion-icon>
+      <span>Reset vista</span>
+    </button>
+  </div>
+
+  <!-- Lista de puntos (siempre visible, sirve como índice y como fallback) -->
+  <div class="lista-puntos">
+    <h3>Puntos de auscultación</h3>
+    <div class="puntos-grid">
+      @for (p of puntosVisibles; track p.id) {
+        <button class="punto-card"
+                [class]="'cat-' + p.grupo"
+                (click)="abrirPunto(p)">
+          <span class="num-pill">{{ etiqueta(p) }}</span>
+          <ion-icon [name]="iconoGrupo(p.grupo)" class="punto-icon"></ion-icon>
+          <div class="punto-info">
+            <strong>{{ p.nombre }}</strong>
+            <small>{{ p.ubicacion }}</small>
+          </div>
+          <span class="icbhi-tag">{{ p.icbhi }}</span>
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Bottom sheet con detalle del punto seleccionado -->
+  <ion-modal
+    [isOpen]="puntoSeleccionado !== null"
+    [initialBreakpoint]="0.55"
+    [breakpoints]="[0, 0.55, 0.9]"
+    (didDismiss)="cerrarPunto()"
+  >
+    <ng-template>
+      @if (puntoSeleccionado; as p) {
+        <div class="punto-sheet">
+          <div class="sheet-handle"></div>
+          <div class="sheet-header">
+            <div class="sheet-chip">
+              <span class="grupo-badge" [class]="'grupo-' + p.grupo">
+                {{ etiqueta(p) }} · {{ labelGrupo(p.grupo) }}
+              </span>
+              <span class="icbhi-badge">ICBHI · {{ p.icbhi }}</span>
+            </div>
+            <ion-button fill="clear" color="medium" (click)="cerrarPunto()" aria-label="Cerrar detalle del punto">
+              <ion-icon slot="icon-only" name="close-outline" aria-hidden="true"></ion-icon>
+            </ion-button>
+          </div>
+
+          <div class="sheet-body">
+            <h2>{{ p.nombre }}</h2>
+
+            <div class="ubicacion">
+              <ion-icon name="location-outline" color="medium"></ion-icon>
+              <span>{{ p.ubicacion }}</span>
+            </div>
+          </div>
+        </div>
+      }
+    </ng-template>
+  </ion-modal>
+
+</ion-content>
