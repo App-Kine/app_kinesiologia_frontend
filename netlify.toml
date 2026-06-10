@@ -1,0 +1,22 @@
+# =============================================================================
+# Netlify — Frontend Auris (app unificada estudiante + panel)
+# -----------------------------------------------------------------------------
+# Es una SPA Angular: el build genera la carpeta `www/` (index.html plano).
+# ANTES de desplegar, edita src/environments/environment.prod.ts con las URLs
+# HTTPS reales del Controlador y la Lógica (ver DESPLIEGUE_NUBE.md en el repo de
+# la lógica). El frontend NO usa variables de entorno: las URLs se compilan.
+# =============================================================================
+[build]
+  command = "npm install && npx ng build --configuration production"
+  publish = "www"
+
+[build.environment]
+  # Capacitor 7 requiere Node 20 (NO 22).
+  NODE_VERSION = "20"
+
+# SPA: cualquier ruta (deep link como /login o /estudiante/home) debe servir
+# index.html para que el router de Angular la maneje (si no, recargar daría 404).
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
