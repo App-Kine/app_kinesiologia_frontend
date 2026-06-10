@@ -5,10 +5,11 @@ import { Router } from '@angular/router';
 import {
   IonContent, IonHeader, IonToolbar, IonTitle, IonButtons, IonBackButton,
   IonButton, IonIcon, IonItem, IonLabel, IonInput, IonText, IonSpinner, IonNote,
+  IonInputPasswordToggle,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
-  lockClosedOutline, keyOutline, saveOutline, checkmarkCircleOutline,
+  lockClosedOutline, keyOutline, saveOutline, checkmarkCircleOutline, eye, eyeOff,
 } from 'ionicons/icons';
 
 import { PasswordService } from '../../services/password.service';
@@ -26,7 +27,7 @@ import { PasswordService } from '../../services/password.service';
   imports: [
     CommonModule, FormsModule, IonContent, IonHeader, IonToolbar, IonTitle,
     IonButtons, IonBackButton, IonButton, IonIcon, IonItem, IonLabel, IonInput,
-    IonText, IonSpinner, IonNote,
+    IonText, IonSpinner, IonNote, IonInputPasswordToggle,
   ],
 })
 export class CambiarPasswordPage {
@@ -38,7 +39,7 @@ export class CambiarPasswordPage {
   error: string | null = null;
 
   constructor(private router: Router, private pwSvc: PasswordService) {
-    addIcons({ lockClosedOutline, keyOutline, saveOutline, checkmarkCircleOutline });
+    addIcons({ lockClosedOutline, keyOutline, saveOutline, checkmarkCircleOutline, eye, eyeOff });
   }
 
   /** Validación de política RNF-13 (espejo del backend, feedback rápido). */

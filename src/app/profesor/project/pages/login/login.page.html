@@ -50,7 +50,9 @@
             [attr.aria-invalid]="errorMsg ? 'true' : null"
             [attr.aria-describedby]="errorMsg ? 'login-error' : null"
             [disabled]="cargando"
-          ></ion-input>
+          >
+            <ion-input-password-toggle slot="end"></ion-input-password-toggle>
+          </ion-input>
         </ion-item>
 
         @if (errorMsg) {

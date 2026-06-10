@@ -12,11 +12,13 @@ import {
   addOutline, refreshOutline, createOutline, trashOutline,
   documentTextOutline, helpCircleOutline, musicalNotesOutline, imageOutline,
   listOutline, shuffleOutline, sparklesOutline, calendarOutline,
-  alertCircleOutline,
+  alertCircleOutline, eyeOutline, eyeOffOutline, checkmarkCircle, closeCircleOutline,
 } from 'ionicons/icons';
 
 import { TestService, TestDetalle } from '../../services/test.service';
-import { PreguntaService } from '../../services/pregunta.service';
+import { PreguntaService, PreguntaDetalle } from '../../services/pregunta.service';
+import { MultimediaService } from '../../services/multimedia.service';
+import { SafeHtmlPipe } from '../../pipes/safe-html.pipe';
 
 @Component({
   selector: 'app-test-detalle',
@@ -26,7 +28,7 @@ import { PreguntaService } from '../../services/pregunta.service';
   imports: [
     CommonModule, FormsModule, IonContent, IonHeader, IonToolbar, IonTitle,
     IonButtons, IonBackButton, IonButton, IonIcon, IonSpinner, IonNote, IonChip,
-    IonLabel, IonText, IonFab, IonFabButton,
+    IonLabel, IonText, IonFab, IonFabButton, SafeHtmlPipe,
   ],
 })
 export class TestDetallePage implements OnInit {
@@ -42,15 +44,48 @@ export class TestDetallePage implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private alertCtrl: AlertController,
-    private toastCtrl: ToastController
+    private toastCtrl: ToastController,
+    private mediaSvc: MultimediaService
   ) {
     addIcons({
       addOutline, refreshOutline, createOutline, trashOutline,
       documentTextOutline, helpCircleOutline, musicalNotesOutline, imageOutline,
       listOutline, shuffleOutline, sparklesOutline, calendarOutline,
-      alertCircleOutline,
+      alertCircleOutline, eyeOutline, eyeOffOutline, checkmarkCircle, closeCircleOutline,
     });
   }
+
+  // -------- Vista previa de la pregunta (cómo la ve el estudiante) --------
+  /** preguntaId → abierta/cerrada */
+  previewOpen: Record<number, boolean> = {};
+  /** preguntaId → pregunta completa (con alternativas) ya cargada */
+  previewData: Record<number, PreguntaDetalle> = {};
+  /** preguntaId → cargando */
+  previewLoading: Record<number, boolean> = {};
+
+  /** Abre/cierra la vista previa de una pregunta; carga sus alternativas la 1ª vez. */
+  async togglePreview(preguntaId: number): Promise<void> {
+    this.previewOpen[preguntaId] = !this.previewOpen[preguntaId];
+    if (this.previewOpen[preguntaId] && !this.previewData[preguntaId]) {
+      this.previewLoading[preguntaId] = true;
+      try {
+        this.previewData[preguntaId] = await this.preguntaSvc.obtener(preguntaId);
+      } catch (e: any) {
+        this.previewOpen[preguntaId] = false;
+        const t = await this.toastCtrl.create({
+          message: e?.message || 'No se pudo cargar la vista previa.',
+          duration: 2500, color: 'danger',
+        });
+        await t.present();
+      } finally {
+        this.previewLoading[preguntaId] = false;
+      }
+    }
+  }
+
+  /** URLs de multimedia para el preview. */
+  urlAudio(gridId: string): string { return this.mediaSvc.urlAudio(gridId); }
+  urlImagen(gridId: string): string { return this.mediaSvc.urlImagen(gridId); }
 
   async ngOnInit(): Promise<void> {
     this.testId = Number(this.route.snapshot.paramMap.get('id'));

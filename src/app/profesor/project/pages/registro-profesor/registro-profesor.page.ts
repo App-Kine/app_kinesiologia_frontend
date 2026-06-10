@@ -16,6 +16,7 @@ import {
   IonIcon,
   IonNote,
   IonButtons,
+  IonInputPasswordToggle,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
@@ -26,6 +27,8 @@ import {
   closeCircle,
   saveOutline,
   arrowBackOutline,
+  eye,
+  eyeOff,
 } from 'ionicons/icons';
 
 import { InvitacionService } from '../../services/invitacion.service';
@@ -51,6 +54,7 @@ import { InvitacionService } from '../../services/invitacion.service';
     IonIcon,
     IonNote,
     IonButtons,
+    IonInputPasswordToggle,
   ],
 })
 export class RegistroProfesorPage implements OnInit {
@@ -91,6 +95,8 @@ export class RegistroProfesorPage implements OnInit {
       closeCircle,
       saveOutline,
       arrowBackOutline,
+      eye,
+      eyeOff,
     });
   }
 

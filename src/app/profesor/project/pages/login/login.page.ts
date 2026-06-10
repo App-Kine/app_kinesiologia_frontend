@@ -15,9 +15,10 @@ import {
   IonSpinner,
   IonIcon,
   IonButtons,
+  IonInputPasswordToggle,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { mailOutline, lockClosedOutline, logInOutline, arrowBackOutline } from 'ionicons/icons';
+import { mailOutline, lockClosedOutline, logInOutline, arrowBackOutline, eye, eyeOff } from 'ionicons/icons';
 
 import { AuthService } from '../../services/auth.service';
 
@@ -41,6 +42,7 @@ import { AuthService } from '../../services/auth.service';
     IonSpinner,
     IonIcon,
     IonButtons,
+    IonInputPasswordToggle,
   ],
 })
 export class LoginPage {
@@ -50,7 +52,7 @@ export class LoginPage {
   errorMsg = '';
 
   constructor(private auth: AuthService, private router: Router) {
-    addIcons({ mailOutline, lockClosedOutline, logInOutline, arrowBackOutline });
+    addIcons({ mailOutline, lockClosedOutline, logInOutline, arrowBackOutline, eye, eyeOff });
   }
 
   /** Vuelve a la landing (elegir estudiante/profesor). */

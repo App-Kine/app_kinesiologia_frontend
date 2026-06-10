@@ -172,12 +172,16 @@ const PUNTOS_ANCLA: HotspotBase[] = [
     icbhi: 'Ar',
     grupo: 'anterior',
     lado: 'derecho',
-    ubicacion: '5.º-6.º espacio intercostal, línea medioclavicular.',
+    ubicacion: '5.º-6.º espacio intercostal, línea media mamilar.',
     descripcion:
-      'Segmentos anteriores de los lóbulos inferiores. Sibilancias espiratorias sugieren broncoespasmo (asma/EPOC); crepitantes basales, congestión.',
-    // Bajado al 5.º-6.º EIC (base pulmonar anterior) — antes quedaba a media altura.
-    position: '2.2942971789492916 1.18 -0.18',
-    normal: '-0.3510241330454077 0.08128904589940167 0.9328312543201396',
+      'Segmentos anteriores de los lóbulos inferiores, sobre la línea media mamilar. Sibilancias espiratorias sugieren broncoespasmo (asma/EPOC); crepitantes basales, congestión.',
+    // 5.º-6.º EIC (base pulmonar anterior) sobre la LÍNEA MEDIA MAMILAR
+    // (pedido cliente 2026-06): antes quedaba demasiado medial (X≈2.29, casi
+    // paraesternal). X=2.18 lo lleva a la línea mamilar; su espejo (punto 12,
+    // izquierdo) cae en X≈2.82, justo bajo el foco mitral (misma línea). El
+    // usuario verifica en el dispositivo y se afina si hace falta.
+    position: '2.18 1.18 -0.1',
+    normal: '-0.25 0.06 0.97',
   },
 ];
 

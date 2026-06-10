@@ -80,7 +80,9 @@
               [attr.aria-invalid]="password && !passwordCumple ? 'true' : null"
               aria-describedby="reglas-password"
               [disabled]="cargando"
-            ></ion-input>
+            >
+              <ion-input-password-toggle slot="end"></ion-input-password-toggle>
+            </ion-input>
           </ion-item>
 
           <ion-item lines="full">
@@ -97,7 +99,9 @@
               [attr.aria-invalid]="password2 && password !== password2 ? 'true' : null"
               aria-describedby="reglas-password"
               [disabled]="cargando"
-            ></ion-input>
+            >
+              <ion-input-password-toggle slot="end"></ion-input-password-toggle>
+            </ion-input>
           </ion-item>
 
           <!-- Reglas de complejidad (RNF-13) -->

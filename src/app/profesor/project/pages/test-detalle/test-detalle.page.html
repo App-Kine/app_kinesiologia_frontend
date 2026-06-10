@@ -111,9 +111,18 @@
                 </div>
               </div>
 
-              <p class="card-enunciado">{{ p.enunciado }}</p>
+              <div class="card-enunciado" [innerHTML]="p.enunciado | safeHtml"></div>
 
               <div class="card-actions">
+                <ion-button
+                  fill="clear" size="small"
+                  [color]="previewOpen[p.pregunta_id] ? 'secondary' : 'medium'"
+                  (click)="togglePreview(p.pregunta_id)"
+                  class="action-btn"
+                >
+                  <ion-icon slot="start" [name]="previewOpen[p.pregunta_id] ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
+                  {{ previewOpen[p.pregunta_id] ? 'Ocultar' : 'Vista previa' }}
+                </ion-button>
                 <ion-button
                   fill="clear" size="small" color="medium"
                   (click)="editarPregunta(p.pregunta_id)"
@@ -131,6 +140,49 @@
                   Quitar
                 </ion-button>
               </div>
+
+              <!-- Vista previa: la pregunta tal como la ve el estudiante -->
+              @if (previewOpen[p.pregunta_id]) {
+                <div class="preview-box">
+                  @if (previewLoading[p.pregunta_id]) {
+                    <div class="preview-loading">
+                      <ion-spinner name="crescent"></ion-spinner>
+                      <span>Cargando vista previa…</span>
+                    </div>
+                  } @else if (previewData[p.pregunta_id]; as pd) {
+                    @if (pd.audio_grid_id) {
+                      <div class="preview-media">
+                        <ion-note class="preview-label"><ion-icon name="musical-notes-outline"></ion-icon> Audio</ion-note>
+                        <audio controls preload="none" [src]="urlAudio(pd.audio_grid_id)"></audio>
+                      </div>
+                    }
+                    @if (pd.imagen_grid_id) {
+                      <div class="preview-media">
+                        <ion-note class="preview-label"><ion-icon name="image-outline"></ion-icon> Imagen</ion-note>
+                        <img class="preview-img" [src]="urlImagen(pd.imagen_grid_id)" alt="Imagen de la pregunta" />
+                      </div>
+                    }
+                    <div class="preview-alts">
+                      <ion-note class="preview-label">Alternativas</ion-note>
+                      @for (a of pd.alternativas; track a.alternativa_id) {
+                        <div class="preview-alt" [class.correcta]="a.es_correcta">
+                          <ion-icon
+                            [name]="a.es_correcta ? 'checkmark-circle' : 'close-circle-outline'"
+                            [color]="a.es_correcta ? 'success' : 'medium'"
+                          ></ion-icon>
+                          <span class="preview-alt-texto">{{ a.texto }}</span>
+                        </div>
+                      }
+                    </div>
+                    @if (pd.explicacion_clinica) {
+                      <div class="preview-explicacion">
+                        <ion-note class="preview-label">Explicación clínica</ion-note>
+                        <div [innerHTML]="pd.explicacion_clinica | safeHtml"></div>
+                      </div>
+                    }
+                  }
+                </div>
+              }
             </div>
           }
         </div>

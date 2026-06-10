@@ -5,9 +5,10 @@ import { ActivatedRoute, Router } from '@angular/router';
 import {
   IonContent, IonHeader, IonToolbar, IonTitle, IonButtons, IonBackButton,
   IonButton, IonIcon, IonItem, IonLabel, IonInput, IonText, IonSpinner, IonNote,
+  IonInputPasswordToggle,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { lockClosedOutline, saveOutline, checkmarkCircleOutline } from 'ionicons/icons';
+import { lockClosedOutline, saveOutline, checkmarkCircleOutline, eye, eyeOff } from 'ionicons/icons';
 
 import { PasswordService } from '../../services/password.service';
 
@@ -19,7 +20,7 @@ import { PasswordService } from '../../services/password.service';
   imports: [
     CommonModule, FormsModule, IonContent, IonHeader, IonToolbar, IonTitle,
     IonButtons, IonBackButton, IonButton, IonIcon, IonItem, IonLabel, IonInput,
-    IonText, IonSpinner, IonNote,
+    IonText, IonSpinner, IonNote, IonInputPasswordToggle,
   ],
 })
 export class RestablecerPasswordPage implements OnInit {
@@ -35,7 +36,7 @@ export class RestablecerPasswordPage implements OnInit {
     private router: Router,
     private pwSvc: PasswordService
   ) {
-    addIcons({ lockClosedOutline, saveOutline, checkmarkCircleOutline });
+    addIcons({ lockClosedOutline, saveOutline, checkmarkCircleOutline, eye, eyeOff });
   }
 
   ngOnInit(): void {
