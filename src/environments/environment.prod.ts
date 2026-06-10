@@ -11,14 +11,12 @@
 export const environment = {
   production: true,
 
-  // ⚠️ PRODUCCIÓN: reemplazar por el dominio HTTPS real antes de compilar.
-  // NO debe quedar http:// ni localhost en producción (lo define DTIC/infra).
-  //   Ej: 'https://auris.uv.cl/api/controlador_base/'
-  BASE_API_URL: 'https://CAMBIAR-DOMINIO-PRODUCCION/controlador_base/',
+  // Despliegue de prueba en la nube (Render). Cambiar por el dominio
+  // institucional HTTPS cuando exista. NO debe quedar http:// ni localhost.
+  BASE_API_URL: 'https://auris-controlador-ybp5.onrender.com/controlador_base/',
 
   // Multimedia: se sube/sirve DIRECTO desde la lógica (multipart/streaming).
-  //   Ej: 'https://auris.uv.cl/media/base_logica/'
-  LOGICA_API_URL: 'https://CAMBIAR-DOMINIO-PRODUCCION/base_logica/',
+  LOGICA_API_URL: 'https://auris-logica.onrender.com/base_logica/',
 
 
   DATA_KEY_TOKEN: 'token',
