@@ -165,6 +165,20 @@ const PUNTOS_ANCLA: HotspotBase[] = [
     position: '2.3162497904336563 2.165915227291522 -0.4336559395417483',
     normal: '-0.08155478603238682 0.8677641116676695 0.49023898598217586',
   },
+  // El par anterior-basal (puntos 11 y 12) ya NO se define aquí: se colocó con
+  // posiciones fijas e independientes por costado (medidas en el editor por el
+  // usuario, 2026-06-10). Ver PUNTOS_ANCLA_FIJOS más abajo.
+];
+
+/**
+ * PAR ANTERIOR-BASAL FIJO (puntos 11 y 12). A diferencia del resto de pares
+ * bilaterales, estos NO se espejan: el usuario los colocó de forma independiente
+ * en cada costado con el editor (modelviewer.dev), porque el cuerpo no es
+ * perfectamente simétrico y las normales de cada lado difieren. Son WORLD coords
+ * medidas sobre torso.glb (las mismas que usa el visor), por eso NO se
+ * transforman con el centroX en runtime. (pedido cliente 2026-06-10)
+ */
+const PUNTOS_ANCLA_FIJOS: HotspotBase[] = [
   {
     id: 'ant-basal-der',
     numero: 11,
@@ -175,13 +189,23 @@ const PUNTOS_ANCLA: HotspotBase[] = [
     ubicacion: '5.º-6.º espacio intercostal, línea media mamilar.',
     descripcion:
       'Segmentos anteriores de los lóbulos inferiores, sobre la línea media mamilar. Sibilancias espiratorias sugieren broncoespasmo (asma/EPOC); crepitantes basales, congestión.',
-    // 5.º-6.º EIC (base pulmonar anterior) sobre la LÍNEA MEDIA MAMILAR
-    // (pedido cliente 2026-06): antes quedaba demasiado medial (X≈2.29, casi
-    // paraesternal). X=2.18 lo lleva a la línea mamilar; su espejo (punto 12,
-    // izquierdo) cae en X≈2.82, justo bajo el foco mitral (misma línea). El
-    // usuario verifica en el dispositivo y se afina si hace falta.
-    position: '2.18 1.18 -0.1',
-    normal: '-0.25 0.06 0.97',
+    // Posición fija medida en el editor (NO se espeja).
+    position: '2.25819982459169 1.469460474308502 -0.07925249459419204',
+    normal: '-0.38011554917471974 -0.05769611014258962 0.9231377622814568',
+  },
+  {
+    id: 'ant-basal-izq',
+    numero: 12,
+    nombre: 'Anterior basal izquierdo',
+    icbhi: 'Al',
+    grupo: 'anterior',
+    lado: 'izquierdo',
+    ubicacion: '5.º-6.º espacio intercostal, línea media mamilar.',
+    descripcion:
+      'Segmentos anteriores de los lóbulos inferiores, sobre la línea media mamilar. Sibilancias espiratorias sugieren broncoespasmo (asma/EPOC); crepitantes basales, congestión.',
+    // Posición fija medida en el editor (NO se espeja).
+    position: '2.877737137478319 1.5015438719101601 -0.07240751574124593',
+    normal: '0.271314114976878 -0.41034572613416254 0.8706348465675724',
   },
 ];
 
@@ -273,8 +297,11 @@ export function espejar(
   };
 }
 
-/** Los 6 anclajes medidos, ya expandidos a PuntoAuscultacion. */
+/** Los 5 anclajes bilaterales que SÍ se espejan, ya expandidos. */
 export const PUNTOS_BASE: PuntoAuscultacion[] = PUNTOS_ANCLA.map(aPunto);
+
+/** Puntos 11/12 con posición fija (NO se espejan), ya expandidos. */
+const PUNTOS_FIJOS: PuntoAuscultacion[] = PUNTOS_ANCLA_FIJOS.map(aPunto);
 
 /** Coloca un punto sobre el eje de simetría real (reemplaza su X por centroX). */
 function centrarEnX(p: PuntoAuscultacion, centroX: number): PuntoAuscultacion {
@@ -297,7 +324,8 @@ export function construirPuntos(centroX: number = CENTRO_X): PuntoAuscultacion[]
     ...PUNTOS_BASE.map((p) => espejar(p, centroX)),
   ];
   const traquea = centrarEnX(PUNTO_TRAQUEA, centroX);
-  return [...bilaterales, traquea].sort((a, b) => a.numero - b.numero);
+  // Los puntos 11/12 (fijos) se añaden sin espejar ni transformar por centroX.
+  return [...bilaterales, ...PUNTOS_FIJOS, traquea].sort((a, b) => a.numero - b.numero);
 }
 
 /**
