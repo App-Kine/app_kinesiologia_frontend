@@ -27,6 +27,8 @@ export interface AplicacionResumen {
   visible_desde: string | null;
   visible_hasta: string | null;
   created_at: string;
+  /** Orden manual dentro del curso (NULL = se ordena por nombre). */
+  orden?: number | null;
 }
 
 /** Página de resultados paginados (escalabilidad). */
@@ -110,6 +112,23 @@ export class AplicacionService extends BaseService {
       return data;
     } catch (e) {
       log.error('setActivo', e);
+      throw e;
+    }
+  }
+
+  /**
+   * Reordena las aplicaciones de un curso. `aplicacionIds` va en el orden
+   * deseado; el backend asigna orden = 1..N (anti-IDOR: valida que el profesor
+   * esté asignado al curso).
+   */
+  async reordenar(cursoId: number, aplicacionIds: number[]): Promise<{ curso_id: number; actualizadas: number }> {
+    log.info('reordenar', { cursoId, n: aplicacionIds.length });
+    try {
+      const data = await this.post(this.url + 'reordenarAplicaciones', { cursoId, aplicacionIds });
+      log.info('reordenar OK', data);
+      return data;
+    } catch (e) {
+      log.error('reordenar', e);
       throw e;
     }
   }

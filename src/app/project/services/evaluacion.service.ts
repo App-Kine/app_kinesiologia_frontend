@@ -22,6 +22,8 @@ export interface AplicacionActiva {
   test_nombre: string;
   test_descripcion: string | null;
   cantidad_preguntas: number;
+  /** Orden manual del profesor dentro del curso (NULL = se ordena por nombre). */
+  orden?: number | null;
 }
 
 export interface AlternativaPublica {

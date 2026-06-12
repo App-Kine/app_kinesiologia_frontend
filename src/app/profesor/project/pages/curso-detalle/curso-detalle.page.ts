@@ -5,7 +5,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import {
   IonContent, IonHeader, IonToolbar, IonTitle, IonButtons, IonBackButton,
   IonButton, IonIcon, IonSpinner, IonNote, IonChip, IonLabel, IonText,
-  IonToggle, IonFab, IonFabButton,
+  IonToggle, IonFab, IonFabButton, IonReorder, IonReorderGroup,
   AlertController, ToastController,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
@@ -13,7 +13,7 @@ import {
   addOutline, refreshOutline, schoolOutline, sparklesOutline,
   documentTextOutline, calendarOutline, playCircle, pauseCircle,
   alertCircleOutline, trashOutline, createOutline, helpCircleOutline,
-  statsChartOutline,
+  statsChartOutline, reorderThreeOutline,
 } from 'ionicons/icons';
 
 import {
@@ -21,6 +21,7 @@ import {
 } from '../../services/curso.service';
 import { AplicacionService } from '../../services/aplicacion.service';
 import { createLogger } from '../../services/logger';
+import { ordenarAplicaciones } from '../../../../shared/orden-tests.util';
 
 const log = createLogger('curso-detalle');
 
@@ -33,6 +34,7 @@ const log = createLogger('curso-detalle');
     CommonModule, FormsModule, IonContent, IonHeader, IonToolbar, IonTitle,
     IonButtons, IonBackButton, IonButton, IonIcon, IonSpinner, IonNote,
     IonChip, IonLabel, IonText, IonToggle, IonFab, IonFabButton,
+    IonReorder, IonReorderGroup,
   ],
 })
 export class CursoDetallePage implements OnInit {
@@ -53,7 +55,7 @@ export class CursoDetallePage implements OnInit {
       addOutline, refreshOutline, schoolOutline, sparklesOutline,
       documentTextOutline, calendarOutline, playCircle, pauseCircle,
       alertCircleOutline, trashOutline, createOutline, helpCircleOutline,
-      statsChartOutline,
+      statsChartOutline, reorderThreeOutline,
     });
   }
 
@@ -74,6 +76,11 @@ export class CursoDetallePage implements OnInit {
     this.cargando = true;
     try {
       this.curso = await this.cursoSvc.obtenerConAplicaciones(this.cursoId);
+      // Orden híbrido: orden manual del profesor y, si no, nombre natural
+      // ("Nivel 1, 2, … 10"). Es exactamente lo que verá el estudiante.
+      if (this.curso) {
+        this.curso.aplicaciones = ordenarAplicaciones(this.curso.aplicaciones);
+      }
     } catch (err: any) {
       log.error('recargar', err);
       this.errorCarga = (err && err.message) || 'No se pudo cargar el curso.';
@@ -137,6 +144,29 @@ export class CursoDetallePage implements OnInit {
   /** Abre la analítica de una aplicación concreta. */
   verResultados(a: any): void {
     this.router.navigateByUrl(`/analitica/${a.aplicacion_id}`);
+  }
+
+  /**
+   * El profesor arrastró un test a otra posición. Aplica el nuevo orden, lo
+   * refleja localmente (1..N) y lo persiste. Si falla, recarga el orden guardado.
+   */
+  async onReorder(ev: any): Promise<void> {
+    if (!this.curso) { ev.detail.complete(); return; }
+    // complete(arreglo) devuelve el arreglo ya reordenado.
+    this.curso.aplicaciones = ev.detail.complete(this.curso.aplicaciones);
+    this.curso.aplicaciones.forEach((a, i) => (a.orden = i + 1));
+    const ids = this.curso.aplicaciones.map((a) => a.aplicacion_id);
+    try {
+      await this.aplSvc.reordenar(this.cursoId, ids);
+    } catch (err: any) {
+      const t = await this.toastCtrl.create({
+        message: err?.message || 'No se pudo guardar el nuevo orden.',
+        duration: 3000,
+        color: 'danger',
+      });
+      await t.present();
+      await this.recargar();
+    }
   }
 
   async toggleActivo(a: any, ev: any): Promise<void> {

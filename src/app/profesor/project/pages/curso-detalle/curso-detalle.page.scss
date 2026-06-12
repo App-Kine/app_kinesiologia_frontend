@@ -75,6 +75,23 @@
 
 .apls-list { display: flex; flex-direction: column; gap: 12px; }
 
+// Pista de "arrastra para reordenar"
+.reorder-hint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 10px;
+  font-size: 0.82rem;
+  color: var(--ion-color-medium);
+  ion-icon { font-size: 1.1rem; }
+}
+
+// Asa de arrastre (a la derecha de la fila superior de la tarjeta)
+.apl-drag {
+  color: var(--ion-color-medium);
+  ion-icon { font-size: 1.25rem; }
+}
+
 .apl-card {
   background: var(--ion-card-background, #fff);
   border: 1px solid var(--ion-color-light-shade, #ececec);
@@ -91,6 +108,8 @@
     display: flex;
     gap: 6px;
     flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
     margin-bottom: 8px;
     ion-chip { margin: 0; height: 22px; font-size: 0.72rem; }
   }

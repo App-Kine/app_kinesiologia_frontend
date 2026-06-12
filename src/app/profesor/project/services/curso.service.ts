@@ -31,6 +31,8 @@ export interface CursoConAplicaciones extends CursoResumen {
     visible_desde: string | null;
     visible_hasta: string | null;
     created_at: string;
+    /** Orden manual dentro del curso (NULL = se ordena por nombre). */
+    orden?: number | null;
   }[];
 }
 

@@ -10,6 +10,7 @@ import { addIcons } from 'ionicons';
 import { documentTextOutline, chevronForwardOutline, helpCircleOutline } from 'ionicons/icons';
 
 import { EvaluacionService, AplicacionActiva } from '../../services/evaluacion.service';
+import { ordenarAplicaciones } from '../../../shared/orden-tests.util';
 
 @Component({
   selector: 'app-estudiante-tests',
@@ -79,7 +80,10 @@ export class EstudianteTestsPage implements OnInit {
     this.inFlight = true;
     if (!silencioso) { this.cargando = true; this.error = null; }
     try {
-      this.aplicaciones = await this.evalSvc.aplicacionesActivas(this.cursoId);
+      const apls = await this.evalSvc.aplicacionesActivas(this.cursoId);
+      // Orden híbrido: orden manual del profesor y, si no, nombre natural
+      // ("Nivel 1, 2, … 10"). Mismo criterio que ve el profesor.
+      this.aplicaciones = ordenarAplicaciones(apls);
       this.error = null;
     } catch (e: any) {
       // En refresco silencioso ignoramos errores transitorios (mantenemos la

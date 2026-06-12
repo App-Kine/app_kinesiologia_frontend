@@ -81,7 +81,13 @@
           </ion-button>
         </div>
       } @else {
-        <div class="apls-list">
+        @if (curso.aplicaciones.length > 1) {
+          <p class="reorder-hint">
+            <ion-icon name="reorder-three-outline" aria-hidden="true"></ion-icon>
+            Arrastra desde el asa para definir el orden en que los estudiantes ven los tests.
+          </p>
+        }
+        <ion-reorder-group class="apls-list" [disabled]="false" (ionItemReorder)="onReorder($event)">
           @for (a of curso.aplicaciones; track a.aplicacion_id) {
             <div class="apl-card">
 
@@ -90,6 +96,9 @@
                   <ion-icon name="help-circle-outline"></ion-icon>
                   <ion-label>{{ a.cantidad_preguntas }} preguntas</ion-label>
                 </ion-chip>
+                <ion-reorder class="apl-drag" title="Arrastrar para reordenar" aria-label="Arrastrar para reordenar">
+                  <ion-icon name="reorder-three-outline" aria-hidden="true"></ion-icon>
+                </ion-reorder>
               </div>
 
               <h4 class="apl-nombre">{{ a.test_nombre }}</h4>
@@ -141,7 +150,7 @@
               </div>
             </div>
           }
-        </div>
+        </ion-reorder-group>
       }
     </div>
 
